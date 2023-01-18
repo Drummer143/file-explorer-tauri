@@ -42,7 +42,7 @@ function FrameWindowControlButtons({ isFullscreen, setIsFullscreen }: Props) {
                 .concat(' ', styles.wrapper)}
         >
             <button
-                title={t('windowControlButtons.minimize') || ''}
+                title={t('windowControlButtons.minimize')}
                 onClick={handleMinimize}
                 className={"grid rounded-lg place-items-center cursor-pointer transition w-9 h-9"
                     .concat(' hover:bg-[var(--top-grey-dark)]')}
@@ -51,7 +51,7 @@ function FrameWindowControlButtons({ isFullscreen, setIsFullscreen }: Props) {
             </button>
 
             <button
-                title={t(`windowControlButtons.${isFullscreen ? 'restoreToWindow' : 'maximize'}`) || ''}
+                title={t(`windowControlButtons.${isFullscreen ? 'restoreToWindow' : 'maximize'}`)}
                 onClick={handleWindowViewButtonClick}
                 className={"grid rounded-lg place-items-center cursor-pointer transition w-9 h-9"
                     .concat(' hover:bg-[var(--top-grey-dark)]')}
@@ -60,7 +60,7 @@ function FrameWindowControlButtons({ isFullscreen, setIsFullscreen }: Props) {
             </button>
 
             <button
-                title={t('windowControlButtons.close') || ''}
+                title={t('windowControlButtons.close')}
                 onClick={handleClose}
                 className={"grid rounded-lg place-items-center cursor-pointer transition w-9 h-9"
                     .concat(' hover:bg-[var(--top-grey-dark)]')}
