@@ -1,6 +1,8 @@
 import { useState } from "react";
-import FrameWindowControlButtons from "./components/FrameWindowControlButtons/FrameWindowControlButtons";
+
+import Settings from "./components/Settings/Settings";
 import TittleFrame from "./components/TittleFrame/TittleFrame";
+import FrameWindowControlButtons from "./components/FrameWindowControlButtons/FrameWindowControlButtons";
 
 function App() {
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -9,6 +11,7 @@ function App() {
         <>
             <FrameWindowControlButtons isFullscreen={isFullscreen} setIsFullscreen={setIsFullscreen} />
             <TittleFrame isFullScreen={isFullscreen} />
+            <Settings />
         </>
     );
 }
