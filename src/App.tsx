@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Settings from "./components/Settings/Settings";
 import TittleFrame from "./components/TittleFrame/TittleFrame";

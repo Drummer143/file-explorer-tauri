@@ -18,11 +18,9 @@ function FrameWindowControlButtons({ isFullscreen, setIsFullscreen }: Props) {
 
     const handleWindowViewButtonClick = () => {
         if (isFullscreen) {
-            console.log('window');
             appWindow.setFullscreen(false);
             appWindow.setResizable(true);
         } else {
-            console.log('fullscreen')
             appWindow.setFullscreen(true);
             appWindow.setResizable(false);
         }
