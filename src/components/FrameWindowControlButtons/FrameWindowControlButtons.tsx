@@ -6,6 +6,8 @@ import GoogleIcon from '../GoogleIcon/GoogleIcon';
 
 import styles from './FrameWindowControlButtons.module.scss';
 
+import { event } from '@tauri-apps/api'
+
 type Props = {
     isFullscreen: boolean;
     setIsFullscreen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -39,6 +41,11 @@ function FrameWindowControlButtons({ isFullscreen, setIsFullscreen }: Props) {
                 .concat(isFullscreen ? ' -translate-y-[100%] hover:translate-y-0' : '')
                 .concat(' ', styles.wrapper)}
         >
+            <button onClick={() => {
+                event.emit('ping', 'message');
+            }}>
+                emit
+            </button>
             <button
                 title={t('windowControlButtons.minimize')}
                 onClick={handleMinimize}

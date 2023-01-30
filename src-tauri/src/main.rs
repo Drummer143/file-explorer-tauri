@@ -3,138 +3,68 @@
     windows_subsystem = "windows"
 )]
 
-use std::{ffi::OsStr, fs, path::Path, process::Command};
-// use tauri::api::process::Command;
+mod cfs;
+mod file_types;
 
-const IMAGE_EXTENSIONS: [&str; 3] = ["png", "jpg", "jpeg"];
+use cfs::{read_dir as cfs_read_dir, watch_dir as cfs_watch_dir, FileInfo};
+use notify::{RecommendedWatcher, Watcher};
+use rand::random;
+use std::{collections::HashMap, sync::Mutex, path::Path};
+use tauri::{Manager, Runtime, State};
 
-// Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+#[derive(Default)]
+struct MyState {
+    watcher: Mutex<HashMap<usize, (RecommendedWatcher, String)>>,
+}
+
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
+    cfs_read_dir(path_to_dir)
 }
 
-#[derive(serde::Serialize)]
-struct FileInfo {
-    name: String,
-    r#type: String,
-    size: usize,
-}
+#[tauri::command]
+fn watch_dir<R: Runtime>(
+    window: tauri::Window<R>,
+    state: State<'_, MyState>,
+    path_to_dir: String,
+) -> Result<usize, String> {
+    let watcher = cfs_watch_dir(window, path_to_dir.clone());
 
-impl FileInfo {
-    pub fn new(name: String, r#type: String, size: usize) -> FileInfo {
-        FileInfo { name, r#type, size }
-    }
-}
+    if let Ok(watcher) = watcher {
+        let id = random::<usize>();
 
-fn is_image(path_to_file: &str) -> bool {
-    let p = Path::new(path_to_file);
+        state.watcher.lock().unwrap().insert(id, (watcher, path_to_dir));
 
-    if p.exists() {
-        let ext = p.extension().and_then(OsStr::to_str).unwrap_or("empty");
-
-        IMAGE_EXTENSIONS.contains(&ext)
+        Ok(id)
     } else {
-        println!("file does not exist");
-
-        false
-    }
-}
-
-fn get_disks() -> Result<Vec<FileInfo>, &'static str> {
-    let res = Command::new("wmic")
-        .arg("logicaldisk")
-        .arg("get")
-        .arg("name")
-        .output();
-
-    if let Ok(output) = res {
-        if output.stdout.len() != 0 {
-            let answer = String::from_utf8_lossy(&output.stdout);
-            let answer = answer
-                .split("\r\r\n")
-                .filter(|str| {
-                    // FIXME: REFACTOR THIS
-                    str.to_string()
-                        .chars()
-                        .nth(0)
-                        .unwrap_or('\0')
-                        .is_alphabetic()
-                        && str
-                            .to_string()
-                            .chars()
-                            .nth(1)
-                            .unwrap_or('\0')
-                            .eq_ignore_ascii_case(&':')
-                })
-                .map(|str| FileInfo::new(str.trim().to_string(), "disk".to_string(), 0))
-                .collect::<Vec<FileInfo>>();
-
-            Ok(answer)
-        } else {
-            Err("Can't get info about disks")
-        }
-    } else {
-        Err("Can't get info about disks")
+        Err("Can't create watcher.".into())
     }
 }
 
 #[tauri::command]
-fn read_dir(path_to_dir: &str) -> Result<Vec<FileInfo>, &str> {
-    if path_to_dir.len() == 0 {
-        return get_disks();
-    }
+fn unwatch(state: State<'_, MyState>, id: usize) -> Result<(), String> {
+    let result = state.watcher.lock().unwrap().remove(&id);
 
-    if let Ok(files) = fs::read_dir(path_to_dir) {
-        let mut arr: Vec<FileInfo> = vec![];
+    if let Some((mut watcher, path)) = result {
+        let res = watcher.unwatch(Path::new(&path));
 
-        files.for_each(|file| {
-            if let Ok(file) = file {
-                let file_name = file.file_name().to_str().unwrap().to_string();
-                let meta = file.metadata();
-
-                if meta.is_ok() {
-                    let meta = meta.unwrap();
-
-                    let file_type = if meta.is_dir() {
-                        "directory"
-                    } else {
-                        if is_image(file.path().to_str().unwrap_or("")) {
-                            "image"
-                        } else {
-                            "file"
-                        }
-                    };
-
-                    arr.push(FileInfo::new(
-                        file_name,
-                        file_type.to_string(),
-                        meta.len() as usize,
-                    ));
-                }
-            }
-        });
-
-        Ok(arr)
-    } else {
-        Err("Can't get information about files in directory")
-    }
-}
-
-/*
-if let Ok(entries) = fs::read_dir(".") {
-    for entry in entries {
-        if let Ok(entry) = entry {
-            // Here, `entry` is a `DirEntry`.
-            println!("{:?}", entry.file_name());
+        match res {
+            Ok(_) => Ok(()),
+            Err(_) => Err("Can't disable watcher.".into())
         }
+    } else {
+        Err("Watcher wasn't found.".into())
     }
 }
-*/
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet, read_dir])
+        .invoke_handler(tauri::generate_handler![read_dir, watch_dir, unwatch])
+        .setup(|app| {
+            app.manage(MyState::default());
+
+            Ok(())
+        })
         .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .expect("Can't run app.");
 }
