@@ -1,27 +1,19 @@
 import { invoke } from '@tauri-apps/api';
-import useTauriFrontendStore from './zustand/tauriFrontendStore';
 
-export const unwatchDir = () => {
-    const { watcherId, deleteWatcherId } = useTauriFrontendStore()
+let watcherId: number;
 
-    if (!watchDir) {
+export const unwatchDir = async () => {
+    if (!watcherId) {
         return;
     }
 
-    return invoke('unwatch', { id: deleteWatcherId() })
-        .then(() => {
-            return;
-        })
+    await invoke('unwatch', { id: watcherId });
 }
 
 export const watchDir = async (path: string) => {
-    const { setWatcherId } = useTauriFrontendStore();
-
     try {
         await unwatchDir();
-    } catch (err) {
-        const error: number = err;
-
+    } catch (error) {
         console.warn(error);
     }
 
@@ -31,8 +23,7 @@ export const watchDir = async (path: string) => {
 
     return invoke('watch_dir', { pathToDir: path })
         .then((id: number) => {
-
-            setWatcherId(id);
+            watcherId = id;
 
             return unwatchDir;
         })

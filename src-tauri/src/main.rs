@@ -19,7 +19,12 @@ struct MyState {
 
 #[tauri::command]
 fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
-    cfs_read_dir(path_to_dir)
+    let result = cfs_read_dir(path_to_dir.clone());
+
+    println!("path: '{:?}'", path_to_dir);
+    println!("result: '{:?}'", result);
+
+    result
 }
 
 #[tauri::command]

@@ -9,7 +9,7 @@ use std::{
 };
 use tauri::{Runtime, Window};
 
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, Debug)]
 pub struct FileInfo {
     name: String,
     r#type: String,
@@ -73,20 +73,19 @@ pub fn get_disks() -> Result<Vec<FileInfo>, String> {
 
     if let Ok(output) = res {
         if output.stdout.len() != 0 {
-            let answer = String::from_utf8_lossy(&output.stdout);
-            let answer = answer
+            let disks = String::from_utf8_lossy(&output.stdout)
                 .split("\r\r\n")
                 .filter(|str| {
                     let str = str.to_string();
                     let mut str = str.chars();
                     // FIXME: REFACTOR THIS
                     str.nth(0).unwrap_or('\0').is_alphabetic()
-                        && str.nth(1).unwrap_or('\0').eq_ignore_ascii_case(&':')
+                        && !str.nth(1).unwrap_or('\0').is_alphabetic()
                 })
                 .map(|str| FileInfo::new(str.trim().to_string(), "disk".to_string(), 0))
                 .collect::<Vec<FileInfo>>();
 
-            Ok(answer)
+            Ok(disks)
         } else {
             Err("Can't get info about disks.".into())
         }
