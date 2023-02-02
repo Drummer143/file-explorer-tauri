@@ -28,7 +28,7 @@ function FileExplorerLayout() {
     // }, [currentPath]);
 
     const openDir = async (path: string) => {
-        readDir(path)
+        readDir(path ? `${path}\\` : path)
             .then(({ files }) => {
                 console.log(files);
                 setFiles(files);

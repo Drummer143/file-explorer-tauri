@@ -22,7 +22,7 @@ function FileList({ files, isFilesLoading, setIsFilesLoading }: Props) {
         newPath = newPath.replace(/[\\/]{2,}|\//g, '\\');
 
         if (file.type === 'directory' || file.type === 'disk') {
-            pushRoute(newPath);
+            pushRoute(`${newPath}\\`);
             setIsFilesLoading(true);
 
             fileContainerRef.current.scrollTo({ top: 0 });

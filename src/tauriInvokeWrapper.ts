@@ -7,7 +7,7 @@ export const unwatchDir = async () => {
         return;
     }
 
-    await invoke('unwatch', { id: watcherId });
+    await invoke('plugin:cfs|unwatch', { id: watcherId });
 }
 
 export const watchDir = async (path: string) => {
@@ -21,8 +21,9 @@ export const watchDir = async (path: string) => {
         return;
     }
 
-    return invoke('watch_dir', { pathToDir: path })
+    return invoke('plugin:cfs|watch_dir', { pathToDir: path })
         .then((id: number) => {
+            console.log(id);
             watcherId = id;
 
             return unwatchDir;
@@ -30,7 +31,7 @@ export const watchDir = async (path: string) => {
 };
 
 export const readDir = async (path: string) => {
-    const files: CFile[] = await invoke('read_dir', { pathToDir: path });
+    const files: CFile[] = await invoke('plugin:cfs|read_dir', { pathToDir: path });
 
     const unwatch = await watchDir(path);
 
