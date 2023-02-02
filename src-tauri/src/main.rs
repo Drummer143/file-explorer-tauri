@@ -21,9 +21,6 @@ struct MyState {
 fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
     let result = cfs_read_dir(path_to_dir.clone());
 
-    println!("path: '{:?}'", path_to_dir);
-    println!("result: '{:?}'", result);
-
     result
 }
 

@@ -3,10 +3,10 @@ use notify::{Config, Event, RecommendedWatcher, RecursiveMode, Watcher};
 use std::{
     fs,
     path::Path,
-    process::Command,
     sync::mpsc::{channel, Receiver},
     thread::spawn,
 };
+use sysinfo::{System, SystemExt, DiskExt};
 use tauri::{Runtime, Window};
 
 #[derive(serde::Serialize, Debug)]
@@ -65,33 +65,20 @@ pub fn watch_dir<R: Runtime>(
 }
 
 pub fn get_disks() -> Result<Vec<FileInfo>, String> {
-    let res = Command::new("wmic")
-        .arg("logicaldisk")
-        .arg("get")
-        .arg("name")
-        .output();
+    let mut sys = System::new_all();
 
-    if let Ok(output) = res {
-        if output.stdout.len() != 0 {
-            let disks = String::from_utf8_lossy(&output.stdout)
-                .split("\r\r\n")
-                .filter(|str| {
-                    let str = str.to_string();
-                    let mut str = str.chars();
-                    // FIXME: REFACTOR THIS
-                    str.nth(0).unwrap_or('\0').is_alphabetic()
-                        && !str.nth(1).unwrap_or('\0').is_alphabetic()
-                })
-                .map(|str| FileInfo::new(str.trim().to_string(), "disk".to_string(), 0))
-                .collect::<Vec<FileInfo>>();
+    sys.refresh_disks();
+    sys.refresh_disks_list();
 
-            Ok(disks)
-        } else {
-            Err("Can't get info about disks.".into())
-        }
-    } else {
-        Err("Can't get info about disks.".into())
+    let mut disks: Vec<FileInfo> = vec![];
+
+    for disk in sys.disks() {
+        let mount = disk.mount_point().to_str().unwrap_or("").replace("\\", "");
+
+        disks.push(FileInfo::new(mount.into(), "disk".into(), 0));
     }
+
+    Ok(disks)
 }
 
 pub fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
