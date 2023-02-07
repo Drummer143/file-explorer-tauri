@@ -11,7 +11,13 @@ type Props = {
     onDoubleClick: () => void;
 };
 
+enum Icons {
+    file = 'draft',
+    directory = 'folder'
+}
+
 function FileButton({ file, onDoubleClick }: Props) {
+    const [isFile] = useState(!['disk', 'directory'].includes(file.type))
     const { currentPath } = useHistoryStore(state => state)
     const { currentEditingFile, setCurrentEditingFile } = useCMCStore(state => state)
 
@@ -31,6 +37,19 @@ function FileButton({ file, onDoubleClick }: Props) {
     //         handleRenameFile();
     //     }
     // }
+
+    const selectIcon = () => {
+        switch (file.type) {
+            case 'directory':
+            case 'disk':
+                return Icons.directory;
+
+            case 'file':
+            // case 'image':
+            default:
+                return Icons.file;
+        }
+    }
 
     const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
         switch (e.code) {
@@ -55,26 +74,24 @@ function FileButton({ file, onDoubleClick }: Props) {
                 .concat(' active:bg-[var(--bg-dark)]')
                 .concat(' focus:outline focus:outline-gray-400')}
         >
-            {file.type === 'image' ?
+            {/* {file.type === 'image' ?
                 <img
                     width={50}
                     height={50}
                     src={`${currentPath}/${file.name}`}
                     alt={file.name}
                     className={'max-w-[50px] max-h-[50px]'}
-
                 />
-                :
-                <GoogleIcon
-                    className={`text-[50px]`.concat(['disk', 'directory'].includes(file.type) ? ' text-yellow-300' : '')}
-                    iconName={file.type === 'file' ? 'draft' : 'folder'}
-                />
-            }
+                : */}
+            <GoogleIcon
+                className={`text-[50px]`.concat(isFile ? '' : ' text-yellow-300')}
+                iconName={selectIcon()}
+            />
+            {/* } */}
 
             <form /* onSubmit={handleRenameFileSubmit} */>
-                {currentEditingFile !== file.name ?
-                    <p>{file.name}</p>
-                    :
+                {currentEditingFile !== file.name && <p>{file.name}</p>}
+                {currentEditingFile === file.name && (
                     <input
                         required
                         ref={ref => ref?.focus()}
@@ -86,9 +103,9 @@ function FileButton({ file, onDoubleClick }: Props) {
                         className={'block bg-white text-black rounded-lg px-2 outline outline-1 outline-transparent transition-[outline-color,_background-color]'
                             .concat(' invalid:outline-red-400 invalid:bg-red-100')}
                     />
-                }
+                )}
 
-                {file.type === 'file' || file.type === 'image' && (
+                {file.type === 'file'/*  || file.type === 'image' */ && (
                     <p className={`text-[var(--secondary-text-dark)] text-[0.8rem]`}>{xbytes(file.size)}</p>
                 )}
             </form>

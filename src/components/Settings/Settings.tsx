@@ -65,7 +65,7 @@ function Settings() {
             .concat(opened ? '' : ' translate-x-full')}
         >
             <button
-                className={'absolute z-[100] bg-[var(--bg-dark)] top-0 left-0 -translate-x-full transition-transform rounded-2xl outline outline-1'
+                className={'absolute z-[100] bg-[var(--bg-dark)] top-0 left-0 -translate-x-full transition-transform rounded-2xl outline outline-1 w-10 h-10'
                     .concat(' transition-[opacity,_outline-color,_background-color] outline-transparent -outline-offset-1 scale-[80%] -translate-y-[10%]')
                     .concat(' focus:outline-white')
                     .concat(' hover:bg-gray-700')

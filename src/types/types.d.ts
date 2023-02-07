@@ -1,6 +1,13 @@
+interface FileTypesMap {
+    disk: 'disk',
+    directory: 'directory',
+    file: 'file',
+    // image: 'image'
+};
+
 type CFile = {
     name: string,
-    type: 'disk' | 'directory' | 'file' | 'image'
+    type: (keyof FileTypesMap)
     size: number
 }
 

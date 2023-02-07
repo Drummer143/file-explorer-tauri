@@ -1,12 +1,12 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import PathInput from '../PathInput/PathInput';
 // import useListenElectronEvents from '../../../hooks/useListenElectronEvents';
 
-import FileList from '../FileList/FileList';
-import { useHistoryStore } from '../../../stores/historyStore';
-import { readDir } from './../../../tauriInvokeWrapper';
 import { event } from '@tauri-apps/api';
+import { readDir } from './../../../tauriInvokeWrapper';
+import { useHistoryStore } from '../../../stores/historyStore';
+import FileList from '../FileList/FileList';
 
 function FileExplorerLayout() {
     const { currentPath } = useHistoryStore();
@@ -30,7 +30,6 @@ function FileExplorerLayout() {
     const openDir = async (path: string) => {
         readDir(path ? `${path}\\` : path)
             .then(({ files }) => {
-                console.log(files);
                 setFiles(files);
                 setIsFilesLoading(false);
             })

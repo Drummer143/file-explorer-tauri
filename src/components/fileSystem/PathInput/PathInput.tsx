@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
 import { useHistoryStore } from "../../../stores/historyStore";
-import GoBackButton from "../GoBackButton/GoBackButton";
-import GoForwardButton from "../GoForwardButton/GoForwardButton";
+import HistoryNavigationButton from "../HistoryNavigationButton/HistoryNavigationButton";
 
 import styles from './PathInput.module.scss';
 
@@ -11,7 +10,7 @@ type Props = {
 }
 
 function PathInput({ setIsFilesLoading }: Props) {
-    const { pushRoute, currentPath } = useHistoryStore(state => state);
+    const { pushRoute, goForward, goBack, currentPath } = useHistoryStore(state => state);
 
     const [input, setInput] = useState<string>(currentPath);
     const [canChangeNavBarSize, setCanChangeNavBarSize] = useState(true);
@@ -32,6 +31,22 @@ function PathInput({ setIsFilesLoading }: Props) {
             inputRef.current.blur();
         }
     };
+
+    const handleGoBack = (e: React.MouseEvent<HTMLButtonElement>) => {
+        goBack();
+
+        if (e.clientX || e.clientY) {
+            setCanChangeNavBarSize(false);
+        }
+    }
+
+    const handleGoForward = (e: React.MouseEvent<HTMLButtonElement>) => {
+        goForward();
+
+        if (e.clientX || e.clientY) {
+            setCanChangeNavBarSize(false);
+        }
+    }
 
     useEffect(() => {
         if (canChangeNavBarSize) {
@@ -56,7 +71,7 @@ function PathInput({ setIsFilesLoading }: Props) {
                     .concat(' gap-5 transition-[opacity,_width] grid grid-cols-[min-content,_1fr,_min-content]')
                 }
             >
-                <GoBackButton onClickAdditional={() => setCanChangeNavBarSize(false)} />
+                <HistoryNavigationButton direction='back' onClick={handleGoBack} />
 
                 <input
                     value={input}
@@ -70,7 +85,7 @@ function PathInput({ setIsFilesLoading }: Props) {
                         .concat(' ', styles.pathInput)}
                 />
 
-                <GoForwardButton onClickAdditional={() => setCanChangeNavBarSize(false)} />
+                <HistoryNavigationButton direction='forward' onClick={handleGoForward} />
             </div>
         </>
     );

@@ -1,4 +1,4 @@
-use crate::file_types::is_image;
+// use crate::file_types::is_image;
 use notify::{Config, Event, RecommendedWatcher, RecursiveMode, Watcher};
 use rand::random;
 use std::{
@@ -76,13 +76,13 @@ pub fn watch_dir<R: Runtime>(
         return Err("Error while trying to create watcher.".into());
     }
 
-    let id = random::<u8>();
+    let id: usize = random::<u8>().into();
 
     state
         .watcher
         .lock()
         .unwrap()
-        .insert(id.into(), (watcher, path_to_dir));
+        .insert(id, (watcher, path_to_dir));
 
     Ok(id.into())
 }
@@ -112,7 +112,7 @@ pub fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
     }
 
     if let Ok(files) = fs::read_dir(path_to_dir) {
-        let mut file_info: Vec<FileInfo> = vec![];
+        let mut dir_entry_info: Vec<FileInfo> = vec![];
 
         files.for_each(|file| {
             if let Ok(file) = file {
@@ -123,14 +123,14 @@ pub fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
                     let file_type = if meta.is_dir() {
                         "directory"
                     } else {
-                        if is_image(file.path().to_str().unwrap_or("")) {
-                            "image"
-                        } else {
-                            "file"
-                        }
+                        // if is_image(file.path().to_str().unwrap_or("")) {
+                        //     "image"
+                        // } else {
+                        "file"
+                        // }
                     };
 
-                    file_info.push(FileInfo::new(
+                    dir_entry_info.push(FileInfo::new(
                         file_name,
                         file_type.into(),
                         meta.file_size() as usize,
@@ -139,7 +139,7 @@ pub fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
             }
         });
 
-        Ok(file_info)
+        Ok(dir_entry_info)
     } else {
         Err("Can't get information about files in directory.".into())
     }
@@ -147,8 +147,6 @@ pub fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
 
 #[tauri::command]
 fn unwatch(state: State<'_, MyState>, id: usize) -> Result<(), String> {
-    println!("{}", id);
-    println!("{:?}", state);
     let result = state.watcher.lock().unwrap().remove(&id);
 
     if let Some((mut watcher, path)) = result {
