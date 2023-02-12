@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-import Settings from "./components/Settings/Settings";
-import TittleFrame from "./components/TittleFrame/TittleFrame";
-import FileExplorer from "./components/fileSystem/FileExplorerLayout/FileExplorerLayout";
+import Settings from "./components/Settings";
+import TittleFrame from "./components/TittleFrame";
+import FileExplorer from "./components/FileExplorer/FileExplorer";
 import FrameWindowControlButtons from "./components/FrameWindowControlButtons/FrameWindowControlButtons";
 
 function App() {

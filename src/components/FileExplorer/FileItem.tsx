@@ -1,9 +1,9 @@
 import { useState, useEffect, KeyboardEvent, FormEvent } from 'react';
 import xbytes from 'xbytes';
 
-import { useCMCStore } from '../../../stores/CMCStore';
-import { useHistoryStore } from '../../../stores/historyStore';
-import GoogleIcon from '../../GoogleIcon/GoogleIcon';
+import { useCMCStore } from '../../stores/CMCStore';
+import { useHistoryStore } from '../../stores/historyStore';
+import GoogleIcon from '../GoogleIcon';
 
 type Props = {
     file: CFile;
@@ -16,7 +16,7 @@ enum Icons {
     directory = 'folder'
 }
 
-function FileButton({ file, onDoubleClick }: Props) {
+function FileItem({ file, onDoubleClick }: Props) {
     const [isFile] = useState(!['disk', 'directory'].includes(file.type))
     const { currentPath } = useHistoryStore(state => state)
     const { currentEditingFile, setCurrentEditingFile } = useCMCStore(state => state)
@@ -113,4 +113,4 @@ function FileButton({ file, onDoubleClick }: Props) {
     );
 }
 
-export default FileButton;
+export default FileItem;

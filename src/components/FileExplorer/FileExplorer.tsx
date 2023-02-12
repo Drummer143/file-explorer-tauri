@@ -1,12 +1,10 @@
+import { event } from '@tauri-apps/api';
 import { useEffect, useState } from 'react';
 
-import PathInput from '../PathInput/PathInput';
-// import useListenElectronEvents from '../../../hooks/useListenElectronEvents';
-
-import { event } from '@tauri-apps/api';
-import { readDir } from './../../../tauriInvokeWrapper';
-import { useHistoryStore } from '../../../stores/historyStore';
-import FileList from '../FileList/FileList';
+import { readDir } from '../../tauriInvokeWrapper';
+import { useHistoryStore } from '../../stores/historyStore';
+import FileList from './FileList/FileList';
+import Navbar from './Navbar/Navbar';
 
 function FileExplorerLayout() {
     const { currentPath } = useHistoryStore();
@@ -47,7 +45,7 @@ function FileExplorerLayout() {
 
     return (
         <>
-            <PathInput setIsFilesLoading={setIsFilesLoading} />
+            <Navbar />
 
             <FileList
                 isFilesLoading={isFilesLoading}

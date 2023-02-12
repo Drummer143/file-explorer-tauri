@@ -1,9 +1,11 @@
 import { useHistoryStore } from '../../../stores/historyStore';
-import GoogleIcon from '../../GoogleIcon/GoogleIcon';
+import GoogleIcon from '../../GoogleIcon';
 
 type Props = {
-    onClick: React.MouseEventHandler<HTMLButtonElement>;
     direction: 'back' | 'forward'
+
+    onClick: React.MouseEventHandler<HTMLButtonElement>;
+    setResizable: React.Dispatch<React.SetStateAction<boolean>>
 };
 
 function HistoryNavigationButton({ onClick, direction }: Props) {
@@ -20,7 +22,7 @@ function HistoryNavigationButton({ onClick, direction }: Props) {
                 .concat(' hover:bg-gray-700')
                 .concat(' active:bg-gray-500')}
         >
-            <GoogleIcon iconName={direction === 'back' ? 'arrow_back' : 'arrow_forward'} size={40} />
+            <GoogleIcon iconName={`arrow_${direction}`} size={40} />
         </button>
     );
 }

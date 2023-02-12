@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
-import i18n from './../../i18n';
+import i18n from '../i18n';
 
-import GoogleIcon from '../GoogleIcon/GoogleIcon';
-import LocalizedText from '../LocalizedText/LocalizedText';
+import GoogleIcon from './GoogleIcon';
+import LocalizedText from './LocalizedText';
 
 function Settings() {
     const [languages] = useState(i18n.languages.concat().sort());

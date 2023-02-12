@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 
 import { useHistoryStore } from '../../../stores/historyStore';
-import FileButton from '../FileButton/FileButton';
+import FileItem from '../FileItem';
 
 import styles from './FileList.module.scss';
 
@@ -44,7 +44,7 @@ function FileList({ files, isFilesLoading, setIsFilesLoading }: Props) {
         >
             {files.length ? (
                 files.map((file, i) => (
-                    <FileButton
+                    <FileItem
                         key={file.name + i}
                         file={file}
                         onDoubleClick={() => handleOpenFile(file)}

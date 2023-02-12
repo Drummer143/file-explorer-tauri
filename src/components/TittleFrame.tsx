@@ -1,4 +1,4 @@
-import LocalizedText from '../LocalizedText/LocalizedText';
+import LocalizedText from './LocalizedText';
 
 type Props = {
     isFullScreen: boolean;

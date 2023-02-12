@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { appWindow } from '@tauri-apps/api/window';
 import { useTranslation } from 'react-i18next';
 
-import GoogleIcon from '../GoogleIcon/GoogleIcon';
+import GoogleIcon from '../GoogleIcon';
 
 import styles from './FrameWindowControlButtons.module.scss';
 
