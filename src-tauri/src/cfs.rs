@@ -18,12 +18,12 @@ use tauri::{
 };
 
 #[derive(Default, Debug)]
-pub struct MyState {
+struct MyState {
     watcher: Mutex<HashMap<usize, (RecommendedWatcher, String)>>,
 }
 
 #[derive(serde::Serialize, Debug)]
-pub struct FileInfo {
+struct FileInfo {
     name: String,
     r#type: String,
     size: usize,
@@ -49,7 +49,7 @@ fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<Event>>) {
 }
 
 #[tauri::command]
-pub fn watch_dir<R: Runtime>(
+fn watch_dir<R: Runtime>(
     window: tauri::Window<R>,
     state: State<'_, MyState>,
     path_to_dir: String,
@@ -88,7 +88,7 @@ pub fn watch_dir<R: Runtime>(
 }
 
 #[tauri::command]
-pub fn get_disks() -> Result<Vec<FileInfo>, String> {
+fn get_disks() -> Result<Vec<FileInfo>, String> {
     let mut sys = System::new_all();
 
     sys.refresh_disks();
@@ -106,7 +106,7 @@ pub fn get_disks() -> Result<Vec<FileInfo>, String> {
 }
 
 #[tauri::command]
-pub fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
+fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
     if path_to_dir.len() == 0 {
         return get_disks();
     }
@@ -162,9 +162,30 @@ fn unwatch(state: State<'_, MyState>, id: usize) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn rename<R: Runtime>(window: Window<R>, old_name: String, new_name: String) -> Result<(), String> {
+    let old_path = Path::new(&old_name);
+    let new_path = Path::new(&new_name);
+
+    if !old_path.exists() {
+        return Err("File doesn't exist".into());
+    }
+
+    if !new_path.exists() {
+        return Err("A file with given name already exists".into());
+    }
+
+    let result = fs::rename(old_path, new_path);
+
+    match result {
+        Ok(_) => Ok(()),
+        Err(error) => Err(error.kind().to_string())
+    }    
+
+}
+
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("cfs")
-        .invoke_handler(tauri::generate_handler![read_dir, watch_dir, get_disks, unwatch])
+        .invoke_handler(tauri::generate_handler![read_dir, watch_dir, get_disks, unwatch, rename])
         .setup(|app_handle| {
             // setup plugin specific state here
             app_handle.manage(MyState::default());

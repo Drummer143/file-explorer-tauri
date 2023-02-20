@@ -35,7 +35,6 @@ function FileExplorerLayout() {
     }
 
     useEffect(() => {
-        // TODO: FINISH THIS
         event.listen('changes-in-dir', e => console.log(e.payload));
     }, [])
 

@@ -2,12 +2,12 @@ import { invoke } from '@tauri-apps/api';
 
 let watcherId: number;
 
-export const unwatchDir = async () => {
+export const unwatchDir = () => {
     if (!watcherId) {
         return;
     }
 
-    await invoke('plugin:cfs|unwatch', { id: watcherId });
+    return invoke('plugin:cfs|unwatch', { id: watcherId });
 }
 
 export const watchDir = async (path: string) => {
@@ -40,3 +40,5 @@ export const readDir = async (path: string) => {
         unwatch
     }
 }
+
+export const rename = (oldName: string, newName: string) => invoke('plugin:cfs|rename', { oldName, newName });

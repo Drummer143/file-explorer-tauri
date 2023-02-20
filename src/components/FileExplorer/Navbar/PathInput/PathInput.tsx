@@ -33,15 +33,15 @@ const PathInput: React.FC<PathInputProps> = ({ resizable, setResizable }) => {
 
     useEffect(() => {
         if (resizable) {
-            inputRef.current.style.width = `calc(${spanRef.current.clientWidth + 20}px + 2.5rem)`;
+            inputRef.current.style.width = `calc(${spanRef.current.clientWidth}px + 20px + 2.5rem)`;
         }
     }, [input, resizable]);
 
     useEffect(() => setInput(currentPath), [currentPath]);
 
     return (
-        <div ref={inputRef} className={'flex-grow min-w-[200px]'}>
-            <span ref={spanRef} className={'absolute h-0 overflow-hidden'}>
+        <div ref={inputRef} className={'flex-grow min-w-[200px] transition-[width]'}>
+            <span ref={spanRef} className={'absolute h-0 overflow-hidden whitespace-nowrap'}>
                 {input}
             </span>
 
@@ -51,7 +51,7 @@ const PathInput: React.FC<PathInputProps> = ({ resizable, setResizable }) => {
                 onKeyDown={handlePathInputEnterPress}
                 onFocus={() => setResizable(true)}
                 className={'text-[var(--secondary-text-dark)] w-full px-5 pt-1 pb-2 border-solid border border-transparent'
-                    .concat(' text-center rounded-2xl leading-[3rem] transition-[width,_border-color]')
+                    .concat(' text-center rounded-2xl leading-[3rem] transition-[border-color]')
                     .concat(' hover:border-[var(--top-grey-dark)]')
                     .concat(' focus:text-[var(--primary-text-dark)]')
                     .concat(' ', styles.pathInput)}
