@@ -5,7 +5,11 @@ module.exports = {
         "./src/**/*.{js,ts,jsx,tsx}"
     ],
     theme: {
-        extend: {},
+        extend: {
+            boxShadow: {
+                'ctx': '0 0 1rem 0 #333'
+            },
+        },
     },
     plugins: [],
 }

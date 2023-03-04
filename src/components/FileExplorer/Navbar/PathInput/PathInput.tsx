@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { useHistoryStore } from "../../../../stores/historyStore";
+import { useHistoryStore } from "src/stores/historyStore";
 
 import styles from './PathInput.module.scss';
 
@@ -11,7 +11,7 @@ type PathInputProps = {
 }
 
 const PathInput: React.FC<PathInputProps> = ({ resizable, setResizable }) => {
-    const { pushRoute, currentPath } = useHistoryStore(state => state);
+    const { pushRoute, currentPath } = useHistoryStore();
 
     const [input, setInput] = useState<string>(currentPath);
 

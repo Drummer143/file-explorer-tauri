@@ -1,29 +1,21 @@
 import { event } from '@tauri-apps/api';
 import { useEffect, useState } from 'react';
 
-import { readDir } from '../../tauriInvokeWrapper';
-import { useHistoryStore } from '../../stores/historyStore';
-import FileList from './FileList/FileList';
 import Navbar from './Navbar/Navbar';
+import FileList from './FileList/FileList';
+import { useHistoryStore } from 'src/stores/historyStore';
+import { openInExplorer, readDir } from 'src/tauriInvokeWrapper';
 
 function FileExplorerLayout() {
-    const { currentPath } = useHistoryStore();
     const [files, setFiles] = useState<CFile[]>([]);
     const [isFilesLoading, setIsFilesLoading] = useState(true);
+    const { currentPath } = useHistoryStore(state => state);
 
-    // const handleKeyDown = (e: KeyboardEvent) => {
-    //     if (e.ctrlKey && e.shiftKey && e.code === 'KeyE') {
-    //         window.electronAPI.openInExplorer(currentPath);
-    //     }
-    // }
-
-    // useEffect(() => {
-    //     document.addEventListener('keydown', handleKeyDown);
-
-    //     return () => {
-    //         document.removeEventListener('keydown', handleKeyDown);
-    //     }
-    // }, [currentPath]);
+    const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.ctrlKey && e.shiftKey && e.code === 'KeyE') {
+            openInExplorer(currentPath).catch((error) => console.error(error));
+        }
+    }
 
     const openDir = async (path: string) => {
         readDir(path ? `${path}\\` : path)
@@ -35,12 +27,22 @@ function FileExplorerLayout() {
     }
 
     useEffect(() => {
-        event.listen('changes-in-dir', e => console.log(e.payload));
+        const unlisten = event.listen('changes-in-dir', e => console.info(e.payload));
+
+        return () => {
+            unlisten.then(fn => fn());
+        }
     }, [])
 
     useEffect(() => {
-        openDir(currentPath)
-    }, [currentPath])
+        document.addEventListener('keydown', handleKeyDown);
+
+        openDir(currentPath);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        }
+    }, [currentPath]);
 
     return (
         <>

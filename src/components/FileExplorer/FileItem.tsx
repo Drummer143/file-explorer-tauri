@@ -64,7 +64,7 @@ function FileItem({ file, onDoubleClick }: Props) {
     return (
         <button
             data-ctx={file.type}
-            data-info={name}
+            data-info={file.name}
             onDoubleClick={onDoubleClick}
             onKeyDown={handleKeyDown}
             onClick={e => (e.target as HTMLElement).focus()}

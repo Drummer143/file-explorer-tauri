@@ -1,7 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 
-import { useHistoryStore } from '../../../stores/historyStore';
 import FileItem from '../FileItem';
+import { useHistoryStore } from 'src/stores/historyStore';
 
 import styles from './FileList.module.scss';
 
@@ -17,19 +17,19 @@ function FileList({ files, isFilesLoading, setIsFilesLoading }: Props) {
 
     const fileContainerRef = useRef<HTMLDivElement>(null);
 
-    const handleOpenFile = (file: CFile) => {
+    const handleOpenFile = useCallback((file: CFile) => {
         let newPath = currentPath ? `${currentPath}\\${file.name}` : file.name;
         newPath = newPath.replace(/[\\/]{2,}|\//g, '\\');
 
         if (file.type === 'directory' || file.type === 'disk') {
-            pushRoute(`${newPath}\\`);
+            pushRoute(newPath);
             setIsFilesLoading(true);
 
             fileContainerRef.current.scrollTo({ top: 0 });
         }/*  else {
             window.electronAPI.openFile(newPath);
         } */
-    };
+    }, [currentPath]);
 
     return (
         <div

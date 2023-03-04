@@ -38,8 +38,8 @@ i18n
                             appearance: 'Appearance'
                         },
                         sections: {
-                            drive: 'drive',
-                            folder: 'folder',
+                            disk: 'disk',
+                            directory: 'directory',
                             file: 'file',
                             explorer: 'explorer'
                         }
@@ -78,8 +78,8 @@ i18n
                             appearance: 'Вид'
                         },
                         sections: {
-                            drive: 'диск',
-                            folder: 'папка',
+                            disk: 'диск',
+                            directory: 'папка',
                             file: 'файл',
                             explorer: 'проводник'
                         }

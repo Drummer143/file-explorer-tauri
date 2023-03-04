@@ -23,7 +23,6 @@ export const watchDir = async (path: string) => {
 
     return invoke('plugin:cfs|watch_dir', { pathToDir: path })
         .then((id: number) => {
-            console.log(id);
             watcherId = id;
 
             return unwatchDir;
@@ -31,14 +30,27 @@ export const watchDir = async (path: string) => {
 };
 
 export const readDir = async (path: string) => {
-    const files: CFile[] = await invoke('plugin:cfs|read_dir', { pathToDir: path });
+    try {
+        const files: CFile[] = await invoke('plugin:cfs|read_dir', { pathToDir: path });
 
-    const unwatch = await watchDir(path);
+        const unwatch = await watchDir(path);
 
-    return {
-        files,
-        unwatch
+        return {
+            files,
+            unwatch
+        }
+    } catch (error) {
+        console.error(error);
+        throw error as string;
     }
 }
 
-export const rename = (oldName: string, newName: string) => invoke('plugin:cfs|rename', { oldName, newName });
+export const rename = (oldName: string, newName: string): Promise<void> => invoke('plugin:cfs|rename', { oldName, newName });
+
+export const openInExplorer = async (pathToDir = '') => {
+    try {
+        await invoke('open_in_explorer', { pathToDir })
+    } catch (error) {
+        throw error as string;
+    };
+}
