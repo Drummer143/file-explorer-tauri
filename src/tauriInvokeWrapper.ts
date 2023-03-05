@@ -54,3 +54,9 @@ export const openInExplorer = async (pathToDir = '') => {
         throw error as string;
     };
 }
+
+export const deleteFile = (pathToFile: string) => {
+    invoke('plugin:cfs|check_file_before_delete', { pathToFile })
+        .then(() => console.log('successful'))
+        .catch((error: string) => console.error(error))
+}

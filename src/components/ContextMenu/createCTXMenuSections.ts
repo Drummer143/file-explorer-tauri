@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import { useCMCStore } from "src/stores/CMCStore";
 import { useHistoryStore } from "src/stores/historyStore";
-import { openInExplorer } from "src/tauriInvokeWrapper";
+import { deleteFile, openInExplorer } from "src/tauriInvokeWrapper";
 
 export default function createCTXMenuSections(): MenuSections {
     const { setCurrentEditingFile, setModal } = useCMCStore(state => state);
@@ -30,7 +30,7 @@ export default function createCTXMenuSections(): MenuSections {
             },
             {
                 name: t('ctx.buttons.delete'),
-                onClick: info => console.log(info)/* window.electronAPI.deleteFile(`${currentPath}\\${info}`) */,
+                onClick: info => deleteFile(`${currentPath}\\${info}`)/* window.electronAPI.deleteFile(`${currentPath}\\${info}`) */,
                 type: 'action'
             },
             {
@@ -50,7 +50,7 @@ export default function createCTXMenuSections(): MenuSections {
             },
             {
                 name: t('ctx.buttons.delete'),
-                onClick: info => console.log(info),
+                onClick: info => deleteFile(`${currentPath}\\${info}`),
                 type: 'action'
             },
             {
