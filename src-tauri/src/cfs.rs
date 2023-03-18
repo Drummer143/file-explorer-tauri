@@ -1,11 +1,14 @@
 // use crate::file_types::is_image;
-use notify::{Config, Event, EventKind, RecommendedWatcher, RecursiveMode, Watcher};
+use notify::{
+    Config, Event as NotifyEvent, EventKind as NotifyEventKind, RecommendedWatcher, RecursiveMode,
+    Watcher, event::EventAttributes,
+};
 use rand::random;
 use std::{
     collections::HashMap,
     fs,
     os::windows::fs::MetadataExt,
-    path::Path,
+    path::{Path, PathBuf},
     sync::mpsc::{channel, Receiver},
     sync::Mutex,
     thread::spawn,
@@ -19,7 +22,7 @@ use tauri::{
 };
 
 #[derive(Default, Debug)]
-struct MyState {
+struct CFSState {
     watcher: Mutex<HashMap<usize, (RecommendedWatcher, String)>>,
 }
 
@@ -36,12 +39,46 @@ impl FileInfo {
     }
 }
 
-fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<Event>>) {
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+enum FileChangeEventType {
+    Access,
+    Any,
+    Create,
+    Modify,
+    Remove,
+    Other,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+struct FileChangePayload {
+    r#type: FileChangeEventType,
+    kind: NotifyEventKind,
+    paths: Vec<PathBuf>,
+    attrs: EventAttributes,
+}
+
+fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>>) {
     spawn(move || {
-        let event_name = format!("changes-in-dir");
         while let Ok(event) = rx.recv() {
             if let Ok(event) = event {
-                let _ = window.emit(&event_name, event);
+                let event_type = match event.kind {
+                    NotifyEventKind::Access(_) => FileChangeEventType::Access,
+                    NotifyEventKind::Any => FileChangeEventType::Any,
+                    NotifyEventKind::Create(_) => FileChangeEventType::Create,
+                    NotifyEventKind::Modify(_) => FileChangeEventType::Modify,
+                    NotifyEventKind::Other => FileChangeEventType::Other,
+                    NotifyEventKind::Remove(_) => FileChangeEventType::Remove,
+                };
+
+                let payload = FileChangePayload {
+                    r#type: event_type,
+                    attrs: event.attrs,
+                    kind: event.kind,
+                    paths: event.paths
+                };
+
+                let _ = window.emit("changes-in-dir", payload);
             }
         }
     });
@@ -50,7 +87,7 @@ fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<Event>>) {
 #[tauri::command]
 fn watch_dir<R: Runtime>(
     window: tauri::Window<R>,
-    state: State<'_, MyState>,
+    state: State<'_, CFSState>,
     path_to_dir: String,
 ) -> Result<usize, String> {
     let path = Path::new(&path_to_dir);
@@ -145,7 +182,7 @@ fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
 }
 
 #[tauri::command]
-fn unwatch(state: State<'_, MyState>, id: usize) -> Result<(), String> {
+fn unwatch(state: State<'_, CFSState>, id: usize) -> Result<(), String> {
     let result = state.watcher.lock().unwrap().remove(&id);
 
     if let Some((mut watcher, path)) = result {
@@ -169,7 +206,7 @@ fn rename(old_name: String, new_name: String) -> Result<(), String> {
         return Err("File doesn't exist".into());
     }
 
-    if !new_path.exists() {
+    if new_path.exists() {
         return Err("A file with given name already exists".into());
     }
 
@@ -303,7 +340,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
         ])
         .setup(|app_handle| {
             // setup plugin specific state here
-            app_handle.manage(MyState::default());
+            app_handle.manage(CFSState::default());
             Ok(())
         })
         .build()

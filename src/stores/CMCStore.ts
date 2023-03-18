@@ -2,12 +2,12 @@
 
 import { create } from "zustand";
 
-type ModalInfo = {
+export type ModalInfo = {
     name: 'fileCreating'
     data: FileCreatingModalParams
 }
 
-interface CMCStore {
+export interface CMCStore {
     currentEditingFile?: string
     modalInfo?: ModalInfo
 
@@ -23,4 +23,4 @@ const useCMCStore = create<CMCStore>((set, get) => ({
     })
 }))
 
-export { useCMCStore };
+export default useCMCStore;

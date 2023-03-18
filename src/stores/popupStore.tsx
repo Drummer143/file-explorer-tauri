@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-interface PopupStore {
+export interface PopupStore {
     maxPopups: number
     popups: (PopupInfo & { id: string })[]
     lifetime: number

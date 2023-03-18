@@ -1,5 +1,5 @@
 import GoogleIcon from 'src/components/GoogleIcon';
-import { useHistoryStore } from 'src/stores/historyStore';
+import useHistoryStore from 'src/stores/historyStore';
 
 type Props = {
     direction: 'back' | 'forward'

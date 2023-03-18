@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import { useHistoryStore } from "src/stores/historyStore";
+import useHistoryStore from "src/stores/historyStore";
 
 import styles from './PathInput.module.scss';
 

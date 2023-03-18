@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
 import PathInput from './PathInput/PathInput';
+import useHistoryStore from 'src/stores/historyStore';
 import HistoryNavigationButton from './HistoryNavigationButton';
-import { useHistoryStore } from 'src/stores/historyStore';
 
 const Navbar: React.FC = () => {
     const { goForward, goBack } = useHistoryStore(state => state);

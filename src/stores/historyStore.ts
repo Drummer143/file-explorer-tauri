@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-interface HistoryStore {
+export interface HistoryStore {
     history: string[];
     currentPath: string;
     currentPathIndex: number;
@@ -67,4 +67,4 @@ const useHistoryStore = create<HistoryStore>((set, get) => ({
     reset: () => set(() => ({ history: [], currentPath: '' }))
 }));
 
-export { useHistoryStore };
+export default useHistoryStore;

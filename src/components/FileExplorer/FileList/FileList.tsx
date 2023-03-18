@@ -1,19 +1,14 @@
 import React, { useCallback, useRef } from 'react';
 
 import FileItem from '../FileItem';
-import { useHistoryStore } from 'src/stores/historyStore';
+import useHistoryStore from 'src/stores/historyStore';
 
 import styles from './FileList.module.scss';
+import useFileExplorerState from 'src/stores/FileExplorerStore';
 
-type Props = {
-    isFilesLoading: boolean
-    files: CFile[]
-
-    setIsFilesLoading: React.Dispatch<React.SetStateAction<boolean>>
-}
-
-function FileList({ files, isFilesLoading, setIsFilesLoading }: Props) {
+function FileList() {
     const { pushRoute, currentPath } = useHistoryStore(state => state);
+    const { isWaitingNewFiles, files, setIsWaitingNewFiles } = useFileExplorerState(state => state);
 
     const fileContainerRef = useRef<HTMLDivElement>(null);
 
@@ -23,7 +18,7 @@ function FileList({ files, isFilesLoading, setIsFilesLoading }: Props) {
 
         if (file.type === 'directory' || file.type === 'disk') {
             pushRoute(newPath);
-            setIsFilesLoading(true);
+            setIsWaitingNewFiles(true);
 
             fileContainerRef.current.scrollTo({ top: 0 });
         }/*  else {
@@ -38,7 +33,7 @@ function FileList({ files, isFilesLoading, setIsFilesLoading }: Props) {
             className={'max-xl:w-3/4 absolute overflow-y-auto max-h-[calc(100vh_-_14rem)] left-1/2 transition-[transform,_top,_left_,opacity,_border-color] duration-500'
                 .concat(' scroll-smooth -translate-x-1/2 flex w-3/4 justify-center flex-wrap gap-2 text-xl border border-solid border-transparent rounded-xl p-3')
                 .concat(' ', currentPath && files.length !== 0 ? 'top-40 border-slate-800 h-full content-start' : 'top-1/2 -translate-y-1/2')
-                .concat(isFilesLoading ? ' opacity-0' : '')
+                .concat(isWaitingNewFiles ? ' opacity-0' : '')
                 .concat(files.length === 0 ? ' min-h-[100px]' : '')
                 .concat(' ', styles.filesContainer)}
         >

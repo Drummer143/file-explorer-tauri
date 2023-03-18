@@ -1,58 +1,60 @@
-import { event } from '@tauri-apps/api';
-import { useEffect, useState } from 'react';
+import { useEffect, useCallback, useState } from 'react';
 
+import event from 'src/tauriCLIWrapper/event';
 import Navbar from './Navbar/Navbar';
 import FileList from './FileList/FileList';
-import { useHistoryStore } from 'src/stores/historyStore';
-import { openInExplorer, readDir } from 'src/tauriInvokeWrapper';
+import useHistoryStore from 'src/stores/historyStore';
+import useFileExplorerState from 'src/stores/FileExplorerStore';
+import { openInExplorer, readDir } from 'src/tauriCLIWrapper/invoke';
 
 function FileExplorerLayout() {
-    const [files, setFiles] = useState<CFile[]>([]);
-    const [isFilesLoading, setIsFilesLoading] = useState(true);
+    const { setFiles } = useFileExplorerState(state => state);
     const { currentPath } = useHistoryStore(state => state);
 
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = useCallback((e: KeyboardEvent) => {
         if (e.ctrlKey && e.shiftKey && e.code === 'KeyE') {
             openInExplorer(currentPath).catch((error) => console.error(error));
         }
-    }
+    }, [currentPath]);
 
     const openDir = async (path: string) => {
-        readDir(path ? `${path}\\` : path)
-            .then(({ files }) => {
-                setFiles(files);
-                setIsFilesLoading(false);
-            })
-            .catch(error => console.error(error))
+        try {
+            const { files } = await readDir(path ? `${path}\\` : path)
+
+            setFiles(files);
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     useEffect(() => {
-        const unlisten = event.listen('changes-in-dir', e => console.info(e.payload));
+        const unlisten = event.listen('changes-in-dir', ({ payload }) => {
+            console.log(payload);
+        });
 
-        return () => {
-            unlisten.then(fn => fn());
-        }
-    }, [])
-
-    useEffect(() => {
         document.addEventListener('keydown', handleKeyDown);
 
-        openDir(currentPath);
+        window.onbeforeunload = () => {
+            unlisten.then(fn => fn());
+            let start_data = Date.now();
+
+            while (Date.now() - start_data < 200) { };
+        }
 
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         }
+    }, [])
+
+    useEffect(() => {
+        openDir(currentPath)
     }, [currentPath]);
 
     return (
         <>
             <Navbar />
 
-            <FileList
-                isFilesLoading={isFilesLoading}
-                setIsFilesLoading={setIsFilesLoading}
-                files={files}
-            />
+            <FileList />
         </>
     );
 }

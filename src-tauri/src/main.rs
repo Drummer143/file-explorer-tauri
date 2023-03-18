@@ -4,7 +4,6 @@
 )]
 
 mod cfs;
-mod file_types;
 
 use std::process::Command;
 

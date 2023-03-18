@@ -1,12 +1,15 @@
 import { useTranslation } from "react-i18next";
 
-import { useCMCStore } from "src/stores/CMCStore";
-import { useHistoryStore } from "src/stores/historyStore";
-import { deleteFile, openInExplorer } from "src/tauriInvokeWrapper";
+import useCMCStore from "src/stores/CMCStore";
+import useHistoryStore from "src/stores/historyStore";
+import useFileExplorerState from "src/stores/FileExplorerStore";
+import { deleteFile, openInExplorer } from "src/tauriCLIWrapper/invoke";
 
 export default function createCTXMenuSections(): MenuSections {
-    const { setCurrentEditingFile, setModal } = useCMCStore(state => state);
+    const { setModal } = useCMCStore(state => state);
+    const { setCurrentEditingFile } = useFileExplorerState(state => state);
     const { pushRoute, currentPath } = useHistoryStore(state => state);
+
     const { t } = useTranslation();
 
     return {
