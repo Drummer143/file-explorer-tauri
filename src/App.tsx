@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import Settings from "./components/Settings";
 import TittleFrame from "./components/TittleFrame";
+import ContextMenu from "./components/ContextMenu/ContextMenu";
 import FileExplorer from "./components/FileExplorer/FileExplorer";
 import FrameWindowControlButtons from "./components/FrameWindowControlButtons/FrameWindowControlButtons";
-import ContextMenu from "./components/ContextMenu/ContextMenu";
 
-function App() {
+const App: React.FC = () => {
     const [isFullscreen, setIsFullscreen] = useState(false);
 
     return (

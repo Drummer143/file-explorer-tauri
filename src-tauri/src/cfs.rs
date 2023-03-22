@@ -1,11 +1,12 @@
 // use crate::file_types::is_image;
 use notify::{
-    Config, Event as NotifyEvent, EventKind as NotifyEventKind, RecommendedWatcher, RecursiveMode,
-    Watcher, event::EventAttributes,
+    event::EventAttributes, Config, Event as NotifyEvent, EventKind as NotifyEventKind,
+    RecommendedWatcher, RecursiveMode, Watcher,
 };
 use rand::random;
 use std::{
     collections::HashMap,
+    ffi::OsStr,
     fs,
     os::windows::fs::MetadataExt,
     path::{Path, PathBuf},
@@ -26,7 +27,7 @@ struct CFSState {
     watcher: Mutex<HashMap<usize, (RecommendedWatcher, String)>>,
 }
 
-#[derive(serde::Serialize, Debug)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 struct FileInfo {
     name: String,
     r#type: String,
@@ -51,11 +52,13 @@ enum FileChangeEventType {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
 struct FileChangePayload {
     r#type: FileChangeEventType,
     kind: NotifyEventKind,
     paths: Vec<PathBuf>,
     attrs: EventAttributes,
+    file_info: FileInfo,
 }
 
 fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>>) {
@@ -71,11 +74,32 @@ fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>
                     NotifyEventKind::Remove(_) => FileChangeEventType::Remove,
                 };
 
+                let event_clone = event.clone();
+                let path_buf_default = &PathBuf::default();
+
+                let path_to_file = event_clone.paths.first().unwrap_or(path_buf_default);
+                let filename = path_to_file
+                    .file_name()
+                    .unwrap_or(OsStr::new(""))
+                    .to_string_lossy();
+                let file_type = if path_to_file.is_dir() { "directory" } else { "file" };
+                let metadata = path_to_file.metadata();
+                let size: usize = if let Ok(metadata) = metadata {
+                    metadata.file_size() as usize
+                } else {
+                    0
+                };
+
                 let payload = FileChangePayload {
                     r#type: event_type,
                     attrs: event.attrs,
                     kind: event.kind,
-                    paths: event.paths
+                    paths: event.paths,
+                    file_info: FileInfo {
+                        name: filename.to_string(),
+                        r#type: file_type.into(),
+                        size: size as usize,
+                    },
                 };
 
                 let _ = window.emit("changes-in-dir", payload);

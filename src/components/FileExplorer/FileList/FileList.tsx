@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 
 import FileItem from '../FileItem';
 import useHistoryStore from 'src/stores/historyStore';

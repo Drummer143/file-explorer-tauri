@@ -1,10 +1,10 @@
 import { useEffect, useCallback, useState } from 'react';
 
-import event from 'src/tauriCLIWrapper/event';
 import Navbar from './Navbar/Navbar';
 import FileList from './FileList/FileList';
 import useHistoryStore from 'src/stores/historyStore';
 import useFileExplorerState from 'src/stores/FileExplorerStore';
+import { event } from '@tauri-apps/api';
 import { openInExplorer, readDir } from 'src/tauriCLIWrapper/invoke';
 
 function FileExplorerLayout() {
@@ -28,18 +28,11 @@ function FileExplorerLayout() {
     }
 
     useEffect(() => {
-        const unlisten = event.listen('changes-in-dir', ({ payload }) => {
+        event.listen<Events['changes-in-dir']>('changes-in-dir', ({ payload }) => {
             console.log(payload);
         });
 
         document.addEventListener('keydown', handleKeyDown);
-
-        window.onbeforeunload = () => {
-            unlisten.then(fn => fn());
-            let start_data = Date.now();
-
-            while (Date.now() - start_data < 200) { };
-        }
 
         return () => {
             document.removeEventListener('keydown', handleKeyDown);

@@ -10,7 +10,7 @@ export const unwatchDir = () => {
     return invoke('plugin:cfs|unwatch', { id: watcherId });
 }
 
-export const watchDir = async (path: string) => {
+export const watchDir = async (path: string): Promise<void | (() => Promise<unknown>)> => {
     try {
         await unwatchDir();
     } catch (error) {
