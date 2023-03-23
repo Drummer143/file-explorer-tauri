@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import Settings from "./components/Settings";
+import Settings from "./components/Settings/Settings";
 import TittleFrame from "./components/TittleFrame";
 import ContextMenu from "./components/ContextMenu/ContextMenu";
 import FileExplorer from "./components/FileExplorer/FileExplorer";
