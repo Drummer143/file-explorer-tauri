@@ -3,7 +3,7 @@ import { useEffect, useCallback, useState } from 'react';
 import Navbar from './Navbar/Navbar';
 import FileList from './FileList/FileList';
 import useHistoryStore from 'src/stores/historyStore';
-import useFileExplorerState from 'src/stores/FileExplorerStore';
+import useFileExplorerState from 'src/stores/fileExplorerStore';
 import { event } from '@tauri-apps/api';
 import { openInExplorer, readDir } from 'src/tauriCLIWrapper/invoke';
 

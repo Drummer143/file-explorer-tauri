@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 
 import useCMCStore from "src/stores/CMCStore";
 import useHistoryStore from "src/stores/historyStore";
-import useFileExplorerState from "src/stores/FileExplorerStore";
+import useFileExplorerState from "src/stores/fileExplorerStore";
 import { deleteFile, openInExplorer } from "src/tauriCLIWrapper/invoke";
 
 export default function createCTXMenuSections(): MenuSections {

@@ -3,7 +3,7 @@ import React, { useState, useEffect, FormEventHandler, KeyboardEventHandler } fr
 import xbytes from 'xbytes';
 import GoogleIcon from '../GoogleIcon';
 import useHistoryStore from 'src/stores/historyStore';
-import useFileExplorerState from 'src/stores/FileExplorerStore';
+import useFileExplorerState from 'src/stores/fileExplorerStore';
 import { rename } from 'src/tauriCLIWrapper/invoke';
 
 type Props = {

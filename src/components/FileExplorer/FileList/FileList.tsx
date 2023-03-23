@@ -4,7 +4,7 @@ import FileItem from '../FileItem';
 import useHistoryStore from 'src/stores/historyStore';
 
 import styles from './FileList.module.scss';
-import useFileExplorerState from 'src/stores/FileExplorerStore';
+import useFileExplorerState from 'src/stores/fileExplorerStore';
 
 function FileList() {
     const { pushRoute, currentPath } = useHistoryStore(state => state);
