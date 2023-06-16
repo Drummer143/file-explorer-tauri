@@ -7,3 +7,4 @@ Roadmap:
 - [] Settings
 - [] Localization
 - [] Context Menu
+- [] Side Menu

@@ -2,7 +2,7 @@ import React from 'react';
 import { I18nextProvider } from 'react-i18next';
 import { render, RenderOptions } from '@testing-library/react';
 
-import i18n from '../i18n/i18n';
+import i18n from '../i18n/index.js';
 
 import '@testing-library/jest-dom';
 

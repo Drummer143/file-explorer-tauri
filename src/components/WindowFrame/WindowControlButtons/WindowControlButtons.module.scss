@@ -1,0 +1,45 @@
+.wrapper {
+    line-height: 0;
+
+    display: flex;
+    gap: 0.25rem;
+}
+
+.windowControlButton {
+    position: relative;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 0.125rem;
+    border-radius: 0.25rem;
+
+    overflow: hidden;
+
+    &::after {
+        content: "";
+
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 1;
+
+        background-color: transparent;
+        transition: background-color 150ms;
+    }
+
+    &:hover::after {
+        background-color: var(--window-control-button-hover-color);
+    }
+
+    &:active::after {
+        background-color: var(--window-control-button-active-color);
+    }
+
+    svg {
+        stroke: var(--window-control-button-icon-color);
+    }
+}
