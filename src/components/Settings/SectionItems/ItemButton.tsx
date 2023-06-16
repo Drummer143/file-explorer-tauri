@@ -8,7 +8,6 @@ type ItemButtonProps = {
 };
 
 const ItemButton: React.FC<ItemButtonProps> = ({ onClick, text, isActive }) => {
-
     return (
         <button
             disabled={isActive}

@@ -7,6 +7,10 @@ export default defineConfig({
         coverage: {
             provider: 'istanbul',
             include: ['src/components/**/*.tsx']
-        }
-    }
+        },
+        alias: {
+            src: 'src/'
+        },
+        clearMocks: true
+    },
 })

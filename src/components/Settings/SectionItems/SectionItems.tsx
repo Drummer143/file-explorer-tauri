@@ -1,6 +1,7 @@
 import React from 'react';
-import useSettingsStore from 'src/stores/SettingsStore';
+
 import ItemButton from './ItemButton';
+import useSettingsStore from 'src/stores/settingsStore';
 
 type SectionItemsProps = {
     sectionName: string

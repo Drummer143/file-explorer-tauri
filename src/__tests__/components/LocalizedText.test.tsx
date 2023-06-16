@@ -1,5 +1,6 @@
 import { test, expect, it } from 'vitest';
-import { render, screen } from './test-utils';
+
+import { render, screen } from 'src/__tests__/test-utils';
 
 import LocalizedText from 'src/components/LocalizedText';
 
