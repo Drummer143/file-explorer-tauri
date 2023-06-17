@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 
 import Disk from './Disk';
 import { getDisks, readDir } from "../../tauriAPIWrapper/invoke";
 
-import styles from "./FileView.module.scss";
+import styles from "./FileList.module.scss";
 
-const FilesView: React.FC = () => {
+const FileList: React.FC = () => {
     const [files, setFiles] = useState<CFile[]>([]);
 
     const { path } = useParams<{ path: string }>();
@@ -23,7 +23,7 @@ const FilesView: React.FC = () => {
 
     useEffect(() => {
         if (path) {
-            readDir(path + "/").then(setFiles);
+            readDir(path + "\\").then(setFiles);
         } else {
             getDisks().then(setFiles);
         }
@@ -35,4 +35,4 @@ const FilesView: React.FC = () => {
         </div>
     )
 }
-export default FilesView;
+export default FileList;

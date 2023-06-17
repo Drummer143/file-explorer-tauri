@@ -1,7 +1,7 @@
 import { createBrowserRouter, Navigate, RouteObject } from "react-router-dom";
 
 import Layout from "./components/Layout";
-import FilesView from "./components/FilesView";
+import FileList from "./components/FileList";
 
 const route404: RouteObject = {
     path: "/",
@@ -15,11 +15,11 @@ export default createBrowserRouter([
         children: [
             {
                 path: "/explorer",
-                element: <FilesView />
+                element: <FileList />
             },
             {
                 path: "/explorer/:path",
-                element: <FilesView />
+                element: <FileList />
             },
             route404
         ]
