@@ -17,8 +17,6 @@ const WindowControlButtons: React.FC = () => {
         appWindow.isMaximized().then(res => {
             setIsMaximized(res);
 
-            console.log(isMaximized);
-
             isReady.current = true;
         })
     }, []);

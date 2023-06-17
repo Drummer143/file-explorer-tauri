@@ -28,6 +28,28 @@ struct CFSState {
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+struct DiskInfo {
+    mount_point: String,
+    name: String,
+    r#type: String,
+    total_space: usize,
+    available_space: usize,
+}
+
+impl DiskInfo {
+    pub fn new(mount_point: String, name: String, total_space: usize, available_space: usize) -> Self {
+        Self {
+            mount_point,
+            name,
+            total_space,
+            available_space,
+            r#type: "disk".into(),
+        }
+    }
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 struct FileInfo {
     name: String,
     r#type: String,
@@ -82,7 +104,11 @@ fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>
                     .file_name()
                     .unwrap_or(OsStr::new(""))
                     .to_string_lossy();
-                let file_type = if path_to_file.is_dir() { "directory" } else { "file" };
+                let file_type = if path_to_file.is_dir() {
+                    "directory"
+                } else {
+                    "file"
+                };
                 let metadata = path_to_file.metadata();
                 let size: usize = if let Ok(metadata) = metadata {
                     metadata.file_size() as usize
@@ -148,18 +174,23 @@ fn watch_dir<R: Runtime>(
 }
 
 #[tauri::command]
-fn get_disks() -> Result<Vec<FileInfo>, String> {
+fn get_disks() -> Result<Vec<DiskInfo>, String> {
     let mut sys = System::new_all();
 
     sys.refresh_disks();
     sys.refresh_disks_list();
 
-    let mut disks: Vec<FileInfo> = vec![];
+    let mut disks: Vec<DiskInfo> = vec![];
 
     for disk in sys.disks() {
         let mount = disk.mount_point().to_str().unwrap_or("").replace("\\", "");
 
-        disks.push(FileInfo::new(mount.into(), "disk".into(), 0));
+        disks.push(DiskInfo::new(
+            mount,
+            disk.name().to_str().unwrap_or("").into(),
+            disk.total_space() as usize,
+            disk.available_space() as usize,
+        ));
     }
 
     Ok(disks)
@@ -168,7 +199,7 @@ fn get_disks() -> Result<Vec<FileInfo>, String> {
 #[tauri::command]
 fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
     if path_to_dir.len() == 0 {
-        return get_disks();
+        return Err("Path is empty".into());
     }
 
     if let Ok(files) = fs::read_dir(path_to_dir) {

@@ -1,0 +1,1 @@
+export { ReactComponent as DiskSVG } from "./disk.svg";
