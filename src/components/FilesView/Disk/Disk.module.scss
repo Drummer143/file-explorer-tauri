@@ -28,6 +28,10 @@
 
     &:focus {
         outline-color: rgba($color: #fff, $alpha: 0.45);
+
+        &:not(:hover) {
+            background-color: rgba($color: #fff, $alpha: 0.05);
+        }
     }
 
     &:active {

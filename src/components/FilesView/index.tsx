@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 
 import Disk from './Disk';
-import { getDisks } from "../../tauriAPIWrapper/invoke";
+import { getDisks, readDir } from "../../tauriAPIWrapper/invoke";
 
 import styles from "./FileView.module.scss";
 
 const FilesView: React.FC = () => {
     const [files, setFiles] = useState<CFile[]>([]);
+
+    const { path } = useParams<{ path: string }>();
 
     const mapFiles = (file: CFile) => {
         switch (file.type) {
@@ -19,8 +22,12 @@ const FilesView: React.FC = () => {
     }
 
     useEffect(() => {
-        getDisks().then(res => setFiles(res));
-    }, []);
+        if (path) {
+            readDir(path + "/").then(setFiles);
+        } else {
+            getDisks().then(setFiles);
+        }
+    }, [path]);
 
     return (
         <div className={styles.wrapper}>

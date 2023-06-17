@@ -1,17 +1,30 @@
-import FilesView from "./components/FilesView";
-import WindowFrame from "./components/WindowFrame";
+import { useEffect } from "react";
+import { RouterProvider } from "react-router-dom";
 
-import styles from "./App.module.scss";
+import router from "./router";
 
 const App: React.FC = () => {
-    return (
-        <div className={styles.app}>
-            <WindowFrame />
+    // TODO: remove after history navigation components will be made
+    const handleKeyDown = (e: KeyboardEvent) => {
+        switch(e.key) {
+            case "ArrowLeft":
+                history.back();
+                break;
+            case "ArrowRight":
+                history.forward();
+        }
+    }
 
-            <div>
-                <FilesView />
-            </div>
-        </div>
+    useEffect(() => {
+        document.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+        }
+    });
+
+    return (
+        <RouterProvider router={router} />
     );
 }
 
