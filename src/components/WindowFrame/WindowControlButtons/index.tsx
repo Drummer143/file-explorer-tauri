@@ -11,25 +11,21 @@ const WindowControlButtons: React.FC = () => {
 
     const [isMaximized, setIsMaximized] = useState(false);
 
-    const isReady = useRef(false);
+    const isWindowMaximized = async () => {
+        const isMaximized = await appWindow.isMaximized();
+
+        setIsMaximized(isMaximized);
+    }
 
     useEffect(() => {
-        appWindow.isMaximized().then(res => {
-            setIsMaximized(res);
+        isWindowMaximized();
 
-            isReady.current = true;
-        })
+        appWindow.onResized(isWindowMaximized);
     }, []);
 
     const minimize = () => appWindow.minimize();
     const close = () => appWindow.close();
-    const toggleFullscreen = () => {
-        appWindow.toggleMaximize();
-
-        console.log("click");
-
-        setIsMaximized(prev => !prev);
-    };
+    const toggleFullscreen = () => appWindow.toggleMaximize();
 
     return (
         <div className={styles.wrapper}>
