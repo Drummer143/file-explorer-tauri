@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState } from 'react';
 
 import Disk from './Disk';
 import File from './File';
 import Folder from './Folder';
-import { getDisks, readDir } from "../../tauriAPIWrapper/invoke";
+import { useWatchPathChange } from '../../hooks';
 
 import styles from "./FileList.module.scss";
 
 const FileList: React.FC = () => {
     const [files, setFiles] = useState<CFile[]>([]);
-
-    const { path } = useParams<{ path: string }>();
 
     const mapFiles = (file: CFile) => {
         switch (file.type) {
@@ -24,13 +21,7 @@ const FileList: React.FC = () => {
         }
     }
 
-    useEffect(() => {
-        if (path) {
-            readDir(path + "\\").then(setFiles);
-        } else {
-            getDisks().then(setFiles);
-        }
-    }, [path]);
+    useWatchPathChange(setFiles);
 
     return (
         <div className={styles.wrapper}>
