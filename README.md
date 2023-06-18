@@ -1,13 +1,17 @@
 TODO: 
 - [] Files view
     - [x] Show list
+    - [] Actions on click on item
+        - [x] directory
+        - [x] disk
+        - [] file
     - [] Different List appearance
     - [] Files Sorting
     - [] Files grouping
     - [] Extended icons for files
         - [] Icons with file extensions
         - [] Unique icons for specific files
-- [] Navbar
+- [x] Navbar
     - [x] Path Input
     - [x] Navigation Buttons
     - [x] Reload window Button
@@ -20,3 +24,4 @@ TODO:
 - [] Context Menu
 - [] Side Menu
 - [] Drag and drop
+- [] Custom scrollbar
