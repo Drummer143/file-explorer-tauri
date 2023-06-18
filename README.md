@@ -5,20 +5,24 @@ TODO:
         - [x] directory
         - [x] disk
         - [] file
+    - [] Add padding at the bottom of list
     - [] Different List appearance
     - [] Files Sorting
     - [] Files grouping
-    - [] Extended icons for files
-        - [] Icons with file extensions
-        - [] Unique icons for specific files
+    - [] Extended icons for files - ?
+        - [] Icons with file extensions - ?
+        - [] Unique icons for specific files - ?
 - [x] Navbar
     - [x] Path Input
+        - [] Finish styles
     - [x] Navigation Buttons
     - [x] Reload window Button
     - [x] Move to parent directory button
 - [x] Frame
     - [x] BUG: Maximizing/restoring to window doesn't change icon in middle window control button
     - [x] Window Controls
+- [x] Explorer history
+    - [] Limit length of history - ?
 - [] App Config
 - [] Settings
 - [] Localization
@@ -26,3 +30,7 @@ TODO:
 - [] Side Menu
 - [] Drag and drop
 - [] Custom scrollbar
+- [] Hotkeys
+- [] Customization
+- [] Search files in file system
+- [] Tests
