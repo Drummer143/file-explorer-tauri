@@ -1,10 +1,10 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 import { useExplorerHistory } from '../../../zustand';
 import { LeftArrowSVG, RightArrowSVG } from '../../../assets/other';
 
 import styles from "./NavigationButtons.module.scss";
-import { useTranslation } from 'react-i18next';
 
 const NavigationButtons: React.FC = () => {
     const { canGoBack, canGoForward, goBack, goForward } = useExplorerHistory();

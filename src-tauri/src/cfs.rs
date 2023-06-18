@@ -134,7 +134,7 @@ fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>
     });
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn watch_dir<R: Runtime>(
     window: tauri::Window<R>,
     state: State<'_, CFSState>,
@@ -173,7 +173,7 @@ fn watch_dir<R: Runtime>(
     Ok(id.into())
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn get_disks() -> Result<Vec<DiskInfo>, String> {
     let mut sys = System::new_all();
 
@@ -196,7 +196,7 @@ fn get_disks() -> Result<Vec<DiskInfo>, String> {
     Ok(disks)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
     if path_to_dir.len() == 0 {
         return Err("Path is empty".into());
@@ -236,7 +236,7 @@ fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
     }
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn unwatch(state: State<'_, CFSState>, id: usize) -> Result<(), String> {
     let result = state.watcher.lock().unwrap().remove(&id);
 
@@ -252,7 +252,7 @@ fn unwatch(state: State<'_, CFSState>, id: usize) -> Result<(), String> {
     }
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn rename(old_name: String, new_name: String) -> Result<(), String> {
     let old_path = Path::new(&old_name);
     let new_path = Path::new(&new_name);
@@ -297,7 +297,7 @@ fn delete_file(path_to_file: String) -> Result<(), String> {
     Err("Unknown file".into())
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn check_file_before_delete<R: Runtime>(
     window: Window<R>,
     path_to_file: String,

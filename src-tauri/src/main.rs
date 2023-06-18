@@ -7,7 +7,7 @@ mod cfs;
 
 use std::process::Command;
 
-#[tauri::command]
+#[tauri::command(async)]
 fn open_in_explorer(path_to_dir: String) -> Result<(), String> {
     let result = Command::new("explorer").arg(&path_to_dir).output();
 

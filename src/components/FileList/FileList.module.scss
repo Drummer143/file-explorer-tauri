@@ -4,9 +4,9 @@
 
     padding: 2rem;
 
-    display: flex;
+    display: grid;
     gap: 1rem;
-    flex-flow: row wrap;
+    grid-template-columns: repeat(var(--count-of-columns), var(--file-list-item-width));
     justify-content: center;
     overflow-x: hidden;
     overflow-y: auto;
