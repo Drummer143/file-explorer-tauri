@@ -1,11 +1,22 @@
-Roadmap: 
+TODO: 
 - [] Files view
-- [] Path Input
+    - [x] Show list
+    - [] Different List appearance
+    - [] Files Sorting
+    - [] Files grouping
+    - [] Extended icons for files
+        - [] Icons with file extensions
+        - [] Unique icons for specific files
+- [] Navbar
+    - [] Path Input
+    - [x] Navigation Buttons
+    - [] Reload window Button
 - [x] Frame
-    - [] BUG: Maximizing/restoring to window doesn't change icon in middle window control button
-- [] Window Controls
+    - [x] BUG: Maximizing/restoring to window doesn't change icon in middle window control button
+    - [x] Window Controls
 - [] App Config
 - [] Settings
-- [] Localization
+- [x] Localization
 - [] Context Menu
 - [] Side Menu
+- [] Drag and drop
