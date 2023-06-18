@@ -10,7 +10,7 @@ TODO:
 - [] Navbar
     - [x] Path Input
     - [x] Navigation Buttons
-    - [] Reload window Button
+    - [x] Reload window Button
 - [x] Frame
     - [x] BUG: Maximizing/restoring to window doesn't change icon in middle window control button
     - [x] Window Controls
