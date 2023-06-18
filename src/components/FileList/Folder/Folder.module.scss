@@ -1,0 +1,14 @@
+@use "../defaultItemStyle" as d;
+
+.wrapper {
+    @include d.defaultItemStyle;
+}
+
+.icon {
+    @include d.iconStyle;
+}
+
+.description {
+    @include d.textContainerStyle;
+    @include d.mainInfo;
+}

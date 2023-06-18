@@ -1,17 +1,22 @@
 type FileTypes = "disk" | "directory" | "file"
 
-type CFile = {
+interface ExplorerFile {
+    type: "file"
     name: string
-} & ({
-    type: Exclude<FileTypes, "disk">
     size: number
-    type: FileTypes
-} | {
+}
+
+interface ExplorerDirectory {
+    type: "directory"
+    name: string
+}
+
+interface ExplorerDisk {
     type: "disk"
+    name: string
     mountPoint: string
     availableSpace: number
     totalSpace: number
-})
+}
 
-type CFileDisk = CFile & { type: "disk" };
-type CFileFileDirectory = CFile & { type: "directory" | "file" };
+type CFile = ExplorerDirectory | ExplorerDisk | ExplorerFile;

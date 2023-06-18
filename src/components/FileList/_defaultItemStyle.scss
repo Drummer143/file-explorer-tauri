@@ -1,0 +1,72 @@
+@mixin defaultItemStyle {
+    width: var(--file-list-item-width);
+    height: var(--file-list-item-height);
+
+    padding: 0.25rem;
+
+    display: grid;
+    grid-template-columns: min-content 1fr;
+    gap: 0.25rem;
+
+    font-size: 0.875rem;
+    border-radius: 0.25rem;
+    outline: 1px solid transparent;
+    outline-offset: -1px;
+    transition: background-color, outline-color, box-shadow;
+    transition-duration: 100ms;
+
+    &:hover {
+        background-color: rgba($color: #fff, $alpha: 0.15);
+    }
+
+    &:focus {
+        outline-color: rgba($color: #fff, $alpha: 0.45);
+
+        &:not(:hover) {
+            background-color: rgba($color: #fff, $alpha: 0.05);
+        }
+    }
+
+    &:active {
+        background-color: rgba($color: #fff, $alpha: 0.20);
+    }
+}
+
+@mixin iconStyle {
+    height: 100%;
+    width: 100%;
+
+    padding: 0.25rem;
+
+    svg {
+        height: 100%;
+
+        aspect-ratio: 1 / 1;
+    }
+}
+
+@mixin textContainerStyle {
+    align-self: center;
+    flex: 1;
+
+    max-width: 100%;
+
+    padding-right: 0.5rem;
+
+    overflow: hidden;
+    text-align: left;
+}
+
+@mixin mainInfo {
+    width: 100%;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@mixin subInfo {
+    @include mainInfo;
+
+    font-size: 0.9em;
+}

@@ -1,42 +1,7 @@
+@use "../defaultItemStyle" as d;
+
 .wrapper {
-    position: relative;
-
-    width: var(--file-list-item-width);
-    height: 60px;
-
-    padding: 0.25rem;
-
-    display: grid;
-    gap: 0.25rem;
-    grid-template-columns: min-content 1fr;
-    grid-template-rows: 1fr 1fr;
-    grid-template-areas:
-        "icon name"
-        "icon info";
-
-    font-size: 0.875rem;
-    border-radius: 0.25rem;
-    overflow: hidden;
-    outline: 1px solid transparent;
-    outline-offset: -1px;
-    transition: background-color, outline-color, box-shadow;
-    transition-duration: 100ms;
-
-    &:hover {
-        background-color: rgba($color: #fff, $alpha: 0.15);
-    }
-
-    &:focus {
-        outline-color: rgba($color: #fff, $alpha: 0.45);
-
-        &:not(:hover) {
-            background-color: rgba($color: #fff, $alpha: 0.05);
-        }
-    }
-
-    &:active {
-        background-color: rgba($color: #fff, $alpha: 0.20);
-    }
+    @include d.defaultItemStyle;
 
     // &::before {
     //     content: "";
@@ -52,46 +17,22 @@
 
     //     background-color: var(--free-memory-background-color);
     // }
-
-    &:hover::after {
-        opacity: 0.15;
-    }
-
-    &:active::after {
-        opacity: 0.2;
-    }
 }
 
 .icon {
-    grid-area: icon;
+    @include d.iconStyle;
+}
 
-    width: 100%;
-    height: 100%;
-
-    padding: 0.25rem;
-
-    svg {
-        height: 100%;
-
-        aspect-ratio: 1 / 1;
-    }
+.description {
+    @include d.textContainerStyle;
 }
 
 .name {
-    grid-area: name;
+    @include d.mainInfo;
 
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
+    margin-bottom: 0.15rem;
 }
 
 .info {
-    grid-area: info;
-
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-
-    font-size: 0.9em;
-    letter-spacing: 0.05em;
+    @include d.subInfo
 }

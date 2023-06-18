@@ -1,0 +1,23 @@
+@use "../defaultItemStyle" as d;
+
+.wrapper {
+    @include d.defaultItemStyle;
+}
+
+.icon {
+    @include d.iconStyle;
+}
+
+.description {
+    @include d.textContainerStyle;
+}
+
+.name {
+    @include d.mainInfo;
+
+    margin-bottom: 0.15rem;
+}
+
+.size {
+    @include d.subInfo;
+}

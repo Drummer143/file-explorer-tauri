@@ -1,13 +1,14 @@
-import React, { MouseEventHandler, useRef } from 'react';
+import React, { useRef } from 'react';
 import xbytes from 'xbytes';
 import { useNavigate } from 'react-router-dom';
 
+import FileListItemButton from '../../customs/FileListItemButton';
 import { DiskSVG } from "../../../assets";
 // import { getDiskBackgroundColor } from '../../../utils';
 
 import styles from "./Disk.module.scss";
 
-type DiskProps = CFileDisk;
+type DiskProps = ExplorerDisk;
 
 // const FREE_MEMORY_COLOR_CHANGE_THRESHOLD = 0.60;
 // const FREE_MEMORY_COLOR_CHANGE_VALUE_MULTIPLIER = 1 - FREE_MEMORY_COLOR_CHANGE_THRESHOLD;
@@ -25,34 +26,27 @@ const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoin
         prefixIndex: xbytes.parseBytes(totalSpace).prefixIndex
     });
 
-    const handleDoubleClick = () => {
-        navigate("/explorer/" + mountPoint);
-    }
-
-    const handleClick: MouseEventHandler<HTMLButtonElement> = (e) => {
-        if(!e.clientX && !e.clientY) {
-            handleDoubleClick();
-        }
-    }
+    const handleAction = () => navigate("/explorer/" + mountPoint);
 
     return (
-        <button
-            onDoubleClick={handleDoubleClick}
-            onClick={handleClick}
+        <FileListItemButton
+            onAction={handleAction}
             className={styles.wrapper}
-            // style={{
-            //     '--available-space-width': availableSpacePercentage + "%",
-            //     "--free-memory-background-color": getDiskBackgroundColor((availableSpacePercentage / 100 - FREE_MEMORY_COLOR_CHANGE_THRESHOLD) * FREE_MEMORY_COLOR_CHANGE_VALUE_MULTIPLIER)
-            // } as React.CSSProperties}
+        // style={{
+        //     '--available-space-width': availableSpacePercentage + "%",
+        //     "--free-memory-background-color": getDiskBackgroundColor((availableSpacePercentage / 100 - FREE_MEMORY_COLOR_CHANGE_THRESHOLD) * FREE_MEMORY_COLOR_CHANGE_VALUE_MULTIPLIER)
+        // } as React.CSSProperties}
         >
             <div className={styles.icon}>
                 <DiskSVG />
             </div>
 
-            <p className={styles.name}>{mountPoint} {name}</p>
+            <div className={styles.description}>
+                <p className={styles.name}>{mountPoint} {name}</p>
 
-            <p className={styles.info}>{xbytes(availableSpace, xbytesConfig.current)} / {xbytes(totalSpace, xbytesConfig.current)}</p>
-        </button>
+                <p className={styles.info}>{xbytes(availableSpace, xbytesConfig.current)} / {xbytes(totalSpace, xbytesConfig.current)}</p>
+            </div>
+        </FileListItemButton>
     )
 }
 export default Disk;

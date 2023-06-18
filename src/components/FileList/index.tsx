@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 import Disk from './Disk';
+import File from './File';
+import Folder from './Folder';
 import { getDisks, readDir } from "../../tauriAPIWrapper/invoke";
 
 import styles from "./FileList.module.scss";
@@ -16,8 +18,9 @@ const FileList: React.FC = () => {
             case 'disk':
                 return <Disk key={file.mountPoint} {...file} />
             case 'directory':
+                return <Folder key={file.name} {...file} />
             case 'file':
-                return <div key={file.name}>{file.name}</div>
+                return <File key={file.name} {...file} />
         }
     }
 
