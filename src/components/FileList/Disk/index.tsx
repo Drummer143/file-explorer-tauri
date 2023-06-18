@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import FileListItemButton from '../../customs/FileListItemButton';
 import { DiskSVG } from "../../../assets";
+import { useExplorerHistory } from '../../../zustand';
 // import { getDiskBackgroundColor } from '../../../utils';
 
 import styles from "./Disk.module.scss";
@@ -14,7 +15,7 @@ type DiskProps = ExplorerDisk;
 // const FREE_MEMORY_COLOR_CHANGE_VALUE_MULTIPLIER = 1 - FREE_MEMORY_COLOR_CHANGE_THRESHOLD;
 
 const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoint }) => {
-    const navigate = useNavigate();
+    const { pushRoute } = useExplorerHistory();
 
     // const availableSpacePercentage = useMemo(() => {
     //     const onePercent = totalSpace / 100;
@@ -26,7 +27,7 @@ const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoin
         prefixIndex: xbytes.parseBytes(totalSpace).prefixIndex
     });
 
-    const handleAction = () => navigate("/explorer/" + mountPoint);
+    const handleAction = () => pushRoute(mountPoint);
 
     return (
         <FileListItemButton

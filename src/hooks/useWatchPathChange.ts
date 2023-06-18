@@ -1,16 +1,16 @@
 import { useEffect } from "react";
-import { useParams } from "react-router-dom";
 
 import { readDir, getDisks } from "../tauriAPIWrapper/invoke";
+import { useExplorerHistory } from "../zustand";
 
 export const useWatchPathChange = (onChange: (files: CFile[]) => void) => {
-    const { path } = useParams<{ path: string }>();
+    const { currentPath } = useExplorerHistory();
 
     useEffect(() => {
-        if (path) {
-            readDir(path + "\\").then(onChange);
+        if (currentPath) {
+            readDir(currentPath + "\\").then(onChange);
         } else {
             getDisks().then(onChange);
         }
-    }, [path]);
+    }, [currentPath]);
 }

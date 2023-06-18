@@ -17,10 +17,6 @@ export default createBrowserRouter([
                 path: "/explorer",
                 element: <FileList />
             },
-            {
-                path: "/explorer/:path",
-                element: <FileList />
-            },
             route404
         ]
     },

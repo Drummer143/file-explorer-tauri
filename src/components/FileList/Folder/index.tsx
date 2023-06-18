@@ -3,17 +3,17 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import FileListItemButton from '../../customs/FileListItemButton';
 import { FolderSVG } from '../../../assets';
+import { useExplorerHistory } from '../../../zustand';
 
 import styles from "./Folder.module.scss"
 
 type FolderProps = ExplorerDirectory;
 
 const Folder: React.FC<FolderProps> = ({ name }) => {
-    const { path } = useParams<{ path: string }>();
-    const navigate = useNavigate();
+    const { currentPath, pushRoute } = useExplorerHistory();
 
     const handleAction: React.MouseEventHandler<HTMLButtonElement> = () => {
-        navigate("/explorer/" + encodeURI(`${path}\\${name}`))
+        pushRoute(`${currentPath}\\${name}`)
     }
 
     return (

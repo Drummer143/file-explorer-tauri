@@ -1,0 +1,15 @@
+import React from 'react';
+
+import NavigationButtons from './NavigationButtons';
+
+import styles from "./Navbar.module.scss";
+
+const Navbar: React.FC = () => {
+    return (
+        <div>
+            <NavigationButtons />
+        </div>
+    )
+}
+
+export default Navbar;
