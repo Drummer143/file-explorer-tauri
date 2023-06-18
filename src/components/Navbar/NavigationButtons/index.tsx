@@ -2,12 +2,12 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useExplorerHistory } from '../../../zustand';
-import { LeftArrowSVG, ReloadSVG, RightArrowSVG } from '../../../assets/other';
+import { LeftArrowSVG, ReloadSVG, RightArrowSVG, UpArrowSVG } from '../../../assets/other';
 
 import styles from "./NavigationButtons.module.scss";
 
 const NavigationButtons: React.FC = () => {
-    const { canGoBack, canGoForward, goBack, goForward } = useExplorerHistory();
+    const { canGoBack, canGoForward, goBack, goForward, goToParent, hasParent } = useExplorerHistory();
 
     const { t } = useTranslation();
 
@@ -25,6 +25,10 @@ const NavigationButtons: React.FC = () => {
 
             <button className={styles.button} title='Reload page. You can also reload page by pressing "Right Control + R"' onClick={handleReload}>
                 <ReloadSVG />
+            </button>
+
+            <button className={styles.button} title='Move to parent folder' onClick={goToParent} disabled={!hasParent}>
+                <UpArrowSVG />
             </button>
         </div>
     )

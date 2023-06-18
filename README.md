@@ -15,12 +15,13 @@ TODO:
     - [x] Path Input
     - [x] Navigation Buttons
     - [x] Reload window Button
+    - [x] Move to parent directory button
 - [x] Frame
     - [x] BUG: Maximizing/restoring to window doesn't change icon in middle window control button
     - [x] Window Controls
 - [] App Config
 - [] Settings
-- [x] Localization
+- [] Localization
 - [] Context Menu
 - [] Side Menu
 - [] Drag and drop

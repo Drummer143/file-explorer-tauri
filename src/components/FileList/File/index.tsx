@@ -1,9 +1,8 @@
 import React from 'react';
 import xbytes from 'xbytes';
 
-import { FileSVG } from '../../../assets';
-
 import FileListItemButton from '../../customs/FileListItemButton';
+import { FileSVG } from '../../../assets';
 
 import styles from "./File.module.scss";
 
