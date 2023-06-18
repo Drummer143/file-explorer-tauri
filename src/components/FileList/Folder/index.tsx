@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { sep } from "@tauri-apps/api/path";
 
 import FileListItemButton from '../../customs/FileListItemButton';
 import { FolderSVG } from '../../../assets';
@@ -13,7 +13,7 @@ const Folder: React.FC<FolderProps> = ({ name }) => {
     const { currentPath, pushRoute } = useExplorerHistory();
 
     const handleAction: React.MouseEventHandler<HTMLButtonElement> = () => {
-        pushRoute(`${currentPath}\\${name}`)
+        pushRoute(currentPath + sep + name)
     }
 
     return (

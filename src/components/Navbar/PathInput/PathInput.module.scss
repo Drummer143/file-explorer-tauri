@@ -1,0 +1,51 @@
+@mixin inputStyle {
+    width: 100%;
+    height: 100%;
+
+    padding: 0.125rem 0.5rem;
+    font-size: 0.85rem;
+    border-radius: 0.125rem;
+}
+
+.wrapper {
+    min-width: 350px;
+    width: 50%;
+
+    display: flex;
+    align-items: center;
+}
+
+.inputContainer {
+    width: 100%;
+    min-height: 25px;
+
+    position: relative;
+    z-index: 1;
+}
+
+.input {
+    @include inputStyle;
+
+    min-height: 25px;
+
+    background-color: rgba($color: #fff, $alpha: 0.25);
+
+    &:not(:focus) {
+        color: transparent;
+    }
+
+    &:focus+.currentPath {
+        display: none;
+    }
+}
+
+.currentPath {
+    @include inputStyle;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+
+    pointer-events: none;
+}

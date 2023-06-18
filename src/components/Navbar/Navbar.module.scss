@@ -1,5 +1,8 @@
 .wrapper {
-    height: 35px;
+    height: 40px;
+
+    display: flex;
+    gap: 1rem;
 
     background-color: var(--navbar-background);
 }

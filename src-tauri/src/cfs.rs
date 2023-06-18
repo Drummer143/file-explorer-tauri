@@ -383,6 +383,11 @@ pub fn check_file_before_delete<R: Runtime>(
     Ok(())
 }
 
+#[tauri::command(async)]
+fn exists(path_to_file: String) -> bool {
+    Path::new(&path_to_file).exists()
+}
+
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("cfs")
         .invoke_handler(tauri::generate_handler![
@@ -391,7 +396,8 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             get_disks,
             unwatch,
             rename,
-            check_file_before_delete
+            check_file_before_delete,
+            exists
         ])
         .setup(|app_handle| {
             // setup plugin specific state here

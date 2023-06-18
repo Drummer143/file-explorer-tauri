@@ -27,14 +27,6 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
 
             const updatedHistory = history.slice(0, currentPathIndex + 1).concat(route);
 
-            console.log({
-                canGoBack: true,
-                canGoForward: false,
-                history: updatedHistory,
-                currentPathIndex: currentPathIndex + 1,
-                currentPath: route
-            });
-
             set({
                 canGoBack: true,
                 canGoForward: false,
@@ -53,13 +45,6 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
             }
 
             const newIndex = currentPathIndex - 1;
-
-            console.log({
-                currentPath: history[newIndex],
-                canGoBack: newIndex > 0,
-                canGoForward: true,
-                currentPathIndex: newIndex
-            });
 
             set({
                 currentPath: history[newIndex],

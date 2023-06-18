@@ -1,6 +1,7 @@
+import { sep } from "@tauri-apps/api/path";
 import { useEffect } from "react";
 
-import { readDir, getDisks } from "../tauriAPIWrapper/invoke";
+import { readDir, getDisks } from "../tauriAPIWrapper";
 import { useExplorerHistory } from "../zustand";
 
 export const useWatchPathChange = (onChange: (files: CFile[]) => void) => {
@@ -8,7 +9,7 @@ export const useWatchPathChange = (onChange: (files: CFile[]) => void) => {
 
     useEffect(() => {
         if (currentPath) {
-            readDir(currentPath + "\\").then(onChange);
+            readDir(currentPath + sep).then(onChange);
         } else {
             getDisks().then(onChange);
         }

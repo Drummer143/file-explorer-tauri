@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
 import xbytes from 'xbytes';
-import { useNavigate } from 'react-router-dom';
 
 import FileListItemButton from '../../customs/FileListItemButton';
 import { DiskSVG } from "../../../assets";

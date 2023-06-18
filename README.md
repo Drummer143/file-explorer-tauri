@@ -8,7 +8,7 @@ TODO:
         - [] Icons with file extensions
         - [] Unique icons for specific files
 - [] Navbar
-    - [] Path Input
+    - [x] Path Input
     - [x] Navigation Buttons
     - [] Reload window Button
 - [x] Frame
