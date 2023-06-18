@@ -1,5 +1,9 @@
 export default {
     translation: {
+        navbar: {
+            back: "Вперёд",
+            forward: "Назад"
+        },
         enterFileName: 'Введите имя файла',
         enterFolderName: 'Введите имя папки',
         create: 'Создать',

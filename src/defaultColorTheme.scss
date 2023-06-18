@@ -1,4 +1,8 @@
 :root {
+    --body-background: #282828;
+    
+    --navbar-background: #242424;
+
     // frame
     --frame-background-color: #202020;
 
@@ -7,7 +11,5 @@
     --window-control-button-active-color: rgba(255, 255, 255, 0.25);
 
     // some unused colors
-    --body-background: #282828;
-    --some-color: #525252;
     --some-color2: #CA3E47;
 }

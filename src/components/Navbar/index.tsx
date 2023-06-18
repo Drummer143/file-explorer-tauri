@@ -6,7 +6,7 @@ import styles from "./Navbar.module.scss";
 
 const Navbar: React.FC = () => {
     return (
-        <div>
+        <div className={styles.wrapper}>
             <NavigationButtons />
         </div>
     )

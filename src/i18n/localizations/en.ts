@@ -1,5 +1,9 @@
 export default {
     translation: {
+        navbar: {
+            back: "Back",
+            forward: "Forward"
+        },
         enterFileName: 'Enter file name',
         enterFolderName: 'Enter folder name',
         create: 'Create',
