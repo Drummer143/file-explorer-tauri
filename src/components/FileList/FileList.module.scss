@@ -7,7 +7,9 @@
     display: grid;
     gap: 1rem;
     grid-template-columns: repeat(var(--count-of-columns), var(--file-list-item-width));
+    grid-auto-rows: min-content;
     justify-content: center;
+
     overflow-x: hidden;
     overflow-y: auto;
 }
