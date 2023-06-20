@@ -15,11 +15,13 @@ TODO:
 - [x] Navbar
     - [x] Path Input
         - [] Finish styles
+        - [x] Path splitting in path input cover
+        - [] FIXME: on input submit with empty input value path checker says that path does'nt exist
     - [x] Navigation Buttons
     - [x] Reload window Button
     - [x] Move to parent directory button
 - [x] Frame
-    - [x] BUG: Maximizing/restoring to window doesn't change icon in middle window control button
+    - [x] FIXED: Maximizing/restoring to window doesn't change icon in middle window control button
     - [x] Window Controls
 - [x] Explorer history
     - [] Limit length of history - ?
