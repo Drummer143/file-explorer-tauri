@@ -1,7 +1,7 @@
 TODO: 
 - [] Files view
     - [x] Show list
-    - [] Actions on click on item
+    - [x] Actions on click on item
         - [x] directory
         - [x] disk
         - [x] file
@@ -34,3 +34,9 @@ TODO:
 - [] Customization
 - [] Search files in file system
 - [] Tests
+- [] Interactivity
+    - [] Show loader while dir is scanning
+    - [] Show loader while file is opening
+- [] Integration
+    - [] Button in native explorer context menu
+    - [] Open app using console
