@@ -4,7 +4,7 @@ TODO:
     - [] Actions on click on item
         - [x] directory
         - [x] disk
-        - [] file
+        - [x] file
     - [] Add padding at the bottom of list
     - [] Different List appearance
     - [] Files Sorting

@@ -1,16 +1,25 @@
 import React from 'react';
 import xbytes from 'xbytes';
+import { sep } from "@tauri-apps/api/path"
 
 import FileListItemButton from '../../customs/FileListItemButton';
 import { FileSVG } from '../../../assets';
+import { openInExplorer } from '../../../tauriAPIWrapper';
+import { useExplorerHistory } from '../../../zustand';
 
 import styles from "./File.module.scss";
 
 type FileProps = ExplorerFile;
 
 const File: React.FC<FileProps> = ({ name, size }) => {
+    const { currentPath } = useExplorerHistory();
+
+    const handleAction = () => openInExplorer(currentPath + sep + name)
+        .then(() => console.log("opened"))
+        .catch(error => console.log(error, "error"));
+
     return (
-        <FileListItemButton onAction={e => console.log(e)} className={styles.wrapper}>
+        <FileListItemButton onAction={handleAction} className={styles.wrapper}>
             <div className={styles.icon}>
                 <FileSVG />
             </div>
