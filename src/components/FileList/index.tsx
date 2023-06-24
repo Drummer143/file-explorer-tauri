@@ -36,7 +36,7 @@ const FileList: React.FC = () => {
 
             const countOfColumns = Math.floor(e.contentRect.width / itemWidth);
 
-            listContainerRef.current.style.setProperty("--count-of-columns", countOfColumns.toString());
+            listContainerRef.current?.style.setProperty("--count-of-columns", countOfColumns.toString());
         }
     });
 
