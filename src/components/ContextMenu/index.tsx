@@ -1,13 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import { CTXTypes, DataSetKeys } from '../../utils';
+
 import styles from "./ContextMenu.module.scss";
 
 type ContextMenuProps = {
     targetRef: React.RefObject<HTMLElement>
 }
 
+type ContextMenuInfo = {
+    contextMenuType: string;
+    coordinates: {
+        x: number,
+        y: number
+    };
+
+    contextMenuAdditionalInfo?: string;
+} | undefined;
+
 const ContextMenu: React.FC<ContextMenuProps> = ({ targetRef }) => {
-    const [menuCoords, setMenuCoords] = useState<{ x: number, y: number } | undefined>(undefined);
+    const [contextMenuInfo, setContextMenuInfo] = useState<ContextMenuInfo>(undefined);
 
     const ctxContainerRef = useRef<HTMLDivElement>(null);
 
@@ -16,30 +28,52 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ targetRef }) => {
         const ctxContainer = ctxContainerRef.current;
 
         if (ctxContainer && !composedPath.includes(ctxContainer)) {
-            setMenuCoords(undefined);
+            setContextMenuInfo(undefined);
 
             targetRef.current?.removeEventListener("click", hideCTX);
         }
     };
 
     useEffect(() => {
-        targetRef.current?.addEventListener("contextmenu", e => {
+        const handleContextMenu = (e: MouseEvent) => {
             e.preventDefault();
 
-            setMenuCoords({
-                x: e.clientX,
-                y: e.clientY
+            let composedPath = e.composedPath() as HTMLElement[];
+            const targetRefIndex = composedPath.findIndex(el => el.isEqualNode(targetRef.current));
+
+            composedPath = composedPath.slice(0, targetRefIndex);
+
+            const contextMenuTarget = composedPath.find(el => (el as HTMLElement)?.dataset?.contextMenuType);
+
+            const contextMenuType = contextMenuTarget?.dataset[DataSetKeys.contextMenuType];
+            const contextMenuAdditionalInfo = contextMenuTarget?.dataset[DataSetKeys.contextMenuAdditionalInfo];
+
+            if (!contextMenuType) {
+                setContextMenuInfo(undefined);
+
+                return;
+            }
+
+            setContextMenuInfo({
+                contextMenuType,
+                contextMenuAdditionalInfo,
+                coordinates: {
+                    x: e.clientX,
+                    y: e.clientY
+                }
             });
 
-            targetRef.current?.addEventListener("click", hideCTX);            
-        })
+            targetRef.current?.addEventListener("click", hideCTX);
+        }
+
+        targetRef.current?.addEventListener("contextmenu", handleContextMenu)
 
         return () => {
-            window.oncontextmenu = null;
+            targetRef.current?.removeEventListener("contextmenu", handleContextMenu)
         };
     }, []);
 
-    if (!menuCoords) {
+    if (!contextMenuInfo) {
         return;
     }
 
@@ -48,8 +82,8 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ targetRef }) => {
             className={styles.wrapper}
             ref={ctxContainerRef}
             style={{
-                top: menuCoords.y + "px",
-                left: menuCoords.x + "px"
+                top: contextMenuInfo.coordinates.y + "px",
+                left: contextMenuInfo.coordinates.x + "px"
             }}
         >Context Menu</div>
     );

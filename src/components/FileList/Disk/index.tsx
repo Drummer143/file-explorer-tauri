@@ -3,6 +3,7 @@ import xbytes from 'xbytes';
 
 import FileListItemButton from '../../customs/FileListItemButton';
 import { DiskSVG } from "../../../assets";
+import { CTXTypes } from '../../../utils';
 import { useExplorerHistory } from '../../../zustand';
 // import { getDiskBackgroundColor } from '../../../utils';
 
@@ -32,6 +33,8 @@ const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoin
         <FileListItemButton
             onAction={handleAction}
             className={styles.wrapper}
+            data-context-menu-type={CTXTypes.file}
+            data-context-menu-additional-info={mountPoint}
         // style={{
         //     '--available-space-width': availableSpacePercentage + "%",
         //     "--free-memory-background-color": getDiskBackgroundColor((availableSpacePercentage / 100 - FREE_MEMORY_COLOR_CHANGE_THRESHOLD) * FREE_MEMORY_COLOR_CHANGE_VALUE_MULTIPLIER)

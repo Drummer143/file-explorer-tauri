@@ -5,7 +5,6 @@ TODO:
         - [x] directory
         - [x] disk
         - [x] file
-    - [ ] Add padding at the bottom of list
     - [ ] Different List appearance
     - [ ] Files Sorting
     - [ ] Files grouping
@@ -37,7 +36,7 @@ TODO:
 - [ ] Interactivity
     - [ ] Show loader while dir is scanning
     - [ ] Show loader while file is opening
-- [ ] Integration
+- [ ] Integration in system
     - [ ] Button in native explorer context menu
     - [ ] Open app using console
 - [ ] Handle empty path

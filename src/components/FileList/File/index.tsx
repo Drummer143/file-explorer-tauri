@@ -4,6 +4,7 @@ import { sep } from "@tauri-apps/api/path"
 
 import FileListItemButton from '../../customs/FileListItemButton';
 import { FileSVG } from '../../../assets';
+import { CTXTypes } from '../../../utils';
 import { openInExplorer } from '../../../tauriAPIWrapper';
 import { useExplorerHistory } from '../../../zustand';
 
@@ -19,7 +20,7 @@ const File: React.FC<FileProps> = ({ name, size }) => {
         .catch(error => console.log(error, "error"));
 
     return (
-        <FileListItemButton onAction={handleAction} className={styles.wrapper}>
+        <FileListItemButton onAction={handleAction} className={styles.wrapper} data-context-menu-type={CTXTypes.file} data-context-menu-additional-info={name}>
             <div className={styles.icon}>
                 <FileSVG />
             </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import { sep } from "@tauri-apps/api/path";
 
 import FileListItemButton from '../../customs/FileListItemButton';
+import { CTXTypes } from '../../../utils';
 import { FolderSVG } from '../../../assets';
 import { useExplorerHistory } from '../../../zustand';
 
@@ -17,7 +18,7 @@ const Folder: React.FC<FolderProps> = ({ name }) => {
     }
 
     return (
-        <FileListItemButton onAction={handleAction} className={styles.wrapper}>
+        <FileListItemButton onAction={handleAction} className={styles.wrapper} data-context-menu-type={CTXTypes.file} data-context-menu-additional-info={name}>
             <div className={styles.icon}>
                 <FolderSVG />
             </div>

@@ -18,7 +18,7 @@ interface ExplorerHistoryState {
 }
 
 export const useExplorerHistory = create<ExplorerHistoryState>()(
-    persist((set, get) => ({
+    /* persist( */(set, get) => ({
         canGoBack: false,
         canGoForward: false,
         currentPath: "",
@@ -84,16 +84,16 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
         },
 
         goToParent: async () => {
-            const { hasParent, currentPath, history, currentPathIndex } = get();
+            const { currentPath, history, currentPathIndex } = get();
 
-            let parentDirectory: string 
-            
+            let parentDirectory: string
+
             try {
                 parentDirectory = await dirname(currentPath);
             } catch (error) {
                 const pathWithoutDiskName = currentPath.split(":").at(1);
 
-                if(!pathWithoutDiskName || pathWithoutDiskName === "\\") {
+                if (!pathWithoutDiskName || pathWithoutDiskName === "\\") {
                     parentDirectory = "";
                 } else {
                     throw new Error("Can't get parent directory");
@@ -124,8 +124,8 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
                 history: [""]
             })
         }
-    }), {
+    })/* , {
         name: "store:history",
         version: 1
-    })
+    }) */
 )
