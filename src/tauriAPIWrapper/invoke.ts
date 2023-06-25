@@ -1,8 +1,8 @@
 import { invoke } from '@tauri-apps/api';
 
-export const openInExplorer = async (pathToDir = '') => {
+export const openFile = async (pathToDir = '') => {
     try {
-        await invoke('open_in_explorer', { pathToDir })
+        await invoke('open_file', { pathToDir })
     } catch (error) {
         throw error as string;
     };

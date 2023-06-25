@@ -3,31 +3,32 @@
     windows_subsystem = "windows"
 )]
 
+use std::path::Path;
+
 mod cfs;
 
-use std::process::Command;
-
 #[tauri::command(async)]
-fn open_in_explorer(path_to_dir: String) -> Result<(), String> {
-    let result = Command::new("explorer").arg(&path_to_dir).output();
+fn open_file(path_to_dir: String) -> Result<(), String> {
+    let path_to_dir = Path::new(&path_to_dir);
 
-    match result {
-        Ok(result) => {
-            let stderr = String::from_utf8_lossy(&result.stderr);
+    if !path_to_dir.exists() {
+        return Err("Path don't exist".into());
+    }
 
-            if !stderr.is_empty() {
-                Err(format!("Error while trying to open explorer: {}", stderr))
-            } else {
-                Ok(())
-            }
-        }
-        Err(_) => Err("Error in cmd".into()),
+    let result = open::that(path_to_dir);
+
+    if let Err(error) = result {
+        let error_message = format!("Error while trying to open file. Reason: {}", error.kind());
+
+        Err(error_message)
+    } else {
+        Ok(())
     }
 }
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![open_in_explorer])
+        .invoke_handler(tauri::generate_handler![open_file])
         .plugin(cfs::init())
         .run(tauri::generate_context!())
         .expect("Can't run app.");

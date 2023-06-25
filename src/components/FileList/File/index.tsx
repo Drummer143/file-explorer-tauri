@@ -5,7 +5,7 @@ import { sep } from "@tauri-apps/api/path"
 import FileListItemButton from '../../customs/FileListItemButton';
 import { FileSVG } from '../../../assets';
 import { CTXTypes } from '../../../utils';
-import { openInExplorer } from '../../../tauriAPIWrapper';
+import { openFile } from '../../../tauriAPIWrapper';
 import { useExplorerHistory } from '../../../zustand';
 
 import styles from "./File.module.scss";
@@ -15,9 +15,8 @@ type FileProps = ExplorerFile;
 const File: React.FC<FileProps> = ({ name, size }) => {
     const { currentPath } = useExplorerHistory();
 
-    const handleAction = () => openInExplorer(currentPath + sep + name)
-        .then(() => console.log("opened"))
-        .catch(error => console.log(error, "error"));
+    const handleAction = () => openFile(currentPath + sep + name)
+        .catch(error => console.error(error));
 
     return (
         <FileListItemButton onAction={handleAction} className={styles.wrapper} data-context-menu-type={CTXTypes.file} data-context-menu-additional-info={name}>
