@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import FileContextMenu from './FileContextMenu';
+import ExplorerContextMenu from './ExplorerContextMenu';
 import { DataSetKeys } from '../../utils';
 
 import styles from "./ContextMenu.module.scss";
@@ -25,9 +26,9 @@ const ContextMenu: React.FC = () => {
             case 'file':
             case 'disk':
             case 'folder':
-                contextMenuType
                 return <FileContextMenu fileType={contextMenuType} filename={contextMenuAdditionalInfo!} />;
             case 'explorer':
+                return <ExplorerContextMenu />
         }
     }
 
