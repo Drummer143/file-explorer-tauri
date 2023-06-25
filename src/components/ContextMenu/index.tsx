@@ -23,12 +23,10 @@ const ContextMenu: React.FC = () => {
         // TODO:
         switch (contextMenuType) {
             case 'file':
-                if (contextMenuAdditionalInfo) {
-                    return <FileContextMenu filename={contextMenuAdditionalInfo!} />;
-                }
-                return;
             case 'disk':
             case 'folder':
+                contextMenuType
+                return <FileContextMenu fileType={contextMenuType} filename={contextMenuAdditionalInfo!} />;
             case 'explorer':
         }
     }
