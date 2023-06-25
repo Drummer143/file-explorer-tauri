@@ -11,6 +11,7 @@ TODO:
     - [ ] Extended icons for files - ?
         - [ ] Icons with file extensions - ?
         - [ ] Unique icons for specific files - ?
+    
 - [x] Navbar
     - [x] Path Input
         - [ ] Finish styles
@@ -22,10 +23,19 @@ TODO:
     - [x] Window Controls
 - [x] Explorer history
     - [ ] Limit length of history - ?
+- [ ] Interaction with fs
+    - [x] Open file
+    - [ ] Delete file
+        - [ ] Move to trash
+        - [ ] Permanently delete
+    - [ ] Rename file
+    - [ ] Copy/cut file
+    - [ ] Create file
+    - [ ] Watch changes in current directory
 - [ ] App Config
 - [ ] Settings
 - [ ] Localization
-- [ ] Context Menu
+- [x] Context Menu
 - [ ] Side Menu
 - [ ] Drag and drop
 - [ ] Custom scrollbar
