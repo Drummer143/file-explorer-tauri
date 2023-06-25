@@ -27,7 +27,7 @@ const FileList: React.FC = () => {
     useWatchPathChange(setFiles);
 
     useResizeObserver({
-        targetRef: listContainerRef,
+        target: listContainerRef.current,
         onResize: ([e]) => {
             const itemWidth = parseInt(getComputedStyle(document.body).getPropertyValue("--file-list-item-width"));
 

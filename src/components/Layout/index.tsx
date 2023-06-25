@@ -22,7 +22,7 @@ const Layout: React.FC = () => {
                 </div>
             </div>
 
-            <ContextMenu targetRef={layoutRef} />
+            <ContextMenu />
         </>
     );
 }

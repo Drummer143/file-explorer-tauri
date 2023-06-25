@@ -30,6 +30,10 @@
     &:active {
         background-color: rgba($color: #fff, $alpha: 0.20);
     }
+
+    * {
+        pointer-events: none;
+    }
 }
 
 @mixin iconStyle {

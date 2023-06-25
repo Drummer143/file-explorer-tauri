@@ -18,7 +18,7 @@ const Folder: React.FC<FolderProps> = ({ name }) => {
     }
 
     return (
-        <FileListItemButton onAction={handleAction} className={styles.wrapper} data-context-menu-type={CTXTypes.file} data-context-menu-additional-info={name}>
+        <FileListItemButton onAction={handleAction} className={styles.wrapper} data-context-menu-type={CTXTypes.folder} data-context-menu-additional-info={name}>
             <div className={styles.icon}>
                 <FolderSVG />
             </div>

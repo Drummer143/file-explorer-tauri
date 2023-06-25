@@ -1,25 +1,23 @@
 import { RefObject, useEffect, useMemo } from "react";
 
 type UseResizeObserverProps = {
-    targetRef: RefObject<HTMLElement>;
+    target?: HTMLElement | null;
 
     onResize: ResizeObserverCallback;
 };
 
-export const useResizeObserver = ({ onResize, targetRef }: UseResizeObserverProps) => {
+export const useResizeObserver = ({ onResize, target }: UseResizeObserverProps) => {
     const resizeObserver = useMemo(() => new ResizeObserver(onResize), [onResize]);
 
     useEffect(() => {
-        const target = targetRef.current;
-
-        if (target) {
-            resizeObserver.observe(target);
+        if (!target) {
+            return;
         }
 
+        resizeObserver.observe(target);
+
         return () => {
-            if (target) {
-                resizeObserver.unobserve(target);
-            }
+            resizeObserver.unobserve(target);
         };
-    }, [resizeObserver, targetRef]);
+    }, [resizeObserver, target]);
 };

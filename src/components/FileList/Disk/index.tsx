@@ -33,7 +33,7 @@ const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoin
         <FileListItemButton
             onAction={handleAction}
             className={styles.wrapper}
-            data-context-menu-type={CTXTypes.file}
+            data-context-menu-type={CTXTypes.disk}
             data-context-menu-additional-info={mountPoint}
         // style={{
         //     '--available-space-width': availableSpacePercentage + "%",
