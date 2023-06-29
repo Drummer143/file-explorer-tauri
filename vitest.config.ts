@@ -1,16 +1,16 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
     test: {
         globals: true,
-        environment: 'jsdom',
+        environment: "jsdom",
         coverage: {
-            provider: 'istanbul',
-            include: ['src/components/**/*.tsx']
+            provider: "istanbul",
+            include: ["src/components/**/*.tsx"]
         },
         alias: {
-            src: 'src/'
+            src: "src/"
         },
         clearMocks: true
-    },
-})
+    }
+});

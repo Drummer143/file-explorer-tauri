@@ -16,30 +16,16 @@
         "ecmaVersion": "latest",
         "sourceType": "module"
     },
-    "plugins": [
-        "react",
-        "react-hooks",
-        "@typescript-eslint"
-    ],
+    "plugins": ["react", "react-hooks", "@typescript-eslint"],
     "rules": {
-        "linebreak-style": [
-            "error",
-            "windows"
-        ],
+        "linebreak-style": ["error", "windows"],
         "no-console": [
             "warn",
             {
-                "allow": [
-                    "warn",
-                    "error",
-                    "info"
-                ]
+                "allow": ["warn", "error", "info"]
             }
         ],
-        "comma-dangle": [
-            "warn",
-            "never"
-        ],
+        "comma-dangle": ["warn", "never"],
         "camelcase": "error",
         "eqeqeq": "error",
         "max-len": [
@@ -74,9 +60,6 @@
                 "omitLastInOneLineBlock": true
             }
         ],
-        "quotes": [
-            "warn",
-            "double"
-        ]
+        "quotes": ["warn", "double"]
     }
 }
