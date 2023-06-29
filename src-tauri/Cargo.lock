@@ -838,7 +838,7 @@ dependencies = [
 name = "file-explorer"
 version = "0.0.0"
 dependencies = [
- "notify 5.1.0",
+ "notify",
  "open 5.0.0",
  "rand 0.8.5",
  "serde",
@@ -846,7 +846,6 @@ dependencies = [
  "sysinfo",
  "tauri",
  "tauri-build",
- "tauri-plugin-fs-watch",
 ]
 
 [[package]]
@@ -2004,36 +2003,6 @@ dependencies = [
  "serde",
  "walkdir",
  "windows-sys 0.42.0",
-]
-
-[[package]]
-name = "notify"
-version = "6.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5738a2795d57ea20abec2d6d76c6081186709c0024187cd5977265eda6598b51"
-dependencies = [
- "bitflags",
- "crossbeam-channel",
- "filetime",
- "fsevent-sys",
- "inotify",
- "kqueue",
- "libc",
- "mio",
- "serde",
- "walkdir",
- "windows-sys 0.45.0",
-]
-
-[[package]]
-name = "notify-debouncer-mini"
-version = "0.3.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e55ee272914f4563a2f8b8553eb6811f3c0caea81c756346bad15b7e3ef969f0"
-dependencies = [
- "crossbeam-channel",
- "notify 6.0.1",
- "serde",
 ]
 
 [[package]]
@@ -3531,20 +3500,6 @@ dependencies = [
  "syn 1.0.107",
  "tauri-codegen",
  "tauri-utils",
-]
-
-[[package]]
-name = "tauri-plugin-fs-watch"
-version = "0.0.0"
-source = "git+https://github.com/tauri-apps/plugins-workspace?branch=v1#a305ad3ddbdf4b7c009394ac3dc4794cfc222f0f"
-dependencies = [
- "log",
- "notify 6.0.1",
- "notify-debouncer-mini",
- "serde",
- "serde_json",
- "tauri",
- "thiserror",
 ]
 
 [[package]]

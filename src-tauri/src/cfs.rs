@@ -186,9 +186,12 @@ async fn unwatch(state: tauri::State<'_, CFSState>, id: usize) -> Result<(), Str
     if let Some((mut watcher, path)) = state.watcher.lock().unwrap().remove(&id) {
         let path = Path::new(&path);
 
-        watcher.unwatch(&path);
+        let res = watcher.unwatch(&path);
 
-        Ok(())
+        match res {
+            Ok(_) => return Ok(()),
+            Err(error) => return Err(format!("{:?}", error.kind))
+        }
     } else {
         Err("Watcher not found".into())
     }
