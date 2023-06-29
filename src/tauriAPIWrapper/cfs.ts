@@ -1,57 +1,36 @@
 import { invoke } from "@tauri-apps/api";
+import { event } from "@tauri-apps/api";
 
-let watcherId: number[] = [];
+export const unwatchDir = async (id: number) => invoke<void>('plugin:cfs|unwatch', { id });
 
-export const unwatchDir = () => {
-    if (!watcherId.length) {
-        return;
-    }
-
-    watcherId.forEach(id => invoke('plugin:cfs|unwatch', { id }));
-    watcherId = [];
-}
-
-export const watchDir = async (path: string): Promise<void | (() => void)> => {
+export const watchDir = async (path: string, onChangeInDir: (e: event.Event<ChangesInDirectoryPayload>) => void) => {
     try {
-        unwatchDir();
+        if (!path) {
+            return;
+        }
+
+        const unlisten = await event.listen<ChangesInDirectoryPayload>(`changes-in-dir`, onChangeInDir);
+        const id = await invoke<number>('plugin:cfs|watch_dir', { pathToDir: path });
+
+        return {
+            unwatch: () => unwatchDir(id),
+            unlisten
+        }
     } catch (error) {
-        console.warn(error);
-    }
-
-    if (!path) {
-        return;
-    }
-
-    const id: number = await invoke('plugin:cfs|watch_dir', { pathToDir: path });
-
-    watcherId.push(id);
-
-    return unwatchDir;
+        throw error;
+    };
 };
 
-export const readDir = async (path: string): Promise<ExplorerDirectory[]> => {
-    unwatchDir();
+export const readDir = (path: string) => invoke<ExplorerDirectory[]>('plugin:cfs|read_dir', { pathToDir: path });
 
-    const files: ExplorerDirectory[] = await invoke('plugin:cfs|read_dir', { pathToDir: path });
+export const getDisks = () => invoke<ExplorerDisk[]>('plugin:cfs|get_disks');
 
-    return files;
-}
+export const removeFile = async (pathToFile: string) => invoke<void>("plugin:cfs|remove_file", { pathToFile });
 
-export const getDisks = async (): Promise<ExplorerDisk[]> => {
-    unwatchDir();
+export const removeDirectory = (pathToDirectory: string) => invoke<void>("plugin:cfs|remove_directory", { pathToDirectory });
 
-    const files: ExplorerDisk[] = await invoke('plugin:cfs|get_disks');
+export const rename = (oldName: string, newName: string) => invoke<void>('plugin:cfs|rename', { oldName, newName });
 
-    return files;
-}
+export const deleteFile = (pathToFile: string) => invoke<void>('plugin:cfs|check_file_before_delete', { pathToFile })
 
-export const rename = (oldName: string, newName: string): Promise<void> => invoke('plugin:cfs|rename', { oldName, newName });
-
-export const deleteFile = (pathToFile: string) => {
-    invoke('plugin:cfs|check_file_before_delete', { pathToFile })
-        .then(() => console.log('successful'))
-        .catch((error: string) => console.error(error))
-}
-
-export const pathExists = (path: string): Promise<boolean> =>
-    invoke("plugin:cfs|exists", { pathToFile: path });
+export const pathExists = (path: string) => invoke<boolean>("plugin:cfs|exists", { pathToFile: path });

@@ -15,9 +15,8 @@ use std::{
     thread::spawn,
 };
 use sysinfo::{DiskExt, System, SystemExt};
-use tauri::Window;
+use tauri::{api::dialog, Window};
 use tauri::{
-    api::dialog,
     plugin::{Builder, TauriPlugin},
     Manager, Runtime, State,
 };
@@ -38,7 +37,12 @@ struct DiskInfo {
 }
 
 impl DiskInfo {
-    pub fn new(mount_point: String, name: String, total_space: usize, available_space: usize) -> Self {
+    pub fn new(
+        mount_point: String,
+        name: String,
+        total_space: usize,
+        available_space: usize,
+    ) -> Self {
         Self {
             mount_point,
             name,
@@ -96,20 +100,24 @@ fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>
                     NotifyEventKind::Remove(_) => FileChangeEventType::Remove,
                 };
 
-                let event_clone = event.clone();
                 let path_buf_default = &PathBuf::default();
 
-                let path_to_file = event_clone.paths.first().unwrap_or(path_buf_default);
+                let paths = event.paths.clone();
+                let path_to_file = paths.first().unwrap_or(path_buf_default);
+
                 let filename = path_to_file
                     .file_name()
                     .unwrap_or(OsStr::new(""))
                     .to_string_lossy();
+
                 let file_type = if path_to_file.is_dir() {
                     "directory"
                 } else {
                     "file"
                 };
+
                 let metadata = path_to_file.metadata();
+
                 let size: usize = if let Ok(metadata) = metadata {
                     metadata.file_size() as usize
                 } else {
@@ -170,7 +178,20 @@ fn watch_dir<R: Runtime>(
         .unwrap()
         .insert(id, (watcher, path_to_dir));
 
-    Ok(id.into())
+    Ok(id)
+}
+
+#[tauri::command(async)]
+async fn unwatch(state: tauri::State<'_, CFSState>, id: usize) -> Result<(), String> {
+    if let Some((mut watcher, path)) = state.watcher.lock().unwrap().remove(&id) {
+        let path = Path::new(&path);
+
+        watcher.unwatch(&path);
+
+        Ok(())
+    } else {
+        Err("Watcher not found".into())
+    }
 }
 
 #[tauri::command(async)]
@@ -198,58 +219,51 @@ fn get_disks() -> Result<Vec<DiskInfo>, String> {
 
 #[tauri::command(async)]
 fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
-    if path_to_dir.len() == 0 {
-        return Err("Path is empty".into());
+    let path_to_dir = Path::new(&path_to_dir);
+
+    if !path_to_dir.exists() {
+        return Err("Path don't exist".into());
     }
 
-    if let Ok(files) = fs::read_dir(path_to_dir) {
-        let mut dir_entry_info: Vec<FileInfo> = vec![];
+    let files = path_to_dir.read_dir();
 
-        files.for_each(|file| {
-            if let Ok(file) = file {
-                let file_name = file.file_name().to_str().unwrap().to_string();
-                let meta = fs::metadata(file.path());
+    if let Err(error) = files {
+        let message = format!(
+            "Can't get information about files in directory. Reason: {}",
+            error.kind()
+        );
 
-                if let Ok(meta) = meta {
-                    let file_type = if meta.is_dir() {
-                        "directory"
-                    } else {
-                        // if is_image(file.path().to_str().unwrap_or("")) {
-                        //     "image"
-                        // } else {
-                        "file"
-                        // }
-                    };
+        return Err(message);
+    }
 
-                    dir_entry_info.push(FileInfo::new(
-                        file_name,
-                        file_type.into(),
-                        meta.file_size() as usize,
-                    ));
-                }
+    let mut dir_entry_info: Vec<FileInfo> = vec![];
+
+    files.unwrap().for_each(|file| {
+        if let Ok(file) = file {
+            let file_name = file.file_name().to_str().unwrap().to_string();
+            let meta = file.metadata();
+
+            if let Ok(meta) = meta {
+                let file_type = if meta.is_dir() {
+                    "directory"
+                } else {
+                    // if is_image(file.path().to_str().unwrap_or("")) {
+                    //     "image"
+                    // } else {
+                    "file"
+                    // }
+                };
+
+                dir_entry_info.push(FileInfo::new(
+                    file_name,
+                    file_type.into(),
+                    meta.file_size() as usize,
+                ));
             }
-        });
-
-        Ok(dir_entry_info)
-    } else {
-        Err("Can't get information about files in directory.".into())
-    }
-}
-
-#[tauri::command(async)]
-fn unwatch(state: State<'_, CFSState>, id: usize) -> Result<(), String> {
-    let result = state.watcher.lock().unwrap().remove(&id);
-
-    if let Some((mut watcher, path)) = result {
-        let res = watcher.unwatch(Path::new(&path));
-
-        match res {
-            Ok(_) => Ok(()),
-            Err(_) => Err("Can't disable watcher.".into()),
         }
-    } else {
-        Err("Watcher wasn't found.".into())
-    }
+    });
+
+    Ok(dir_entry_info)
 }
 
 #[tauri::command(async)]
@@ -273,119 +287,68 @@ fn rename(old_name: String, new_name: String) -> Result<(), String> {
     }
 }
 
-fn delete_file(path_to_file: String) -> Result<(), String> {
-    let path_to_file = Path::new(&path_to_file);
-
-    if path_to_file.is_dir() {
-        let result = fs::remove_dir_all(path_to_file);
-
-        match result {
-            Ok(_) => return Ok(()),
-            Err(_) => return Err("Can't delete directory".into()),
-        }
-    }
-
-    if path_to_file.is_file() {
-        let result = fs::remove_file(path_to_file);
-
-        match result {
-            Ok(_) => return Ok(()),
-            Err(_) => return Err("Can't delete directory".into()),
-        }
-    }
-
-    Err("Unknown file".into())
-}
-
-#[tauri::command(async)]
-pub fn check_file_before_delete<R: Runtime>(
-    window: Window<R>,
-    path_to_file: String,
-) -> Result<(), String> {
-    let path = Path::new(&path_to_file);
-
-    if !path.exists() {
-        return Err("File doesn't exist".into());
-    }
-
-    if path.is_dir() {
-        let dir_entry = fs::read_dir(path);
-
-        match dir_entry {
-            Ok(mut files) => {
-                let is_empty = files.next().is_none();
-
-                if !is_empty {
-                    let filename: &str = if let Some(file_name) = path.file_name() {
-                        file_name.to_str().unwrap_or("directory")
-                    } else {
-                        "directory"
-                    };
-
-                    dialog::confirm(
-                        Some(&window),
-                        format!("Deleting {}", filename),
-                        format!("Confirm {} deletion", filename),
-                        |answer| {
-                            if answer {
-                                let result = delete_file(path_to_file);
-
-                                if let Err(error) = result {
-                                    println!("{}", error);
-                                }
-                            }
-                        },
-                    );
-
-                    return Ok(());
-                } else {
-                    return delete_file(path_to_file);
-                }
-            }
-            Err(_) => return Err("Can't read directory".into()),
-        }
-    }
-
-    if path.is_file() {
-        let file_entry = fs::read(path);
-
-        match file_entry {
-            Ok(data) => {
-                if data.len() != 0 {
-                    let filename: &str = if let Some(file_name) = path.file_name() {
-                        file_name.to_str().unwrap_or("file")
-                    } else {
-                        "file"
-                    };
-
-                    dialog::confirm(
-                        Some(&window),
-                        format!("Deleting {}", filename),
-                        format!("Confirm {} deletion", filename),
-                        |answer| {
-                            if answer {
-                                let result = delete_file(path_to_file);
-
-                                if let Err(error) = result {
-                                    println!("{}", error);
-                                }
-                            }
-                        },
-                    );
-                } else {
-                    return delete_file(path_to_file);
-                }
-            }
-            Err(_) => return Err("Can't read file".into()),
-        }
-    }
-
-    Ok(())
-}
-
 #[tauri::command(async)]
 fn exists(path_to_file: String) -> bool {
     Path::new(&path_to_file).exists()
+}
+
+#[tauri::command(async)]
+fn remove_file<R: Runtime>(window: Window<R>, path_to_file: String) -> Result<(), String> {
+    let path_to_file = Path::new(&path_to_file);
+
+    let file_name = path_to_file.file_name();
+    let file_name = file_name.unwrap_or(OsStr::new("file"));
+    let file_name = file_name.to_str().unwrap_or("file");
+
+    let dialog_title = format!("Remove {file_name}");
+    let dialog_message = format!("Remove {}?", file_name);
+
+    let confirmed = dialog::blocking::confirm(Some(&window), dialog_title, dialog_message);
+
+    if !confirmed {
+        return Ok(());
+    }
+
+    match fs::remove_file(path_to_file) {
+        Ok(_) => return Ok(()),
+        Err(error) => return Err(format!("Can't remove file. Reason: {}", error.kind())),
+    };
+}
+
+#[tauri::command(async)]
+fn remove_directory<R: Runtime>(window: Window<R>, path_to_dir: String) -> Result<(), String> {
+    let path_to_dir = Path::new(&path_to_dir);
+
+    let dir_entries = path_to_dir.read_dir();
+
+    if let Err(error) = dir_entries {
+        return Err(format!(
+            "Unable to read directory. Reason: {}",
+            error.kind()
+        ));
+    }
+
+    let is_dir_empty = dir_entries.unwrap().count() == 0;
+
+    if !is_dir_empty {
+        let file_name = path_to_dir.file_name();
+        let file_name = file_name.unwrap_or(OsStr::new("folder"));
+        let file_name = file_name.to_str().unwrap_or("folder");
+
+        let dialog_title = format!("Remove {file_name}");
+        let dialog_message = format!("Remove {}?", file_name);
+
+        let confirmed = dialog::blocking::confirm(Some(&window), dialog_title, dialog_message);
+
+        if !confirmed {
+            return Ok(());
+        }
+    }
+
+    match fs::remove_dir_all(path_to_dir) {
+        Ok(_) => return Ok(()),
+        Err(error) => return Err(format!("Can't remove directory. Reason: {}", error.kind())),
+    }
 }
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
@@ -396,12 +359,13 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             get_disks,
             unwatch,
             rename,
-            check_file_before_delete,
-            exists
+            exists,
+            remove_directory,
+            remove_file
         ])
-        .setup(|app_handle| {
+        .setup(|app| {
             // setup plugin specific state here
-            app_handle.manage(CFSState::default());
+            app.manage(CFSState::default());
             Ok(())
         })
         .build()

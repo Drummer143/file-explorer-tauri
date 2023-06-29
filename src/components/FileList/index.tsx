@@ -9,8 +9,6 @@ import { useResizeObserver, useWatchPathChange } from '../../hooks';
 import styles from "./FileList.module.scss";
 
 const FileList: React.FC = () => {
-    const [files, setFiles] = useState<CFile[]>([]);
-
     const listContainerRef = useRef<HTMLDivElement>(null);
 
     const mapFiles = (file: CFile) => {
@@ -24,14 +22,14 @@ const FileList: React.FC = () => {
         }
     }
 
-    useWatchPathChange(setFiles);
+    const { files } = useWatchPathChange();
 
     useResizeObserver({
         target: listContainerRef.current,
         onResize: ([e]) => {
             const itemWidth = parseInt(getComputedStyle(document.body).getPropertyValue("--file-list-item-width"));
 
-            if(isNaN(itemWidth)) {
+            if (isNaN(itemWidth)) {
                 return console.error("Can't get width of item in file list");
             }
 
