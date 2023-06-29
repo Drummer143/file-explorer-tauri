@@ -1,24 +1,24 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+// import { persist } from "zustand/middleware";
 import { dirname } from "@tauri-apps/api/path";
 
 interface ExplorerHistoryState {
-    history: string[],
-    canGoBack: boolean,
-    canGoForward: boolean,
-    currentPath: string,
-    currentPathIndex: number
-    hasParent: boolean
+    history: string[];
+    canGoBack: boolean;
+    canGoForward: boolean;
+    currentPath: string;
+    currentPathIndex: number;
+    hasParent: boolean;
 
-    pushRoute: (route: string) => void
-    goBack: () => boolean
-    goForward: () => boolean
-    clear: () => void
-    goToParent: () => void
+    pushRoute: (route: string) => void;
+    goBack: () => boolean;
+    goForward: () => boolean;
+    clear: () => void;
+    goToParent: () => void;
 }
 
 export const useExplorerHistory = create<ExplorerHistoryState>()(
-    /* persist( */(set, get) => ({
+    /* persist( */ (set, get) => ({
         canGoBack: false,
         canGoForward: false,
         currentPath: "",
@@ -26,7 +26,7 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
         currentPathIndex: 0,
         hasParent: false,
 
-        pushRoute: (route) => {
+        pushRoute: route => {
             const { history, currentPathIndex } = get();
 
             const updatedHistory = history.slice(0, currentPathIndex + 1).concat(route);
@@ -38,7 +38,7 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
                 currentPathIndex: currentPathIndex + 1,
                 currentPath: route,
                 hasParent: !!route
-            })
+            });
         },
 
         goBack: () => {
@@ -57,7 +57,7 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
                 canGoForward: true,
                 currentPathIndex: newIndex,
                 hasParent: !!history[newIndex]
-            })
+            });
 
             return true;
         },
@@ -78,7 +78,7 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
                 canGoBack: true,
                 currentPathIndex: newIndex,
                 hasParent: !!history[newIndex]
-            })
+            });
 
             return true;
         },
@@ -86,7 +86,7 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
         goToParent: async () => {
             const { currentPath, history, currentPathIndex } = get();
 
-            let parentDirectory: string
+            let parentDirectory: string;
 
             try {
                 parentDirectory = await dirname(currentPath);
@@ -102,15 +102,13 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
 
             const updatedHistory = history.slice(0, currentPathIndex + 1).concat(parentDirectory);
 
-            console.log(parentDirectory);
-
             set({
                 canGoForward: false,
                 history: updatedHistory,
                 currentPathIndex: currentPathIndex + 1,
                 currentPath: parentDirectory,
                 hasParent: !!parentDirectory
-            })
+            });
         },
 
         clear: () => {
@@ -122,10 +120,10 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
                 currentPath: "",
                 currentPathIndex: 0,
                 history: [""]
-            })
+            });
         }
-    })/* , {
+    }) /* , {
         name: "store:history",
         version: 1
     }) */
-)
+);

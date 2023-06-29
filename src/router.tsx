@@ -1,3 +1,4 @@
+import React from "react";
 import { createBrowserRouter, Navigate, RouteObject } from "react-router-dom";
 
 import Layout from "./components/Layout";
@@ -6,7 +7,7 @@ import FileList from "./components/FileList";
 const route404: RouteObject = {
     path: "/",
     element: <Navigate to="/explorer/" replace />
-}
+};
 
 export default createBrowserRouter([
     {
@@ -21,4 +22,4 @@ export default createBrowserRouter([
         ]
     },
     route404
-])
+]);

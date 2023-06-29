@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 type UseResizeObserverProps = {
     target?: HTMLElement | null;

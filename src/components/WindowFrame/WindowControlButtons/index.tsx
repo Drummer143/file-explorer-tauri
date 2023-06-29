@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { appWindow } from '@tauri-apps/api/window';
-import { useTranslation } from 'react-i18next';
+import React, { useEffect, useState } from "react";
+import { appWindow } from "@tauri-apps/api/window";
+import { useTranslation } from "react-i18next";
 
-import { CloseSVG, MaximizeSVG, MinimizeSVG, RestoreToWindowSVG } from '../../../assets';
+import { CloseSVG, MaximizeSVG, MinimizeSVG, RestoreToWindowSVG } from "../../../assets";
 
 import styles from "./WindowControlButtons.module.scss";
 
@@ -15,7 +15,7 @@ const WindowControlButtons: React.FC = () => {
         const isMaximized = await appWindow.isMaximized();
 
         setIsMaximized(isMaximized);
-    }
+    };
 
     useEffect(() => {
         isWindowMaximized();
@@ -30,7 +30,7 @@ const WindowControlButtons: React.FC = () => {
     return (
         <div className={styles.wrapper}>
             <button
-                type='button'
+                type="button"
                 className={styles.windowControlButton}
                 onClick={minimize}
                 title={t("windowControlButtons.minimize")}
@@ -39,7 +39,7 @@ const WindowControlButtons: React.FC = () => {
             </button>
 
             <button
-                type='button'
+                type="button"
                 className={styles.windowControlButton}
                 onClick={toggleFullscreen}
                 title={isMaximized ? t("windowControlButtons.restoreToWindow") : t("windowControlButtons.maximize")}
@@ -48,7 +48,7 @@ const WindowControlButtons: React.FC = () => {
             </button>
 
             <button
-                type='button'
+                type="button"
                 className={styles.windowControlButton}
                 onClick={close}
                 title={t("windowControlButtons.close")}
@@ -56,6 +56,7 @@ const WindowControlButtons: React.FC = () => {
                 <CloseSVG />
             </button>
         </div>
-    )
-}
+    );
+};
+
 export default WindowControlButtons;

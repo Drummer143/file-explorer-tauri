@@ -1,0 +1,82 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true
+    },
+    "extends": [
+        "prettier",
+        "eslint:recommended",
+        "plugin:react/recommended",
+        "plugin:react-hooks/recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "overrides": [],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    "plugins": [
+        "react",
+        "react-hooks",
+        "@typescript-eslint"
+    ],
+    "rules": {
+        "linebreak-style": [
+            "error",
+            "windows"
+        ],
+        "no-console": [
+            "warn",
+            {
+                "allow": [
+                    "warn",
+                    "error",
+                    "info"
+                ]
+            }
+        ],
+        "comma-dangle": [
+            "warn",
+            "never"
+        ],
+        "camelcase": "error",
+        "eqeqeq": "error",
+        "max-len": [
+            "warn",
+            {
+                "code": 120,
+                "tabWidth": 4
+            }
+        ],
+        "max-depth": [
+            "warn",
+            {
+                "max": 4
+            }
+        ],
+        "max-lines": [
+            "warn",
+            {
+                "max": 200,
+                "skipBlankLines": true,
+                "skipComments": true
+            }
+        ],
+        "newline-after-var": "warn",
+        "no-debugger": "warn",
+        "no-dupe-keys": "error",
+        "no-duplicate-case": "error",
+        "semi": [
+            "warn",
+            "always",
+            {
+                "omitLastInOneLineBlock": true
+            }
+        ],
+        "quotes": [
+            "warn",
+            "double"
+        ]
+    }
+}

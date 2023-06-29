@@ -34,7 +34,7 @@
         color: transparent;
     }
 
-    &:focus+.currentPath {
+    &:focus + .currentPath {
         display: none;
     }
 }
@@ -79,5 +79,5 @@
 }
 
 .pathSeparator {
-    margin: 0 .0675rem;
+    margin: 0 0.0675rem;
 }

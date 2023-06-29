@@ -1,7 +1,7 @@
-import React from 'react';
+import React from "react";
 
-import PathInput from './PathInput';
-import NavigationButtons from './NavigationButtons';
+import PathInput from "./PathInput";
+import NavigationButtons from "./NavigationButtons";
 
 import styles from "./Navbar.module.scss";
 
@@ -12,7 +12,7 @@ const Navbar: React.FC = () => {
 
             <PathInput />
         </div>
-    )
-}
+    );
+};
 
 export default Navbar;

@@ -1,19 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 
-import FileContextMenu from './FileContextMenu';
-import ExplorerContextMenu from './ExplorerContextMenu';
-import { DataSetKeys } from '../../utils';
+import FileContextMenu from "./FileContextMenu";
+import ExplorerContextMenu from "./ExplorerContextMenu";
+import { DataSetKeys } from "../../utils";
 
 import styles from "./ContextMenu.module.scss";
 
-type ContextMenuInfo = {
-    CTXComponent: React.ReactNode;
-    opacity: 0 | 1;
-    coordinates: {
-        x: number;
-        y: number;
-    };
-} | undefined;
+type ContextMenuInfo =
+    | {
+          CTXComponent: React.ReactNode;
+          opacity: 0 | 1;
+          coordinates: {
+              x: number;
+              y: number;
+          };
+      }
+    | undefined;
 
 const ContextMenu: React.FC = () => {
     const [contextMenuInfo, setContextMenuInfo] = useState<ContextMenuInfo>(undefined);
@@ -23,14 +25,18 @@ const ContextMenu: React.FC = () => {
     const selectContextMenu = (contextMenuType?: string, contextMenuAdditionalInfo?: string) => {
         // TODO:
         switch (contextMenuType) {
-            case 'file':
-            case 'disk':
-            case 'folder':
-                return <FileContextMenu fileType={contextMenuType} filename={contextMenuAdditionalInfo!} />;
-            case 'explorer':
-                return <ExplorerContextMenu />
+            case "file":
+            case "disk":
+            case "folder":
+                if (contextMenuAdditionalInfo) {
+                    return <FileContextMenu fileType={contextMenuType} filename={contextMenuAdditionalInfo} />;
+                } else {
+                    return <></>;
+                }
+            case "explorer":
+                return <ExplorerContextMenu />;
         }
-    }
+    };
 
     const closeCTX = () => {
         setContextMenuInfo(undefined);
@@ -68,18 +74,19 @@ const ContextMenu: React.FC = () => {
                 coordinates: {
                     x: e.clientX,
                     y: e.clientY
-                },
+                }
             });
 
             document.addEventListener("click", closeCTXOnOuterClick);
             window.addEventListener("resize", closeCTX);
-        }
+        };
 
         document.addEventListener("contextmenu", handleContextMenu);
 
         return () => {
             document.removeEventListener("contextmenu", handleContextMenu);
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -110,8 +117,8 @@ const ContextMenu: React.FC = () => {
             coordinates: {
                 x,
                 y
-            },
-        }))
+            }
+        }));
     }, [contextMenuInfo]);
 
     return (
@@ -119,17 +126,21 @@ const ContextMenu: React.FC = () => {
             className={styles.wrapper}
             ref={ctxContainerRef}
             onClick={closeCTX}
-            style={contextMenuInfo ? {
-                top: contextMenuInfo.coordinates.y + "px",
-                left: contextMenuInfo.coordinates.x + "px",
-                opacity: !contextMenuInfo.opacity ? 0 : undefined
-            } : {
-                display: "none"
-            }}
+            style={
+                contextMenuInfo
+                    ? {
+                          top: contextMenuInfo.coordinates.y + "px",
+                          left: contextMenuInfo.coordinates.x + "px",
+                          opacity: !contextMenuInfo.opacity ? 0 : undefined
+                      }
+                    : {
+                          display: "none"
+                      }
+            }
         >
             {!!contextMenuInfo && contextMenuInfo.CTXComponent}
         </div>
     );
-}
+};
 
 export default ContextMenu;

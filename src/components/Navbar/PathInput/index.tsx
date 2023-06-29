@@ -1,9 +1,9 @@
-import React, { ChangeEventHandler, FormEventHandler, useEffect, useState } from 'react';
+import React, { ChangeEventHandler, FormEventHandler, useEffect, useState } from "react";
 import { message } from "@tauri-apps/api/dialog";
 import { normalize, sep } from "@tauri-apps/api/path";
 
-import { pathExists } from '../../../tauriAPIWrapper';
-import { useExplorerHistory } from '../../../zustand';
+import { pathExists } from "../../../tauriAPIWrapper";
+import { useExplorerHistory } from "../../../zustand";
 
 import styles from "./PathInput.module.scss";
 
@@ -12,7 +12,7 @@ const PathInput: React.FC = () => {
 
     const [inputValue, setInputValue] = useState(currentPath);
 
-    const handleSubmit: FormEventHandler<HTMLFormElement & { path: HTMLInputElement }> = async (e) => {
+    const handleSubmit: FormEventHandler<HTMLFormElement & { path: HTMLInputElement }> = async e => {
         e.preventDefault();
 
         const form = e.currentTarget;
@@ -33,11 +33,11 @@ const PathInput: React.FC = () => {
 
         pushRoute(normalizedPath);
         setInputValue(normalizedPath);
-    }
+    };
 
     const handleChange: ChangeEventHandler<HTMLInputElement> = e => {
         setInputValue(e.target.value);
-    }
+    };
 
     const handlePathPartClick = (partIndex: number) => {
         const currentPathParts = currentPath.split(sep);
@@ -51,19 +51,19 @@ const PathInput: React.FC = () => {
         const newPath = currentPathParts.slice(0, partIndex + 1).join(sep);
 
         pushRoute(newPath);
-    }
+    };
 
     useEffect(() => setInputValue(currentPath), [currentPath]);
 
     return (
         <form className={styles.wrapper} onSubmit={handleSubmit}>
             <div className={styles.inputContainer} data-current-path={currentPath}>
-                <input type="text" name='path' className={styles.input} value={inputValue} onChange={handleChange} />
+                <input type="text" name="path" className={styles.input} value={inputValue} onChange={handleChange} />
 
                 <div className={styles.currentPath}>
                     {currentPath.split(sep).map((pathPart, i, { length }) => (
                         <React.Fragment key={pathPart + i}>
-                            <button type='button' className={styles.pathPart} onClick={() => handlePathPartClick(i)}>
+                            <button type="button" className={styles.pathPart} onClick={() => handlePathPartClick(i)}>
                                 {pathPart}
                             </button>
 
@@ -74,5 +74,6 @@ const PathInput: React.FC = () => {
             </div>
         </form>
     );
-}
+};
+
 export default PathInput;

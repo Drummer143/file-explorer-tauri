@@ -1,10 +1,10 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from "react";
 
-import Disk from './Disk';
-import File from './File';
-import Folder from './Folder';
-import { CTXTypes } from '../../utils';
-import { useResizeObserver, useWatchPathChange } from '../../hooks';
+import Disk from "./Disk";
+import File from "./File";
+import Folder from "./Folder";
+import { CTXTypes } from "../../utils";
+import { useResizeObserver, useWatchPathChange } from "../../hooks";
 
 import styles from "./FileList.module.scss";
 
@@ -13,14 +13,14 @@ const FileList: React.FC = () => {
 
     const mapFiles = (file: CFile) => {
         switch (file.type) {
-            case 'disk':
-                return <Disk key={file.mountPoint} {...file} />
-            case 'directory':
-                return <Folder key={file.name} {...file} />
-            case 'file':
-                return <File key={file.name} {...file} />
+            case "disk":
+                return <Disk key={file.mountPoint} {...file} />;
+            case "directory":
+                return <Folder key={file.name} {...file} />;
+            case "file":
+                return <File key={file.name} {...file} />;
         }
-    }
+    };
 
     const { files } = useWatchPathChange();
 
@@ -43,6 +43,7 @@ const FileList: React.FC = () => {
         <div ref={listContainerRef} className={styles.wrapper} data-context-menu-type={CTXTypes.explorer}>
             {files.map(mapFiles)}
         </div>
-    )
-}
+    );
+};
+
 export default FileList;

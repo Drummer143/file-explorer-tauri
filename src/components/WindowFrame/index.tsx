@@ -1,6 +1,6 @@
-import React from 'react';
+import React from "react";
 
-import WindowControlButtons from './WindowControlButtons';
+import WindowControlButtons from "./WindowControlButtons";
 
 import styles from "./WindowFrame.module.scss";
 
@@ -12,6 +12,6 @@ const WindowFrame: React.FC = () => {
             <WindowControlButtons />
         </div>
     );
-}
+};
 
-export default WindowFrame
+export default WindowFrame;

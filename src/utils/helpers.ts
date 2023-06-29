@@ -4,4 +4,4 @@ export const getDiskBackgroundColor = (value: number) => {
     const hue = (1 - value) * 120;
 
     return `hsl(${hue}, 50%, 35%)`;
-}
+};

@@ -1,12 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { I18nextProvider } from 'react-i18next';
+import { I18nextProvider } from "react-i18next";
 
 import App from "./App";
 import i18n from "./i18n";
 
 import "./style.scss";
-import "./defaultColorTheme.scss"
+import "./defaultColorTheme.scss";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <React.StrictMode>

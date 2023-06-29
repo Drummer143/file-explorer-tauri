@@ -1,14 +1,14 @@
-import React from 'react';
+import React from "react";
 
-import { openFile } from '../../../tauriAPIWrapper';
-import { useExplorerHistory } from '../../../zustand';
+import { openFile } from "../../../tauriAPIWrapper";
+import { useExplorerHistory } from "../../../zustand";
 
 const ExplorerContextMenu: React.FC = () => {
     const { currentPath } = useExplorerHistory();
 
     const handleOpenInExplorer = () => openFile(currentPath);
 
-    if(!currentPath) {
+    if (!currentPath) {
         return <></>;
     }
 
@@ -16,7 +16,7 @@ const ExplorerContextMenu: React.FC = () => {
         <>
             <button onClick={handleOpenInExplorer}>Open folder in explorer</button>
         </>
-    )
-}
+    );
+};
 
 export default ExplorerContextMenu;

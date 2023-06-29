@@ -1,10 +1,10 @@
-import React, { useRef } from 'react';
-import xbytes from 'xbytes';
+import React, { useRef } from "react";
+import xbytes from "xbytes";
 
-import FileListItemButton from '../../customs/FileListItemButton';
+import FileListItemButton from "../../customs/FileListItemButton";
 import { DiskSVG } from "../../../assets";
-import { CTXTypes } from '../../../utils';
-import { useExplorerHistory } from '../../../zustand';
+import { CTXTypes } from "../../../utils";
+import { useExplorerHistory } from "../../../zustand";
 // import { getDiskBackgroundColor } from '../../../utils';
 
 import styles from "./Disk.module.scss";
@@ -35,21 +35,28 @@ const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoin
             className={styles.wrapper}
             data-context-menu-type={CTXTypes.disk}
             data-context-menu-additional-info={mountPoint}
-        // style={{
-        //     '--available-space-width': availableSpacePercentage + "%",
-        //     "--free-memory-background-color": getDiskBackgroundColor((availableSpacePercentage / 100 - FREE_MEMORY_COLOR_CHANGE_THRESHOLD) * FREE_MEMORY_COLOR_CHANGE_VALUE_MULTIPLIER)
-        // } as React.CSSProperties}
+            // style={{
+            //     '--available-space-width': availableSpacePercentage + "%",
+            //     "--free-memory-background-color":
+            //             getDiskBackgroundColor((availableSpacePercentage / 100 - FREE_MEMORY_COLOR_CHANGE_THRESHOLD)
+            //             * FREE_MEMORY_COLOR_CHANGE_VALUE_MULTIPLIER)
+            // } as React.CSSProperties}
         >
             <div className={styles.icon}>
                 <DiskSVG />
             </div>
 
             <div className={styles.description}>
-                <p className={styles.name}>{mountPoint} {name}</p>
+                <p className={styles.name}>
+                    {mountPoint} {name}
+                </p>
 
-                <p className={styles.info}>{xbytes(availableSpace, xbytesConfig.current)} / {xbytes(totalSpace, xbytesConfig.current)}</p>
+                <p className={styles.info}>
+                    {xbytes(availableSpace, xbytesConfig.current)} / {xbytes(totalSpace, xbytesConfig.current)}
+                </p>
             </div>
         </FileListItemButton>
-    )
-}
+    );
+};
+
 export default Disk;

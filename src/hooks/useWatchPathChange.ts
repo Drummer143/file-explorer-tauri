@@ -1,6 +1,6 @@
 import { sep } from "@tauri-apps/api/path";
-import { UnlistenFn, listen } from "@tauri-apps/api/event";
-import { useEffect, useRef, useState } from "react";
+import { UnlistenFn } from "@tauri-apps/api/event";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useExplorerHistory } from "../zustand";
 import { readDir, getDisks, watchDir } from "../tauriAPIWrapper";
@@ -11,15 +11,16 @@ export const useWatchPathChange = () => {
 
     const { currentPath } = useExplorerHistory();
 
-    const u = useRef<{
-       unwatch: () => Promise<void>;
-       unlisten: UnlistenFn
-    } | undefined>(undefined);
+    const u = useRef<
+        | {
+              unwatch: () => Promise<void>;
+              unlisten: UnlistenFn;
+          }
+        | undefined
+    >(undefined);
 
-    const getFilesInDirectory = async () => {
+    const getFilesInDirectory = useCallback(async () => {
         setLoading(true);
-
-        console.log(currentPath);
 
         if (u.current) {
             u.current.unlisten();
@@ -33,7 +34,7 @@ export const useWatchPathChange = () => {
 
                 setFiles(await readDir(path));
 
-                u.current = await watchDir(path, (e) => console.log(e));
+                u.current = await watchDir(path, e => console.log(e));
             } else {
                 setFiles(await getDisks());
             }
@@ -42,7 +43,7 @@ export const useWatchPathChange = () => {
         }
 
         setLoading(false);
-    }
+    }, [currentPath]);
 
     useEffect(() => {
         if (u.current) {
@@ -53,7 +54,7 @@ export const useWatchPathChange = () => {
 
     useEffect(() => {
         getFilesInDirectory();
-    }, [currentPath]);
+    }, [currentPath, getFilesInDirectory]);
 
     return { files, loading };
-}
+};

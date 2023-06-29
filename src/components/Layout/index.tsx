@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import React, { useRef } from "react";
 import { Outlet } from "react-router-dom";
 
 import Navbar from "../Navbar";
@@ -25,6 +25,6 @@ const Layout: React.FC = () => {
             <ContextMenu />
         </>
     );
-}
+};
 
 export default Layout;
