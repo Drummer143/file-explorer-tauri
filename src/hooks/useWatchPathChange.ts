@@ -1,9 +1,10 @@
 import { sep } from "@tauri-apps/api/path";
 import { UnlistenFn } from "@tauri-apps/api/event";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 
 import { useExplorerHistory } from "../zustand";
 import { readDir, getDisks, watchDir } from "../tauriAPIWrapper";
+import { Event as TauriEvent } from "@tauri-apps/api/event";
 
 export const useWatchPathChange = () => {
     const [loading, setLoading] = useState(false);
@@ -12,12 +13,34 @@ export const useWatchPathChange = () => {
     const { currentPath } = useExplorerHistory();
 
     const u = useRef<
-        | {
-              unwatch: () => Promise<void>;
-              unlisten: UnlistenFn;
-          }
-        | undefined
+        {
+            unwatch: () => Promise<void>;
+            unlisten: UnlistenFn;
+        } | undefined
     >(undefined);
+
+    const updateFilesOnDirChange = useCallback((
+        { payload }: TauriEvent<ChangesInDirectoryPayload>,
+        handleFiles: Dispatch<SetStateAction<CFile[]>>
+    ) => {
+        switch (payload.type) {
+            case "remove": {
+                handleFiles(prev => prev.filter(f => f.name !== payload.fileInfo.name));
+
+                break;
+            }
+            case "create": {
+                handleFiles(prev => prev.concat(payload.fileInfo));
+
+                break;
+            }
+            case "any":
+            case "modify":
+            case "other":
+            case "access":
+                console.warn("unhandled dir change: ", payload);
+        }
+    }, []);
 
     const getFilesInDirectory = useCallback(async () => {
         setLoading(true);
@@ -34,7 +57,7 @@ export const useWatchPathChange = () => {
 
                 setFiles(await readDir(path));
 
-                u.current = await watchDir(path, e => console.log(e));
+                u.current = await watchDir(path, (e) => updateFilesOnDirChange(e, setFiles));
             } else {
                 setFiles(await getDisks());
             }
@@ -43,7 +66,7 @@ export const useWatchPathChange = () => {
         }
 
         setLoading(false);
-    }, [currentPath]);
+    }, [currentPath, updateFilesOnDirChange]);
 
     useEffect(() => {
         if (u.current) {

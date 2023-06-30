@@ -35,12 +35,12 @@ const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoin
             className={styles.wrapper}
             data-context-menu-type={CTXTypes.disk}
             data-context-menu-additional-info={mountPoint}
-            // style={{
-            //     '--available-space-width': availableSpacePercentage + "%",
-            //     "--free-memory-background-color":
-            //             getDiskBackgroundColor((availableSpacePercentage / 100 - FREE_MEMORY_COLOR_CHANGE_THRESHOLD)
-            //             * FREE_MEMORY_COLOR_CHANGE_VALUE_MULTIPLIER)
-            // } as React.CSSProperties}
+        // style={{
+        //     '--available-space-width': availableSpacePercentage + "%",
+        //     "--free-memory-background-color":
+        //             getDiskBackgroundColor((availableSpacePercentage / 100 - FREE_MEMORY_COLOR_CHANGE_THRESHOLD)
+        //             * FREE_MEMORY_COLOR_CHANGE_VALUE_MULTIPLIER)
+        // } as React.CSSProperties}
         >
             <div className={styles.icon}>
                 <DiskSVG />
