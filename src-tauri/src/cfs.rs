@@ -190,7 +190,7 @@ async fn unwatch(state: tauri::State<'_, CFSState>, id: usize) -> Result<(), Str
 
         match res {
             Ok(_) => return Ok(()),
-            Err(error) => return Err(format!("{:?}", error.kind))
+            Err(error) => return Err(format!("{:?}", error.kind)),
         }
     } else {
         Err("Watcher not found".into())
@@ -244,9 +244,11 @@ fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
     files.unwrap().for_each(|file| {
         if let Ok(file) = file {
             let file_name = file.file_name().to_str().unwrap().to_string();
-            let meta = file.metadata();
+            let meta = file.metadata().unwrap();
 
-            if let Ok(meta) = meta {
+            let is_hidden = (meta.file_attributes() & 0x2) > 0;
+
+            if !is_hidden {
                 let file_type = if meta.is_dir() {
                     "directory"
                 } else {
