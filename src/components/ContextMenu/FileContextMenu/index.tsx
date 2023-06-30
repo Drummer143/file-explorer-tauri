@@ -1,8 +1,8 @@
 import React from "react";
 import { sep } from "@tauri-apps/api/path";
 
+import { openFile, remove } from "../../../tauriAPIWrapper";
 import { useExplorerHistory } from "../../../zustand";
-import { deleteFile, openFile } from "../../../tauriAPIWrapper";
 
 type FileContextMenuProps = {
     filename: string;
@@ -34,7 +34,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
 
             <button onClick={handleOpenInExplorer}>{fileType === "file" ? "Show" : "Open"} in explorer</button>
 
-            {fileType !== "disk" && <button onClick={() => deleteFile(currentPath + sep + filename)}>Delete</button>}
+            {fileType !== "disk" && <button onClick={() => remove(currentPath + sep + filename)}>Delete</button>}
         </>
     );
 };

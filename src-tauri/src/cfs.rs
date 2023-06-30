@@ -354,6 +354,23 @@ fn remove_directory<R: Runtime>(window: Window<R>, path_to_dir: String) -> Resul
     }
 }
 
+#[tauri::command(async)]
+fn remove<R: Runtime>(window: Window<R>, path_to_file: String) -> Result<(), String> {
+    let path = Path::new(&path_to_file);
+
+    if path.is_dir() {
+        remove_directory(window, path_to_file)
+    } else if path.is_file() {
+        remove_file(window, path_to_file)
+    } else {
+        let filename = path.file_name().unwrap().to_string_lossy();
+
+        let message = format!("{} is not removable", filename);
+
+        Err(message)
+    }
+}
+
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("cfs")
         .invoke_handler(tauri::generate_handler![
@@ -364,7 +381,8 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             rename,
             exists,
             remove_directory,
-            remove_file
+            remove_file,
+            remove
         ])
         .setup(|app| {
             // setup plugin specific state here
