@@ -69,9 +69,13 @@
 .pathPart {
     white-space: nowrap;
     transition: background-color 150ms;
-    cursor: pointer;
     pointer-events: all;
+    cursor: pointer;
     padding: 0 0.1875rem;
+
+    &:disabled {
+        cursor: not-allowed;
+    }
 
     &:hover {
         background-color: rgba($color: #fff, $alpha: 0.25);

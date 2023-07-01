@@ -31,7 +31,11 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
         lastHistoryUpdateType: "init",
 
         pushRoute: route => {
-            const { history, currentPathIndex } = get();
+            const { history, currentPathIndex, currentPath } = get();
+
+            if(route === currentPath) {
+                return;
+            }
 
             const updatedHistory = history.slice(0, currentPathIndex + 1).concat(route);
 

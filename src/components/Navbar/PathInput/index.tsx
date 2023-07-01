@@ -63,9 +63,12 @@ const PathInput: React.FC = () => {
                 <div className={styles.currentPath}>
                     {currentPath.split(sep).map((pathPart, i, { length }) => (
                         <React.Fragment key={pathPart + i}>
-                            <button type="button" className={styles.pathPart} onClick={() => handlePathPartClick(i)}>
-                                {pathPart}
-                            </button>
+                            <button
+                                type="button"
+                                className={styles.pathPart}
+                                disabled={length - 1 === i}
+                                onClick={() => handlePathPartClick(i)}
+                            >{pathPart}</button>
 
                             {length - 1 !== i && <p className={styles.pathSeparator}>{sep}</p>}
                         </React.Fragment>
