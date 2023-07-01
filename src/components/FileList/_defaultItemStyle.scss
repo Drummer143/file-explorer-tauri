@@ -1,11 +1,13 @@
 @mixin defaultItemStyle {
+    --padding: 0.25rem;
+
     width: var(--file-list-item-width);
     height: var(--file-list-item-height);
 
-    padding: 0.25rem;
+    padding: var(--padding);
 
     display: grid;
-    grid-template-columns: min-content 1fr;
+    grid-template-columns: calc(var(--file-list-item-height) - var(--padding) * 2) 1fr;
     gap: 0.25rem;
 
     font-size: 0.875rem;
@@ -39,6 +41,10 @@
 @mixin iconStyle {
     height: 100%;
     width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     padding: 0.25rem;
 

@@ -15,10 +15,13 @@ const FileList: React.FC = () => {
         switch (file.type) {
             case "disk":
                 return <Disk key={file.mountPoint} {...file} />;
-            case "directory":
+            case "folder":
                 return <Folder key={file.name} {...file} />;
             case "file":
+            case "image":
                 return <File key={file.name} {...file} />;
+            default: 
+                console.error("unhandled file", file);
         }
     };
 

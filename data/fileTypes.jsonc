@@ -1,0 +1,51 @@
+[
+    // JPG (JPEG) — Joint Photographic Experts Group
+    {
+        "extensions": [
+            "jpg",
+            "jpeg",
+            "jpe",
+            "jif",
+            "jfif",
+            "jfi"
+        ],
+        "type": "image"
+    },
+    // WebP — Google Web Picture Files
+    {
+        "extensions": [
+            "webp"
+        ],
+        "type": "image"
+    },
+    // PNG — Portable Network Graphics
+    {
+        "extensions": [
+            "png"
+        ],
+        "type": "image"
+    },
+    // GIF — Graphics Interchange Format
+    {
+        "extensions": [
+            "gif"
+        ],
+        "type": "image"
+    },
+    // SVG — Scalable Vector Graphics
+    {
+        "extensions": [
+            "svg",
+            "svgz"
+        ],
+        "type": "image"
+    },
+    // BMP - Windows Bitmap
+    {
+        "extensions": [
+            "bmp",
+            "dib"
+        ],
+        "type": "image"
+    }
+]

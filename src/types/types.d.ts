@@ -1,13 +1,13 @@
-type FileTypes = "disk" | "directory" | "file";
+type FileTypes = "disk" | "folder" | "file" | "image";
 
 interface ExplorerFile {
-    type: "file";
+    type: "file" | "image";
     name: string;
     size: number;
 }
 
 interface ExplorerDirectory {
-    type: "directory";
+    type: "folder";
     name: string;
 }
 

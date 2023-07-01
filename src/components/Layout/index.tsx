@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import { Outlet } from "react-router-dom";
 
 import Navbar from "../Navbar";
@@ -8,11 +8,9 @@ import ContextMenu from "../ContextMenu";
 import styles from "./Layout.module.scss";
 
 const Layout: React.FC = () => {
-    const layoutRef = useRef<HTMLDivElement>(null);
-
     return (
         <>
-            <div ref={layoutRef} className={styles.app}>
+            <div className={styles.app}>
                 <WindowFrame />
 
                 <div className={styles.body}>

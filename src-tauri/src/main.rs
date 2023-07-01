@@ -4,6 +4,7 @@
 )]
 
 use std::path::Path;
+use tauri::Manager;
 
 mod cfs;
 
@@ -30,6 +31,17 @@ fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![open_file])
         .plugin(cfs::init())
+        .setup(|app|{
+            let w = app.get_window("main");
+
+            if let Some(window) = w {
+                if !window.is_devtools_open() {
+                    window.open_devtools();
+                }
+            }
+
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("Can't run app.");
 }

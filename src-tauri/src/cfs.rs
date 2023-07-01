@@ -1,4 +1,3 @@
-// use crate::file_types::is_image;
 use notify::{
     event::EventAttributes, Config, Event as NotifyEvent, EventKind as NotifyEventKind,
     RecommendedWatcher, RecursiveMode, Watcher,
@@ -10,6 +9,7 @@ use std::{
     fs,
     os::windows::fs::MetadataExt,
     path::{Path, PathBuf},
+    process::Command,
     sync::mpsc::{channel, Receiver},
     sync::Mutex,
     thread::spawn,
@@ -21,6 +21,26 @@ use tauri::{
     Manager, Runtime, State,
 };
 
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+enum FileChangeEventType {
+    Access,
+    Any,
+    Create,
+    Modify,
+    Remove,
+    Other,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+enum FileTypes {
+    Disk,
+    File,
+    Folder,
+    Image
+}
+
 #[derive(Default, Debug)]
 struct CFSState {
     watcher: Mutex<HashMap<usize, (RecommendedWatcher, String)>>,
@@ -31,7 +51,7 @@ struct CFSState {
 struct DiskInfo {
     mount_point: String,
     name: String,
-    r#type: String,
+    r#type: FileTypes,
     total_space: usize,
     available_space: usize,
 }
@@ -48,33 +68,29 @@ impl DiskInfo {
             name,
             total_space,
             available_space,
-            r#type: "disk".into(),
+            r#type: FileTypes::Disk,
         }
     }
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
 struct FileInfo {
     name: String,
-    r#type: String,
+    r#type: FileTypes,
     size: usize,
+    is_removable: bool,
 }
 
 impl FileInfo {
-    pub fn new(name: String, r#type: String, size: usize) -> FileInfo {
-        FileInfo { name, r#type, size }
+    pub fn new(name: String, r#type: FileTypes, size: usize, is_removable: bool) -> FileInfo {
+        FileInfo {
+            name,
+            r#type,
+            size,
+            is_removable,
+        }
     }
-}
-
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
-#[serde(rename_all = "camelCase")]
-enum FileChangeEventType {
-    Access,
-    Any,
-    Create,
-    Modify,
-    Remove,
-    Other,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
@@ -85,6 +101,24 @@ struct FileChangePayload {
     paths: Vec<PathBuf>,
     attrs: EventAttributes,
     file_info: FileInfo,
+}
+
+const DISPLAYABLE_IMAGE_EXTENSIONS: [&str; 13] = [
+    "jpg", "jpeg", "jpe", "jif", "jfif", "jfi", "webp", "png", "gif", "svg", "svgz", "bmp", "dib",
+];
+
+fn get_file_type(path_to_file: &Path) -> FileTypes {
+    if path_to_file.is_dir() {
+        return FileTypes::Folder;
+    }
+
+    let extension = path_to_file.extension().and_then(OsStr::to_str).unwrap_or("");
+
+    if DISPLAYABLE_IMAGE_EXTENSIONS.contains(&extension) {
+        return FileTypes::Image;
+    }
+
+    FileTypes::File
 }
 
 fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>>) {
@@ -110,19 +144,12 @@ fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>
                     .unwrap_or(OsStr::new(""))
                     .to_string_lossy();
 
-                let file_type = if path_to_file.is_dir() {
-                    "directory"
-                } else {
-                    "file"
-                };
+                let file_type = get_file_type(path_to_file);
 
-                let metadata = path_to_file.metadata();
+                let metadata = path_to_file.metadata().unwrap();
 
-                let size: usize = if let Ok(metadata) = metadata {
-                    metadata.file_size() as usize
-                } else {
-                    0
-                };
+                let size = metadata.file_size() as usize;
+                let is_removable = metadata.permissions().readonly();
 
                 let payload = FileChangePayload {
                     r#type: event_type,
@@ -132,7 +159,8 @@ fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>
                     file_info: FileInfo {
                         name: filename.to_string(),
                         r#type: file_type.into(),
-                        size: size as usize,
+                        is_removable,
+                        size,
                     },
                 };
 
@@ -249,20 +277,13 @@ fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
             let is_hidden = (meta.file_attributes() & 0x2) > 0;
 
             if !is_hidden {
-                let file_type = if meta.is_dir() {
-                    "directory"
-                } else {
-                    // if is_image(file.path().to_str().unwrap_or("")) {
-                    //     "image"
-                    // } else {
-                    "file"
-                    // }
-                };
+                let file_type = get_file_type(&file.path());
 
                 dir_entry_info.push(FileInfo::new(
                     file_name,
                     file_type.into(),
                     meta.file_size() as usize,
+                    meta.permissions().readonly(),
                 ));
             }
         }
@@ -321,8 +342,8 @@ fn remove_file<R: Runtime>(window: Window<R>, path_to_file: String) -> Result<()
 }
 
 #[tauri::command(async)]
-fn remove_directory<R: Runtime>(window: Window<R>, path_to_dir: String) -> Result<(), String> {
-    let path_to_dir = Path::new(&path_to_dir);
+fn remove_directory<R: Runtime>(window: Window<R>, path: String) -> Result<(), String> {
+    let path_to_dir = Path::new(&path);
 
     let dir_entries = path_to_dir.read_dir();
 
@@ -350,9 +371,45 @@ fn remove_directory<R: Runtime>(window: Window<R>, path_to_dir: String) -> Resul
         }
     }
 
+    let meta = fs::metadata(path_to_dir).unwrap();
+
+    println!("{}", meta.permissions().readonly());
+
     match fs::remove_dir_all(path_to_dir) {
         Ok(_) => return Ok(()),
-        Err(error) => return Err(format!("Can't remove directory. Reason: {}", error.kind())),
+        Err(error) => {
+            if error.raw_os_error().unwrap_or(-1) == 5 {
+                let output = Command::new("cmd")
+                    .args(&[
+                        "/C",
+                        "runas",
+                        "/user:Administrator",
+                        "cmd.exe",
+                        "/C",
+                        "del",
+                        &path,
+                    ])
+                    .output()
+                    .expect("Failed to execute command.");
+                if output.status.success() {
+                    return Ok(());
+                } else {
+                    let a = if !!output.stdout.is_empty() {
+                        output.stdout
+                    } else {
+                        output.stderr
+                    };
+                    let message = format!(
+                        "Error deleting file with administrator rights. Reason: {:#?}",
+                        a
+                    );
+
+                    return Err(message);
+                }
+            } else {
+                return Err(format!("Can't remove directory. Reason: {}", error.kind()));
+            }
+        }
     }
 }
 
@@ -376,14 +433,14 @@ fn remove<R: Runtime>(window: Window<R>, path_to_file: String) -> Result<(), Str
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("cfs")
         .invoke_handler(tauri::generate_handler![
-            read_dir,
+            remove_directory,
+            remove_file,
             watch_dir,
             get_disks,
+            read_dir,
             unwatch,
             rename,
             exists,
-            remove_directory,
-            remove_file,
             remove
         ])
         .setup(|app| {

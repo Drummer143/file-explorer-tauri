@@ -1,6 +1,7 @@
 import React from "react";
 import xbytes from "xbytes";
 import { sep } from "@tauri-apps/api/path";
+import { convertFileSrc } from "@tauri-apps/api/tauri";
 
 import FileListItemButton from "../../customs/FileListItemButton";
 import { FileSVG } from "../../../assets";
@@ -12,7 +13,7 @@ import styles from "./File.module.scss";
 
 type FileProps = ExplorerFile;
 
-const File: React.FC<FileProps> = ({ name, size }) => {
+const File: React.FC<FileProps> = ({ name, size, type }) => {
     const { currentPath } = useExplorerHistory();
 
     const handleAction = () => openFile(currentPath + sep + name).catch(error => console.error(error));
@@ -25,7 +26,9 @@ const File: React.FC<FileProps> = ({ name, size }) => {
             data-context-menu-additional-info={name}
         >
             <div className={styles.icon}>
-                <FileSVG />
+                {type === "file" ? <FileSVG /> : (
+                    <img src={convertFileSrc(currentPath + sep + name)} />
+                )}
             </div>
 
             <div className={styles.description}>
