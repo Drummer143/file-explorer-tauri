@@ -23,7 +23,7 @@ const InteractivePath: React.FC = () => {
     };
 
     return (
-        <div className={styles.currentPath}>
+        <div className={styles.interactivePath}>
             {currentPath.split(sep).map((pathPart, i, { length }) => (
                 <React.Fragment key={pathPart + i}>
                     <button

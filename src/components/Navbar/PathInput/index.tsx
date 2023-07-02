@@ -45,9 +45,16 @@ const PathInput: React.FC = () => {
     return (
         <form className={styles.wrapper} onSubmit={handleSubmit}>
             <div className={styles.inputContainer} data-current-path={currentPath}>
-                <input type="text" name="path" className={styles.input} value={inputValue} onChange={handleChange} />
+                <input
+                    type="text"
+                    name="path"
+                    autoComplete="off"
+                    className={styles.input}
+                    value={inputValue}
+                    onChange={handleChange}
+                />
 
-                <InteractivePath />
+                {currentPath && <InteractivePath />}
             </div>
         </form>
     );

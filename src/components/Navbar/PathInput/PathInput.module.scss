@@ -4,7 +4,6 @@
 
     padding: 0.125rem 0.5rem;
     font-size: 0.85rem;
-    border-radius: 0.125rem;
 }
 
 .wrapper {
@@ -16,11 +15,15 @@
 }
 
 .inputContainer {
+    position: relative;
+    z-index: 1;
+
     width: 100%;
     min-height: 25px;
 
-    position: relative;
-    z-index: 1;
+    border-radius: 0.125rem;
+    overflow: hidden;
+    background-color: rgba($color: #fff, $alpha: 0.15);
 }
 
 .input {
@@ -28,26 +31,24 @@
 
     min-height: 25px;
 
-    background-color: rgba($color: #fff, $alpha: 0.25);
+    background-color: transparent;
+    transition: background-color 150ms;
+
+    &:hover,
+    &:focus {
+        background-color: rgba($color: #fff, $alpha: 0.1);
+    }
 
     &:not(:focus) {
         color: transparent;
     }
 
-    &:focus + .currentPath {
+    &:focus+.interactivePath {
         display: none;
     }
 }
 
-.pathInputCover {
-    width: 100%;
-    height: 100%;
-
-    display: grid;
-    grid-template-columns: 1fr 2rem;
-}
-
-.currentPath {
+.interactivePath {
     @include inputStyle;
 
     position: absolute;
