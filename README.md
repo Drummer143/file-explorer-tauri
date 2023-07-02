@@ -14,7 +14,7 @@ TODO:
         -   [ ] Unique icons for specific files - ?
 -   [x] Navbar
     -   [x] Path Input
-        -   [ ] Finish styles
+        -   [x] Finish styles
         -   [x] Path splitting in path input cover
     -   [x] Navigation Buttons
     -   [x] Reload window Button
@@ -27,11 +27,11 @@ TODO:
     -   [x] Open file
     -   [ ] Delete file
         -   [ ] Move to trash
-        -   [ ] Permanently delete
+        -   [x] Permanently delete
     -   [ ] Rename file
     -   [ ] Copy/cut file
     -   [ ] Create file
-    -   [ ] Watch changes in current directory
+    -   [x] Watch changes in current directory
 -   [ ] App Config
 -   [ ] Settings
 -   [ ] Localization
@@ -41,6 +41,7 @@ TODO:
 -   [ ] Custom scrollbar
 -   [ ] Hotkeys
 -   [ ] Customization
+-   [ ] Error Notifications
 -   [ ] Search files in file system
 -   [ ] Tests
 -   [ ] Interactivity
