@@ -13,7 +13,7 @@ type CreateType = {
 };
 
 type ModifyType = {
-    modify: { from: string; to: string } | { [key: string]: unknown };
+    modify: { kind: "rename"; mode: "from" | "to" };
 };
 
 type OtherType = AnyType;
@@ -38,6 +38,7 @@ interface NotifyEvent<T extends keyof EventTypes> {
     attrs: {
         [key: string]: unknown;
     };
+    name: string;
     paths: string[];
     kind: EventTypes[T];
 }

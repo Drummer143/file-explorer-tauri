@@ -24,7 +24,7 @@ export const useWatchPathChange = () => {
     ) => {
         switch (payload.type) {
             case "remove": {
-                handleFiles(prev => prev.filter(f => f.name !== payload.fileInfo.name));
+                handleFiles(prev => prev.filter(f => f.name !== payload.name));
 
                 break;
             }
@@ -33,8 +33,15 @@ export const useWatchPathChange = () => {
 
                 break;
             }
-            case "any":
             case "modify":
+                if (payload.kind.modify.mode === "from") {
+                    handleFiles(prev => prev.filter(f => f.name !== payload.name));
+                } else {
+                    handleFiles(prev => prev.concat(payload.fileInfo));
+                }
+
+                break;
+            case "any":
             case "other":
             case "access":
                 console.warn("unhandled dir change: ", payload);

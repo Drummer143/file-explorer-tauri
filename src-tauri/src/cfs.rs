@@ -129,7 +129,8 @@ struct FileChangePayload {
     kind: NotifyEventKind,
     paths: Vec<PathBuf>,
     attrs: EventAttributes,
-    file_info: FileInfo,
+    name: String,
+    file_info: Option<FileInfo>,
 }
 
 const DISPLAYABLE_IMAGE_EXTENSIONS: [&str; 13] = [
@@ -153,7 +154,7 @@ fn get_file_type(path_to_file: &Path) -> FileTypes {
     FileTypes::File
 }
 
-fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>>) {
+fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>>, id: usize) {
     spawn(move || {
         while let Ok(event) = rx.recv() {
             if let Ok(event) = event {
@@ -178,25 +179,33 @@ fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>
 
                 let file_type = get_file_type(path_to_file);
 
-                let metadata = path_to_file.metadata().unwrap();
+                let metadata = path_to_file.metadata();
+                let mut file_info: Option<FileInfo> = None;
 
-                let size = metadata.file_size() as usize;
-                let is_removable = metadata.permissions().readonly();
+                if let Ok(metadata) = metadata {
+                    let size = metadata.file_size() as usize;
+                    let is_removable = !metadata.permissions().readonly();
+
+                    file_info = Some(FileInfo {
+                        name: filename.to_string(),
+                        r#type: file_type.into(),
+                        is_removable,
+                        size,
+                    });
+                }
 
                 let payload = FileChangePayload {
                     r#type: event_type,
                     attrs: event.attrs,
                     kind: event.kind,
                     paths: event.paths,
-                    file_info: FileInfo {
-                        name: filename.to_string(),
-                        r#type: file_type.into(),
-                        is_removable,
-                        size,
-                    },
+                    name: filename.to_string(),
+                    file_info,
                 };
 
-                let _ = window.emit("changes-in-dir", payload);
+                let event_name = format!("changes-in-dir/{id}");
+
+                let _ = window.emit(&event_name, payload);
             }
         }
     });
@@ -226,8 +235,10 @@ fn watch_dir<R: Runtime>(
 
     let mut watcher = watcher.unwrap();
 
+    let id: usize = random::<u8>().into();
+
     let result = watcher.watch(path, RecursiveMode::NonRecursive);
-    watch(window, rx);
+    watch(window, rx, id);
 
     if let Err(error) = result {
         return Err(ErrorMessage::new_all(
@@ -235,8 +246,6 @@ fn watch_dir<R: Runtime>(
             error.to_string(),
         ));
     }
-
-    let id: usize = random::<u8>().into();
 
     state
         .watcher

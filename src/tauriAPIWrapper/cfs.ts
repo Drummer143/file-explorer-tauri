@@ -8,8 +8,8 @@ export const watchDir = async (path: string, onChangeInDir: (e: event.Event<Chan
         return;
     }
 
-    const unlisten = await event.listen<ChangesInDirectoryPayload>("changes-in-dir", onChangeInDir);
     const id = await invoke<number>("plugin:cfs|watch_dir", { pathToDir: path });
+    const unlisten = await event.listen<ChangesInDirectoryPayload>(`changes-in-dir/${id}`, onChangeInDir);
 
     return {
         unwatch: () => unwatchDir(id),
