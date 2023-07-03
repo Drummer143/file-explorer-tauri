@@ -25,8 +25,8 @@ TODO:
     -   [ ] Limit length of history - ?
 -   [ ] Interaction with fs
     -   [x] Open file
-    -   [ ] Delete file
-        -   [ ] Move to trash
+    -   [x] Delete file
+        -   [x] Move to trash
         -   [x] Permanently delete
     -   [ ] Rename file
     -   [ ] Copy/cut file

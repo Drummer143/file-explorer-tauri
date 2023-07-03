@@ -133,6 +133,8 @@ struct FileChangePayload {
     file_info: Option<FileInfo>,
 }
 
+///  10 Megabytes
+const FILE_SIZE_TRASHCAN_LIMIT: u64 = 10 * 8 * 1024 * 1024;
 const DISPLAYABLE_IMAGE_EXTENSIONS: [&str; 13] = [
     "jpg", "jpeg", "jpe", "jif", "jfif", "jfi", "webp", "png", "gif", "svg", "svgz", "bmp", "dib",
 ];
@@ -379,13 +381,49 @@ fn remove_file<R: Runtime>(window: Window<R>, path_to_file: String) -> Result<()
     let dialog_title = format!("Remove {file_name}");
     let dialog_message = format!("Remove {}?", file_name);
 
-    let confirmed = dialog::blocking::confirm(Some(&window), dialog_title, dialog_message);
+    let metadata = fs::metadata(path_to_file);
 
-    if !confirmed {
-        return Ok(());
+    if let Err(error) = metadata {
+        return Err(ErrorMessage::new_all(
+            "Can't get file".into(),
+            error.to_string(),
+        ));
     }
 
-    match fs::remove_file(path_to_file) {
+    let metadata = metadata.unwrap();
+    let file_size = metadata.file_size();
+
+    let mut remove_permanently = file_size == 0;
+
+    if file_size > 0 {
+        let confirmed = dialog::blocking::confirm(Some(&window), dialog_title, dialog_message);
+
+        if !confirmed {
+            return Ok(());
+        }
+    }
+
+    if file_size >= FILE_SIZE_TRASHCAN_LIMIT {
+        remove_permanently = dialog::blocking::ask(
+            Some(&window),
+            format!("{file_name} deletion"),
+            format!("{file_name} is too large. Remove permanently?"),
+        );
+    }
+
+    if remove_permanently {
+        match fs::remove_file(path_to_file) {
+            Ok(_) => return Ok(()),
+            Err(error) => {
+                return Err(ErrorMessage::new_all(
+                    "Can't remove file.".into(),
+                    error.to_string(),
+                ))
+            }
+        };
+    }
+
+    match trash::delete(path_to_file) {
         Ok(_) => return Ok(()),
         Err(error) => {
             return Err(ErrorMessage::new_all(
@@ -393,7 +431,7 @@ fn remove_file<R: Runtime>(window: Window<R>, path_to_file: String) -> Result<()
                 error.to_string(),
             ))
         }
-    };
+    }
 }
 
 #[tauri::command(async)]
@@ -410,14 +448,13 @@ fn remove_directory<R: Runtime>(window: Window<R>, path: String) -> Result<(), E
     }
 
     let is_dir_empty = dir_entries.unwrap().count() == 0;
+    let file_name = path_to_dir.file_name();
+    let file_name = file_name.unwrap_or(OsStr::new("folder"));
+    let file_name = file_name.to_str().unwrap_or("folder");
 
     if !is_dir_empty {
-        let file_name = path_to_dir.file_name();
-        let file_name = file_name.unwrap_or(OsStr::new("folder"));
-        let file_name = file_name.to_str().unwrap_or("folder");
-
-        let dialog_title = format!("Remove {file_name}");
-        let dialog_message = format!("Remove {}?", file_name);
+        let dialog_title = format!("{file_name} deletion");
+        let dialog_message = format!("Remove {file_name}?");
 
         let confirmed = dialog::blocking::confirm(Some(&window), dialog_title, dialog_message);
 
@@ -426,9 +463,22 @@ fn remove_directory<R: Runtime>(window: Window<R>, path: String) -> Result<(), E
         }
     }
 
-    let meta = fs::metadata(path_to_dir).unwrap();
+    let delete_permanently = dialog::blocking::ask(
+        Some(&window),
+        format!("{file_name} deletion"),
+        format!("Delete {file_name} permanently?"),
+    );
 
-    println!("{}", meta.permissions().readonly());
+    if !delete_permanently {
+        if let Err(error) = trash::delete(path_to_dir) {
+            return Err(ErrorMessage::new_all(
+                "Can't remove directory.".into(),
+                error.to_string(),
+            ));
+        } else {
+            return Ok(());
+        }
+    }
 
     match fs::remove_dir_all(path_to_dir) {
         Ok(_) => return Ok(()),
