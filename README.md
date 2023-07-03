@@ -41,7 +41,8 @@ TODO:
 -   [ ] Custom scrollbar
 -   [ ] Hotkeys
 -   [ ] Customization
--   [ ] Error Notifications
+-   [x] Error Notifications
+    - [ ] Call notifications on every error
 -   [ ] Search files in file system
 -   [ ] Tests
 -   [ ] Interactivity

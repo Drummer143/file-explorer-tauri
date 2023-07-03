@@ -9,7 +9,6 @@ use std::{
     fs,
     os::windows::fs::MetadataExt,
     path::{Path, PathBuf},
-    process::Command,
     sync::mpsc::{channel, Receiver},
     sync::Mutex,
     thread::spawn,
@@ -38,12 +37,42 @@ enum FileTypes {
     Disk,
     File,
     Folder,
-    Image
+    Image,
 }
 
 #[derive(Default, Debug)]
 struct CFSState {
     watcher: Mutex<HashMap<usize, (RecommendedWatcher, String)>>,
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct ErrorMessage {
+    message: Option<String>,
+    error: Option<String>,
+}
+
+impl ErrorMessage {
+    pub fn new_all(message: String, reason: String) -> Self {
+        Self {
+            message: Some(message),
+            error: Some(reason),
+        }
+    }
+
+    pub fn new_reason(reason: String) -> Self {
+        Self {
+            message: None,
+            error: Some(reason),
+        }
+    }
+
+    pub fn new_message(message: String) -> Self {
+        Self {
+            message: Some(message),
+            error: None,
+        }
+    }
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
@@ -112,7 +141,10 @@ fn get_file_type(path_to_file: &Path) -> FileTypes {
         return FileTypes::Folder;
     }
 
-    let extension = path_to_file.extension().and_then(OsStr::to_str).unwrap_or("");
+    let extension = path_to_file
+        .extension()
+        .and_then(OsStr::to_str)
+        .unwrap_or("");
 
     if DISPLAYABLE_IMAGE_EXTENSIONS.contains(&extension) {
         return FileTypes::Image;
@@ -175,18 +207,21 @@ fn watch_dir<R: Runtime>(
     window: tauri::Window<R>,
     state: State<'_, CFSState>,
     path_to_dir: String,
-) -> Result<usize, String> {
+) -> Result<usize, ErrorMessage> {
     let path = Path::new(&path_to_dir);
 
     if !path.exists() {
-        return Err("Directory doesn't exist.".into());
+        return Err(ErrorMessage::new_message("Directory doesn't exist.".into()));
     }
 
     let (tx, rx) = channel();
     let watcher = RecommendedWatcher::new(tx, Config::default());
 
-    if let Err(_) = watcher {
-        return Err("Can't create watcher".into());
+    if let Err(error) = watcher {
+        return Err(ErrorMessage::new_all(
+            "Can't create watcher".into(),
+            error.to_string(),
+        ));
     }
 
     let mut watcher = watcher.unwrap();
@@ -194,8 +229,11 @@ fn watch_dir<R: Runtime>(
     let result = watcher.watch(path, RecursiveMode::NonRecursive);
     watch(window, rx);
 
-    if let Err(_) = result {
-        return Err("Error while trying to create watcher.".into());
+    if let Err(error) = result {
+        return Err(ErrorMessage::new_all(
+            "Error while trying to create watcher.".into(),
+            error.to_string(),
+        ));
     }
 
     let id: usize = random::<u8>().into();
@@ -210,7 +248,7 @@ fn watch_dir<R: Runtime>(
 }
 
 #[tauri::command(async)]
-async fn unwatch(state: tauri::State<'_, CFSState>, id: usize) -> Result<(), String> {
+async fn unwatch(state: tauri::State<'_, CFSState>, id: usize) -> Result<(), ErrorMessage> {
     if let Some((mut watcher, path)) = state.watcher.lock().unwrap().remove(&id) {
         let path = Path::new(&path);
 
@@ -218,15 +256,15 @@ async fn unwatch(state: tauri::State<'_, CFSState>, id: usize) -> Result<(), Str
 
         match res {
             Ok(_) => return Ok(()),
-            Err(error) => return Err(format!("{:?}", error.kind)),
+            Err(error) => return Err(ErrorMessage::new_reason(error.to_string())),
         }
     } else {
-        Err("Watcher not found".into())
+        Err(ErrorMessage::new_message("Watcher not found".into()))
     }
 }
 
 #[tauri::command(async)]
-fn get_disks() -> Result<Vec<DiskInfo>, String> {
+fn get_disks() -> Result<Vec<DiskInfo>, ErrorMessage> {
     let mut sys = System::new_all();
 
     sys.refresh_disks();
@@ -249,22 +287,20 @@ fn get_disks() -> Result<Vec<DiskInfo>, String> {
 }
 
 #[tauri::command(async)]
-fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
+fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, ErrorMessage> {
     let path_to_dir = Path::new(&path_to_dir);
 
     if !path_to_dir.exists() {
-        return Err("Path don't exist".into());
+        return Err(ErrorMessage::new_message("Path don't exist".into()));
     }
 
     let files = path_to_dir.read_dir();
 
     if let Err(error) = files {
-        let message = format!(
-            "Can't get information about files in directory. Reason: {}",
-            error.kind()
-        );
-
-        return Err(message);
+        return Err(ErrorMessage::new_all(
+            "Can't get information about files in directory.".into(),
+            error.to_string(),
+        ));
     }
 
     let mut dir_entry_info: Vec<FileInfo> = vec![];
@@ -293,23 +329,28 @@ fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, String> {
 }
 
 #[tauri::command(async)]
-fn rename(old_name: String, new_name: String) -> Result<(), String> {
+fn rename(old_name: String, new_name: String) -> Result<(), ErrorMessage> {
     let old_path = Path::new(&old_name);
     let new_path = Path::new(&new_name);
 
     if !old_path.exists() {
-        return Err("File doesn't exist".into());
+        return Err(ErrorMessage::new_message("File doesn't exist".into()));
     }
 
     if new_path.exists() {
-        return Err("A file with given name already exists".into());
+        return Err(ErrorMessage::new_message(
+            "A file with given name already exists".into(),
+        ));
     }
 
     let result = fs::rename(old_path, new_path);
 
     match result {
         Ok(_) => Ok(()),
-        Err(error) => Err(error.kind().to_string()),
+        Err(error) => Err(ErrorMessage::new_all(
+            "Can't rename".into(),
+            error.kind().to_string(),
+        )),
     }
 }
 
@@ -319,7 +360,7 @@ fn exists(path_to_file: String) -> bool {
 }
 
 #[tauri::command(async)]
-fn remove_file<R: Runtime>(window: Window<R>, path_to_file: String) -> Result<(), String> {
+fn remove_file<R: Runtime>(window: Window<R>, path_to_file: String) -> Result<(), ErrorMessage> {
     let path_to_file = Path::new(&path_to_file);
 
     let file_name = path_to_file.file_name();
@@ -337,20 +378,25 @@ fn remove_file<R: Runtime>(window: Window<R>, path_to_file: String) -> Result<()
 
     match fs::remove_file(path_to_file) {
         Ok(_) => return Ok(()),
-        Err(error) => return Err(format!("Can't remove file. Reason: {}", error.kind())),
+        Err(error) => {
+            return Err(ErrorMessage::new_all(
+                "Can't remove file.".into(),
+                error.to_string(),
+            ))
+        }
     };
 }
 
 #[tauri::command(async)]
-fn remove_directory<R: Runtime>(window: Window<R>, path: String) -> Result<(), String> {
+fn remove_directory<R: Runtime>(window: Window<R>, path: String) -> Result<(), ErrorMessage> {
     let path_to_dir = Path::new(&path);
 
     let dir_entries = path_to_dir.read_dir();
 
     if let Err(error) = dir_entries {
-        return Err(format!(
-            "Unable to read directory. Reason: {}",
-            error.kind()
+        return Err(ErrorMessage::new_all(
+            "Unable to read directory.".into(),
+            error.to_string(),
         ));
     }
 
@@ -378,43 +424,46 @@ fn remove_directory<R: Runtime>(window: Window<R>, path: String) -> Result<(), S
     match fs::remove_dir_all(path_to_dir) {
         Ok(_) => return Ok(()),
         Err(error) => {
-            if error.raw_os_error().unwrap_or(-1) == 5 {
-                let output = Command::new("cmd")
-                    .args(&[
-                        "/C",
-                        "runas",
-                        "/user:Administrator",
-                        "cmd.exe",
-                        "/C",
-                        "del",
-                        &path,
-                    ])
-                    .output()
-                    .expect("Failed to execute command.");
-                if output.status.success() {
-                    return Ok(());
-                } else {
-                    let a = if !!output.stdout.is_empty() {
-                        output.stdout
-                    } else {
-                        output.stderr
-                    };
-                    let message = format!(
-                        "Error deleting file with administrator rights. Reason: {:#?}",
-                        a
-                    );
+            // if error.raw_os_error().unwrap_or(-1) == 5 {
+            //     let output = Command::new("cmd")
+            //         .args(&[
+            //             "/C",
+            //             "runas",
+            //             "/user:Administrator",
+            //             "cmd.exe",
+            //             "/C",
+            //             "del",
+            //             &path,
+            //         ])
+            //         .output()
+            //         .expect("Failed to execute command.");
+            //     if output.status.success() {
+            //         return Ok(());
+            //     } else {
+            //         let a = if !!output.stdout.is_empty() {
+            //             output.stdout
+            //         } else {
+            //             output.stderr
+            //         };
+            //         let message = format!(
+            //             "Error deleting file with administrator rights. Reason: {:#?}",
+            //             a
+            //         );
 
-                    return Err(message);
-                }
-            } else {
-                return Err(format!("Can't remove directory. Reason: {}", error.kind()));
-            }
+            //         return Err(message);
+            //     }
+            // } else {
+            return Err(ErrorMessage::new_all(
+                "Can't remove directory.".into(),
+                error.to_string(),
+            ));
+            // }
         }
     }
 }
 
 #[tauri::command(async)]
-fn remove<R: Runtime>(window: Window<R>, path_to_file: String) -> Result<(), String> {
+fn remove<R: Runtime>(window: Window<R>, path_to_file: String) -> Result<(), ErrorMessage> {
     let path = Path::new(&path_to_file);
 
     if path.is_dir() {
@@ -426,7 +475,7 @@ fn remove<R: Runtime>(window: Window<R>, path_to_file: String) -> Result<(), Str
 
         let message = format!("{} is not removable", filename);
 
-        Err(message)
+        Err(ErrorMessage::new_message(message))
     }
 }
 

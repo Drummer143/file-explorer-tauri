@@ -2,7 +2,7 @@ import { sep } from "@tauri-apps/api/path";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 
-import { useExplorerHistory } from "../zustand";
+import { useExplorerHistory, useNotificationStore } from "../zustand";
 import { readDir, getDisks, watchDir } from "../tauriAPIWrapper";
 import { Event as TauriEvent } from "@tauri-apps/api/event";
 
@@ -11,13 +11,12 @@ export const useWatchPathChange = () => {
     const [files, setFiles] = useState<CFile[]>([]);
 
     const { currentPath } = useExplorerHistory();
+    const { addNotification } = useNotificationStore();
 
-    const u = useRef<
-        {
-            unwatch: () => Promise<void>;
-            unlisten: UnlistenFn;
-        } | undefined
-    >(undefined);
+    const u = useRef<{
+        unwatch: () => Promise<void>;
+        unlisten: UnlistenFn;
+    } | undefined>(undefined);
 
     const updateFilesOnDirChange = useCallback((
         { payload }: TauriEvent<ChangesInDirectoryPayload>,
@@ -62,11 +61,15 @@ export const useWatchPathChange = () => {
                 setFiles(await getDisks());
             }
         } catch (error) {
+            addNotification({
+                message: JSON.stringify(error),
+                type: "error"
+            });
             console.error(error);
         }
 
         setLoading(false);
-    }, [currentPath, updateFilesOnDirChange]);
+    }, [addNotification, currentPath, updateFilesOnDirChange]);
 
     useEffect(() => {
         if (u.current) {

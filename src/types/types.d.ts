@@ -20,3 +20,15 @@ interface ExplorerDisk {
 }
 
 type CFile = ExplorerDirectory | ExplorerDisk | ExplorerFile;
+
+interface AppNotification {
+    message: string;
+    type: "info" | "warn" | "error";
+
+    reason?: string
+}
+
+interface ErrorMessage {
+    message?: string
+    error?: string
+}

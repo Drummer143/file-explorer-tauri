@@ -1,0 +1,96 @@
+.wrapper {
+    position: relative;
+
+    width: 200px;
+    // height: 3rem;
+
+    background-color: #1a1a1a;
+    border-radius: 0.25rem;
+    border: 1px solid rgba($color: #fff, $alpha: 0.5);
+}
+
+.heading {
+    position: relative;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 0.125rem 0.25rem;
+
+    &::before,
+    &::after {
+        content: "";
+
+        position: absolute;
+        bottom: 0;
+
+        height: 1px;
+
+        transition: width var(--notification-tick-speed);
+    }
+
+    &::before {
+        left: 0;
+
+        width: calc(100% - var(--current-percentage));
+    }
+
+    &::after {
+        right: 0;
+
+        width: var(--current-percentage);
+
+        background-color: rgba($color: #fff, $alpha: 0.5);
+    }
+
+    .wrapper[data-type="error"] &::before {
+        background-color: red;
+    }
+
+    .wrapper[data-type="warn"] &::before {
+        background-color: yellow;
+    }
+
+    .wrapper[data-type="info"] &::before {
+        background-color: aqua;
+    }
+}
+
+.headingText {
+    text-transform: capitalize;
+}
+
+.closeButton {
+    transition: background-color 150ms;
+
+    padding: 0.0675rem;
+
+    border-radius: 0.125rem;
+
+    &:hover {
+        background-color: rgba($color: #fff, $alpha: 0.25);
+    }
+
+    &:active {
+        background-color: rgba($color: #fff, $alpha: 0.15);
+    }
+}
+
+.body {
+    padding: 0.125rem 0.25rem;
+
+    transition: background-color 150ms;
+}
+
+.wrapper[data-has-reason="true"] .body {
+    cursor: pointer;
+
+    &:hover {
+        background-color: rgba($color: #fff, $alpha: 0.1);
+    }
+}
+
+.reason {
+    margin-top: 0.5rem;
+}

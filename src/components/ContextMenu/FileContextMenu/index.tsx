@@ -1,8 +1,9 @@
 import React from "react";
 import { sep } from "@tauri-apps/api/path";
 
+import { isErrorMessage } from "../../../utils";
 import { openFile, remove } from "../../../tauriAPIWrapper";
-import { useExplorerHistory } from "../../../zustand";
+import { useExplorerHistory, useNotificationStore } from "../../../zustand";
 
 type FileContextMenuProps = {
     filename: string;
@@ -10,6 +11,7 @@ type FileContextMenuProps = {
 };
 
 const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType }) => {
+    const { addNotification } = useNotificationStore();
     const { currentPath, pushRoute } = useExplorerHistory();
 
     const handleOpenFile = () => {
@@ -28,13 +30,31 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
         openFile(path);
     };
 
+    const handleDeleteFile = () => {
+        remove(currentPath + sep + filename)
+            .catch(error => {
+                if (!isErrorMessage(error)) {
+                    return;
+                }
+
+                const message = error.message || error.error || "Unexpected error";
+                const reason = error.message && error.error ? error.error : undefined;
+
+                addNotification({ message, type: "error", reason });
+            });
+    };
+
     return (
         <>
             <button onClick={handleOpenFile}>Open</button>
 
             <button onClick={handleOpenInExplorer}>{fileType === "file" ? "Show" : "Open"} in explorer</button>
 
-            {fileType !== "disk" && <button onClick={() => remove(currentPath + sep + filename)}>Delete</button>}
+            {fileType !== "disk" && (
+                <button
+                    onClick={handleDeleteFile}
+                >Delete</button>
+            )}
         </>
     );
 };

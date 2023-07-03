@@ -5,3 +5,11 @@ export const getDiskBackgroundColor = (value: number) => {
 
     return `hsl(${hue}, 50%, 35%)`;
 };
+
+export const isErrorMessage = (error: unknown): error is ErrorMessage => {
+    if (typeof error === "object" && error && ("message" in error || "error" in error)) {
+        return true;
+    }
+
+    return false;
+};
