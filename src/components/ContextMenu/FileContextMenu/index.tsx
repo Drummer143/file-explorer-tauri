@@ -76,6 +76,33 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
 
     const handleRenameFile = () => openModal(filename);
 
+    const handleCopyCutFile = (action: "copy" | "cut") => {
+        document.documentElement.dataset.copiedFile = currentPath + sep + filename;
+        document.documentElement.dataset.clipboardAction = action;
+        document.querySelector<HTMLElement>(".cut-file")?.classList.remove("cut-file");
+
+        if (action === "cut") {
+            document.querySelector<HTMLElement>(`[data-context-menu-additional-info="${filename}"]`)?.classList.add("cut-file");
+        }
+    };
+
+    const handleMovePasteFile = () => {
+        const { copiedFile, clipboardAction } = document.documentElement.dataset;
+
+        if (!copiedFile || !clipboardAction) {
+            return;
+        }
+
+        if (clipboardAction === "copy") {
+            console.log(`pasting "${copiedFile} to ${currentPath}`);
+        } else {
+            console.log(`moving "${copiedFile} to ${currentPath + sep + filename}`);
+
+            document.documentElement.dataset.copiedFile = undefined;
+            document.documentElement.dataset.clipboardAction = undefined;
+        }
+    };
+
     return (
         <>
             <button onClick={handleOpenFile}>Open</button>
@@ -87,7 +114,15 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
                     <button onClick={handleDeleteFile}>Delete</button>
 
                     <button onClick={handleRenameFile}>Rename</button>
+
+                    <button onClick={() => handleCopyCutFile("copy")}>Copy</button>
+
+                    <button onClick={() => handleCopyCutFile("cut")}>Сut</button>
                 </>
+            )}
+
+            {fileType === "folder" && document.documentElement.dataset.copiedFile && (
+                <button onClick={handleMovePasteFile}>Paste in this folder</button>
             )}
         </>
     );

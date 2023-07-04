@@ -65,7 +65,8 @@
                 "label": "main",
                 "resizable": true,
                 "title": "file-explorer",
-                "width": 800
+                "width": 800,
+                "fileDropEnabled": true
             }
         ]
     }

@@ -13,7 +13,7 @@ import styles from "./File.module.scss";
 
 type FileProps = ExplorerFile;
 
-const File: React.FC<FileProps> = ({ name, size, type, isRemovable }) => {
+const File: React.FC<FileProps> = ({ name, size, type }) => {
     const { currentPath } = useExplorerHistory();
 
     const handleAction = () => openFile(currentPath + sep + name).catch(error => console.error(error));
