@@ -23,6 +23,7 @@ const Folder: React.FC<FolderProps> = ({ name }) => {
             className={styles.wrapper}
             data-context-menu-type={CTXTypes.folder}
             data-context-menu-additional-info={name}
+            data-context-menu-additional-info-lowercased={name.toLocaleLowerCase()}
         >
             <div className={styles.icon}>
                 <FolderSVG />

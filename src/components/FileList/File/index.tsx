@@ -13,7 +13,7 @@ import styles from "./File.module.scss";
 
 type FileProps = ExplorerFile;
 
-const File: React.FC<FileProps> = ({ name, size, type }) => {
+const File: React.FC<FileProps> = ({ name, size, type, isRemovable }) => {
     const { currentPath } = useExplorerHistory();
 
     const handleAction = () => openFile(currentPath + sep + name).catch(error => console.error(error));
@@ -24,6 +24,7 @@ const File: React.FC<FileProps> = ({ name, size, type }) => {
             className={styles.wrapper}
             data-context-menu-type={CTXTypes.file}
             data-context-menu-additional-info={name}
+            data-context-menu-additional-info-lowercased={name.toLocaleLowerCase()}
         >
             <div className={styles.icon}>
                 {type === "file" ? <FileSVG /> : (

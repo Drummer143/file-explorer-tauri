@@ -4,11 +4,13 @@ interface ExplorerFile {
     type: "file" | "image";
     name: string;
     size: number;
+    isRemovable: boolean;
 }
 
 interface ExplorerDirectory {
     type: "folder";
     name: string;
+    isRemovable: boolean;
 }
 
 interface ExplorerDisk {
@@ -17,6 +19,7 @@ interface ExplorerDisk {
     mountPoint: string;
     availableSpace: number;
     totalSpace: number;
+    isRemovable: boolean;
 }
 
 type CFile = ExplorerDirectory | ExplorerDisk | ExplorerFile;

@@ -35,6 +35,7 @@ const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoin
             className={styles.wrapper}
             data-context-menu-type={CTXTypes.disk}
             data-context-menu-additional-info={mountPoint}
+            data-context-menu-additional-info-lowercased={name.toLocaleLowerCase()}
         // style={{
         //     '--available-space-width': availableSpacePercentage + "%",
         //     "--free-memory-background-color":

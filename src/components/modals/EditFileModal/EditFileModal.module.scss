@@ -1,0 +1,80 @@
+.portal {
+    position: relative;
+    z-index: 200;
+}
+
+.overlay {
+    position: fixed;
+    inset: 0;
+
+    background-color: rgba($color: #000000, $alpha: 0.5);
+}
+
+.modalBody {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    min-width: 300px;
+
+    background-color: #000;
+    transform: translate(-50%, -50%);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.heading {
+    padding: 0.25rem 0.5rem;
+    background-color: #222;
+
+    border-bottom: 1px solid #666;
+}
+
+.form {
+    padding: 1rem 1rem 1rem;
+
+    display: grid;
+    gap: 1rem;
+}
+
+.inputLabel {
+    display: grid;
+    grid-template-columns: min-content 1fr;
+    gap: 0.5rem;
+}
+
+.input {
+    padding: 0 0.25rem;
+
+    background-color: rgba($color: #fff, $alpha: 0.2);
+    transition: background-color 150ms;
+    border-radius: 0.125rem;
+
+    &:hover,
+    &:focus {
+        background-color: rgba($color: #fff, $alpha: 0.3);
+    }
+}
+
+.submitButton {
+    padding: 0 0.5rem 0.125rem;
+
+    background-color: rgba($color: #0f0, $alpha: 0.28);
+    border-radius: 0.25rem;
+    justify-self: flex-end;
+    transition: background-color 150ms, border-color 150ms;
+    border: 1px solid transparent;
+
+    &:hover {
+        background-color: rgba($color: #0f0, $alpha: 0.36);
+    }
+
+    &:active,
+    &:focus {
+        background-color: rgba($color: #0f0, $alpha: 0.2);
+    }
+
+    &:focus {
+        border-color: rgba($color: #fff, $alpha: 0.3);
+    }
+}

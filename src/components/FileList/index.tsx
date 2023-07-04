@@ -4,6 +4,7 @@ import Disk from "./Disk";
 import File from "./File";
 import Folder from "./Folder";
 import { CTXTypes } from "../../utils";
+import { EditFileModal } from "./../modals/";
 import { useResizeObserver, useWatchPathChange } from "../../hooks";
 
 import styles from "./FileList.module.scss";
@@ -20,7 +21,7 @@ const FileList: React.FC = () => {
             case "file":
             case "image":
                 return <File key={file.name} {...file} />;
-            default: 
+            default:
                 console.error("unhandled file", file);
         }
     };
@@ -43,9 +44,13 @@ const FileList: React.FC = () => {
     });
 
     return (
-        <div ref={listContainerRef} className={styles.wrapper} data-context-menu-type={CTXTypes.explorer}>
-            {files.map(mapFiles)}
-        </div>
+        <>
+            <div ref={listContainerRef} className={styles.wrapper} data-context-menu-type={CTXTypes.explorer}>
+                {files.map(mapFiles)}
+            </div>
+
+            <EditFileModal />
+        </>
     );
 };
 

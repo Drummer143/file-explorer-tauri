@@ -28,7 +28,7 @@ TODO:
     -   [x] Delete file
         -   [x] Move to trash
         -   [x] Permanently delete
-    -   [ ] Rename file
+    -   [x] Rename file
     -   [ ] Copy/cut file
     -   [ ] Create file
     -   [x] Watch changes in current directory

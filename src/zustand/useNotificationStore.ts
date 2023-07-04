@@ -14,6 +14,8 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     notificationLimit: 5,
 
     addNotification: (newNotification) => {
+        console[newNotification.type](newNotification);
+
         const { notificationLimit, notifications } = get();
 
         const notificationsCopy = notifications.slice();
@@ -34,7 +36,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
         let updatedNotifications: NotificationState["notifications"];
 
-        if(index) {
+        if (index) {
             updatedNotifications = notifications.filter(n => n.index !== index);
         } else {
             updatedNotifications = notifications.slice();
