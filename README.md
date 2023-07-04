@@ -29,7 +29,9 @@ TODO:
         -   [x] Move to trash
         -   [x] Permanently delete
     -   [x] Rename file
-    -   [ ] Copy/cut file
+    -   [x] Copy/cut file
+        -   [ ] Frontend
+        -   [ ] Backend
     -   [ ] Create file
     -   [x] Watch changes in current directory
 -   [ ] App Config
