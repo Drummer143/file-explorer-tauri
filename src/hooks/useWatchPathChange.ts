@@ -34,10 +34,12 @@ export const useWatchPathChange = () => {
                 break;
             }
             case "modify":
-                if (payload.kind.modify.mode === "from") {
-                    handleFiles(prev => prev.filter(f => f.name !== payload.name));
-                } else {
-                    handleFiles(prev => prev.concat(payload.fileInfo));
+                if (payload.kind.modify.kind === "rename") {
+                    if (payload.kind.modify.mode === "from") {
+                        handleFiles(prev => prev.filter(f => f.name !== payload.name));
+                    } else {
+                        handleFiles(prev => prev.concat(payload.fileInfo));
+                    }
                 }
 
                 break;

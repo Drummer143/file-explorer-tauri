@@ -538,6 +538,93 @@ fn remove<R: Runtime>(window: Window<R>, path_to_file: String) -> Result<(), Err
     }
 }
 
+#[derive(Clone, serde::Serialize)]
+struct CopyCutProgress {
+    total: usize,
+    done: usize,
+}
+
+// fn check_paths_before_copy_cut<R: Runtime>(
+//     window: Window<R>,
+//     path_to_target: &Path,
+//     path_to_new_parent: &Path,
+// ) -> Result<(), ErrorMessage> {
+//     if !path_to_target.exists() {
+//         Err(ErrorMessage::new_message("Target don't exists".into()));
+//     }
+
+//     if path_to_target.exists() {
+//         let b = dialog::blocking::MessageDialogBuilder::new(
+//             "Replace existing file",
+//             "File with the same name already exists. Replace?",
+//         );
+
+//         let delete = b
+//             .parent(&window)
+//             .buttons(dialog::MessageDialogButtons::OkCancelWithLabels(
+//                 "replace".into(),
+//                 "cancel".into(),
+//             ))
+//             .kind(dialog::MessageDialogKind::Warning)
+//             .show();
+
+//         if !delete {
+//             return Ok(());
+//         }
+
+//         if path_to_target.is_dir() {
+//             let result = remove(window, path_to_new_parent);
+
+//             if let Err(error) = result {
+//                 return Err(error);
+//             }
+//         }
+//     }
+
+//     Ok(())
+// }
+
+#[tauri::command(async)]
+fn copy<R: Runtime>(window: Window<R>, from: String, to: String) -> Result<(), ErrorMessage> {
+    let path_from = Path::new(&from);
+    let path_to = Path::new(&to);
+
+    // if let Err(error) = check_paths_before_copy_cut(window, path_to_target, path_to_new_parent) {
+    //     return Err(error);
+    // }
+
+    if path_from.is_file() {
+        let options = fs_extra::file::CopyOptions::new();
+
+        let result = fs_extra::file::copy_with_progress(
+            path_from,
+            path_to,
+            &options,
+            |progress| {
+                window.emit(
+                    "copy-progress",
+                    CopyCutProgress {
+                        done: progress.copied_bytes as usize,
+                        total: progress.total_bytes as usize,
+                    },
+                );
+            },
+        );
+
+        match result {
+            Ok(res) => {
+                window.emit("copy-finished", res);
+                Ok(())
+            },
+            Err(error) => Err(ErrorMessage::new_all("Error while copying files".into(), error.to_string()))
+        }
+    } else {
+        return Err(ErrorMessage::new_message(
+            "copying files is not implemented".into(),
+        ));
+    }
+}
+
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("cfs")
         .invoke_handler(tauri::generate_handler![
@@ -549,7 +636,8 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             unwatch,
             rename,
             exists,
-            remove
+            remove,
+            copy
         ])
         .setup(|app| {
             // setup plugin specific state here

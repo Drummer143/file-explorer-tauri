@@ -24,10 +24,12 @@ export const getDisks = () => invoke<ExplorerDisk[]>("plugin:cfs|get_disks");
 export const removeFile = async (pathToFile: string) => invoke<void>("plugin:cfs|remove_file", { pathToFile });
 
 export const removeDirectory = (pathToDirectory: string) =>
-invoke<void>("plugin:cfs|remove_directory", { pathToDirectory });
+    invoke<void>("plugin:cfs|remove_directory", { pathToDirectory });
 
 export const remove = async (pathToFile: string) => invoke<void>("plugin:cfs|remove", { pathToFile });
 
 export const rename = (oldName: string, newName: string) => invoke<void>("plugin:cfs|rename", { oldName, newName });
 
 export const pathExists = (path: string) => invoke<boolean>("plugin:cfs|exists", { pathToFile: path });
+
+export const copy = (from: string, to: string) => invoke("plugin:cfs|copy", { from, to });

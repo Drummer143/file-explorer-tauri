@@ -1,7 +1,7 @@
 import React from "react";
 import { sep } from "@tauri-apps/api/path";
 
-import { isErrorMessage } from "../../../utils";
+import { copyFile, cutFile, isErrorMessage, pasteFile } from "../../../utils";
 import { openFile, remove } from "../../../tauriAPIWrapper";
 import { useEditFileModalStore } from "../../../zustand";
 import { useExplorerHistory, useNotificationStore } from "../../../zustand";
@@ -76,32 +76,11 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
 
     const handleRenameFile = () => openModal(filename);
 
-    const handleCopyCutFile = (action: "copy" | "cut") => {
-        document.documentElement.dataset.copiedFile = currentPath + sep + filename;
-        document.documentElement.dataset.clipboardAction = action;
-        document.querySelector<HTMLElement>(".cut-file")?.classList.remove("cut-file");
+    const handleCopyFile = () => copyFile(currentPath + sep + filename);
 
-        if (action === "cut") {
-            document.querySelector<HTMLElement>(`[data-context-menu-additional-info="${filename}"]`)?.classList.add("cut-file");
-        }
-    };
+    const handleCutFile = () => cutFile(currentPath, filename);
 
-    const handleMovePasteFile = () => {
-        const { copiedFile, clipboardAction } = document.documentElement.dataset;
-
-        if (!copiedFile || !clipboardAction) {
-            return;
-        }
-
-        if (clipboardAction === "copy") {
-            console.log(`pasting "${copiedFile} to ${currentPath}`);
-        } else {
-            console.log(`moving "${copiedFile} to ${currentPath + sep + filename}`);
-
-            document.documentElement.dataset.copiedFile = undefined;
-            document.documentElement.dataset.clipboardAction = undefined;
-        }
-    };
+    const handleMovePasteFile = () => pasteFile(currentPath + sep + filename, addNotification);
 
     return (
         <>
@@ -115,9 +94,9 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
 
                     <button onClick={handleRenameFile}>Rename</button>
 
-                    <button onClick={() => handleCopyCutFile("copy")}>Copy</button>
+                    <button onClick={handleCopyFile}>Copy</button>
 
-                    <button onClick={() => handleCopyCutFile("cut")}>Сut</button>
+                    <button onClick={handleCutFile}>Сut</button>
                 </>
             )}
 

@@ -13,7 +13,7 @@ type CreateType = {
 };
 
 type ModifyType = {
-    modify: { kind: "rename"; mode: "from" | "to" };
+    modify: { kind: "rename" | "any"; mode?: "from" | "to" };
 };
 
 type OtherType = AnyType;
