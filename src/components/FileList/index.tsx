@@ -5,15 +5,16 @@ import Disk from "./Disk";
 import File from "./File";
 import Folder from "./Folder";
 import { EditFileModal } from "./../modals/";
-import { useResizeObserver, useWatchPathChange } from "../../hooks";
-import { CTXTypes, copyFile, cutFile, pasteFile } from "../../utils";
-import { useExplorerHistory, useNotificationStore } from "../../zustand";
+import { useExplorerHistory } from "../../zustand";
+import { CTXTypes, copyFile, cutFile } from "../../utils";
+import { useResizeObserver, useWatchPathChange, usePasteFile } from "../../hooks";
 
 import styles from "./FileList.module.scss";
 
 const FileList: React.FC = () => {
     const { currentPath } = useExplorerHistory();
-    const { addNotification } = useNotificationStore();
+
+    const pasteFile = usePasteFile();
 
     const listContainerRef = useRef<HTMLDivElement>(null);
 
@@ -59,10 +60,18 @@ const FileList: React.FC = () => {
 
                 break;
             }
-            case "KeyV":
-                pasteFile(currentPath, addNotification);
+            case "KeyV": {
+                let to = currentPath;
+                const possibleFocusedFileName = (document.activeElement as HTMLElement | null)?.dataset.contextMenuAdditionalInfo;
+
+                if (possibleFocusedFileName) {
+                    to = to + sep + possibleFocusedFileName;
+                }
+
+                pasteFile(to);
+            }
         }
-    }, [addNotification, currentPath]);
+    }, [currentPath, pasteFile]);
 
     useEffect(() => {
         document.addEventListener("keydown", handleCopyCutPasteFile);

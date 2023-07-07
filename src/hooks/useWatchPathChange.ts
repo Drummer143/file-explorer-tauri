@@ -40,6 +40,8 @@ export const useWatchPathChange = () => {
                     } else {
                         handleFiles(prev => prev.concat(payload.fileInfo));
                     }
+                } else {
+                    handleFiles(prev => prev.filter(f => f.name !== payload.name).concat(payload.fileInfo));
                 }
 
                 break;

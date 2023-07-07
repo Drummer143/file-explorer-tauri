@@ -1,9 +1,10 @@
 import React from "react";
 import { sep } from "@tauri-apps/api/path";
 
-import { copyFile, cutFile, isErrorMessage, pasteFile } from "../../../utils";
+import { usePasteFile } from "../../../hooks";
 import { openFile, remove } from "../../../tauriAPIWrapper";
 import { useEditFileModalStore } from "../../../zustand";
+import { copyFile, cutFile, isErrorMessage } from "../../../utils";
 import { useExplorerHistory, useNotificationStore } from "../../../zustand";
 
 type FileContextMenuProps = {
@@ -16,6 +17,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
     const { currentPath, pushRoute } = useExplorerHistory();
 
     const { openModal } = useEditFileModalStore();
+    const pasteFile = usePasteFile();
 
     const handleOpenFile = () => {
         const path = currentPath ? currentPath + sep + filename : filename;
@@ -80,7 +82,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
 
     const handleCutFile = () => cutFile(currentPath, filename);
 
-    const handleMovePasteFile = () => pasteFile(currentPath + sep + filename, addNotification);
+    const handleMovePasteFile = () => pasteFile(currentPath + sep + filename);
 
     return (
         <>

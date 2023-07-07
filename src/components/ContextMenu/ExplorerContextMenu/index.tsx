@@ -1,12 +1,13 @@
 import React from "react";
 
 import { openFile } from "../../../tauriAPIWrapper";
-import { pasteFile } from "../../../utils";
-import { useExplorerHistory, useNotificationStore } from "../../../zustand";
+import { usePasteFile } from "../../../hooks";
+import { useExplorerHistory } from "../../../zustand";
 
 const ExplorerContextMenu: React.FC = () => {
     const { currentPath } = useExplorerHistory();
-    const { addNotification } = useNotificationStore();
+
+    const pasteFile = usePasteFile();
 
     const handleOpenInExplorer = () => openFile(currentPath);
 
@@ -18,9 +19,9 @@ const ExplorerContextMenu: React.FC = () => {
         }
 
         if (clipboardAction === "copy") {
-            pasteFile(currentPath, addNotification);
+            pasteFile(currentPath);
         } else {
-            console.log(`moving "${copiedFile} to ${currentPath}`);
+            console.info(`moving "${copiedFile} to ${currentPath}`);
 
             document.documentElement.dataset.copiedFile = undefined;
             document.documentElement.dataset.clipboardAction = undefined;
