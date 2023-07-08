@@ -7,6 +7,7 @@ use std::path::Path;
 use tauri::Manager;
 
 mod cfs;
+// mod old_cfs;
 
 #[tauri::command(async)]
 fn open_file(path_to_dir: String) -> Result<(), String> {
