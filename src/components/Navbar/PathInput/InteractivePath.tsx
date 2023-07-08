@@ -1,7 +1,7 @@
 import React from "react";
 import { sep } from "@tauri-apps/api/path";
 
-import { useExplorerHistory } from "../../../zustand";
+import { useExplorerHistory } from "@zustand";
 
 import styles from "./PathInput.module.scss";
 

@@ -1,11 +1,10 @@
 import React from "react";
 import { sep } from "@tauri-apps/api/path";
 
-import { usePasteFile } from "../../../hooks";
-import { openFile, remove } from "../../../tauriAPIWrapper";
-import { useEditFileModalStore } from "../../../zustand";
-import { copyFile, cutFile, isErrorMessage } from "../../../utils";
-import { useExplorerHistory, useNotificationStore } from "../../../zustand";
+import { usePasteFile } from "@hooks";
+import { openFile, remove } from "@tauriAPI";
+import { copyFile, cutFile, isErrorMessage } from "@utils";
+import { useEditFileModalStore, useExplorerHistory, useNotificationStore } from "@zustand";
 
 type FileContextMenuProps = {
     filename: string;

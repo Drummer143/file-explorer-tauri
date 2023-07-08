@@ -4,10 +4,10 @@ import { sep } from "@tauri-apps/api/path";
 import Disk from "./Disk";
 import File from "./File";
 import Folder from "./Folder";
-import { EditFileModal } from "./../modals/";
-import { useExplorerHistory } from "../../zustand";
-import { CTXTypes, copyFile, cutFile } from "../../utils";
-import { useResizeObserver, useWatchPathChange, usePasteFile } from "../../hooks";
+import { EditFileModal } from "./../modals";
+import { useExplorerHistory } from "@zustand";
+import { CTXTypes, copyFile, cutFile } from "@utils";
+import { useResizeObserver, useWatchPathChange, usePasteFile } from "@hooks";
 
 import styles from "./FileList.module.scss";
 

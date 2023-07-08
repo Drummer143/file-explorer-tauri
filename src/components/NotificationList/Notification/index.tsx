@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-import { CloseSVG } from "../../../assets";
-import { useAppState, useNotificationStore } from "../../../zustand";
+import { CloseSVG } from "@assets";
+import { useAppState, useNotificationStore } from "@zustand";
 
 import styles from "./Notification.module.scss";
 

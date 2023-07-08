@@ -3,8 +3,8 @@ import { message } from "@tauri-apps/api/dialog";
 import { normalize } from "@tauri-apps/api/path";
 
 import InteractivePath from "./InteractivePath";
-import { pathExists } from "../../../tauriAPIWrapper";
-import { useExplorerHistory } from "../../../zustand";
+import { pathExists } from "@tauriAPI";
+import { useExplorerHistory } from "@zustand";
 
 import styles from "./PathInput.module.scss";
 

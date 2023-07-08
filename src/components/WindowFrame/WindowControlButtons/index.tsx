@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { appWindow } from "@tauri-apps/api/window";
 import { useTranslation } from "react-i18next";
 
-import { CloseSVG, MaximizeSVG, MinimizeSVG, RestoreToWindowSVG } from "../../../assets";
+import { CloseSVG, MaximizeSVG, MinimizeSVG, RestoreToWindowSVG } from "@assets";
 
 import styles from "./WindowControlButtons.module.scss";
 

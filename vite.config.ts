@@ -18,11 +18,28 @@ export default defineConfig({
     // https://tauri.studio/v1/api/config#buildconfig.beforedevcommand
     envPrefix: ["VITE_", "TAURI_"],
     build: {
+        // rollupOptions: {
+        //     input: {
+        //         main: "main.html",
+        //         "file-exists": "file-exists.html"
+        //     }
+        // },
         // Tauri supports es2021
         target: ["es2021", "chrome100", "safari13"],
         // don't minify for debug builds
         minify: !process.env.TAURI_DEBUG ? "esbuild" : false,
         // produce sourcemaps for debug builds
         sourcemap: !!process.env.TAURI_DEBUG
+    },
+    resolve: {
+        alias: {
+            "@src": "src",
+            "@utils": "src/utils/index.ts",
+            "@i18n": "src/i18n/index.ts",
+            "@tauriAPI": "src/tauriAPIWrapper/index.ts",
+            "@hooks": "src/hooks/index.ts",
+            "@assets": "src/assets/index.ts",
+            "@zustand": "src/zustand/index.ts"
+        }
     }
 });

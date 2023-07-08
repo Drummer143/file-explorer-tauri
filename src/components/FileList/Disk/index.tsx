@@ -2,10 +2,9 @@ import React, { useRef } from "react";
 import xbytes from "xbytes";
 
 import FileListItemButton from "../../customs/FileListItemButton";
-import { DiskSVG } from "../../../assets";
-import { CTXTypes } from "../../../utils";
-import { useExplorerHistory } from "../../../zustand";
-// import { getDiskBackgroundColor } from '../../../utils';
+import { DiskSVG } from "@assets";
+import { CTXTypes } from "@utils";
+import { useExplorerHistory } from "@zustand";
 
 import styles from "./Disk.module.scss";
 

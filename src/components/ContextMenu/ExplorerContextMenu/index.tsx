@@ -1,8 +1,8 @@
 import React from "react";
 
-import { openFile } from "../../../tauriAPIWrapper";
-import { usePasteFile } from "../../../hooks";
-import { useExplorerHistory } from "../../../zustand";
+import { openFile } from "@tauriAPI";
+import { usePasteFile } from "@hooks";
+import { useExplorerHistory } from "@zustand";
 
 const ExplorerContextMenu: React.FC = () => {
     const { currentPath } = useExplorerHistory();

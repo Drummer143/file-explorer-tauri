@@ -6,7 +6,7 @@ import "./style.scss";
 import "./defaultColorTheme.scss";
 
 import App from "./App";
-import i18n from "./i18n";
+import i18n from "@i18n";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     // <React.StrictMode>

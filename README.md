@@ -30,7 +30,7 @@ TODO:
         -   [x] Permanently delete
     -   [x] Rename file
     -   [x] Copy/cut file
-        -   [ ] Frontend
+        -   [x] Frontend
         -   [ ] Backend
     -   [ ] Create file
     -   [x] Watch changes in current directory

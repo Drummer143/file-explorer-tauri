@@ -1,7 +1,7 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
 
 import Navbar from "../Navbar";
+import FileList from "../FileList";
 import WindowFrame from "../WindowFrame";
 import ContextMenu from "../ContextMenu";
 import NotificationList from "../NotificationList";
@@ -17,7 +17,7 @@ const Layout: React.FC = () => {
                 <div className={styles.body}>
                     <Navbar />
 
-                    <Outlet />
+                    <FileList />
                 </div>
             </div>
 

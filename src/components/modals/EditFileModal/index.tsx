@@ -3,11 +3,11 @@ import Modal from "react-modal";
 import { sep } from "@tauri-apps/api/path";
 import { useForm, SubmitHandler } from "react-hook-form";
 
-import { rename, pathExists } from "../../../tauriAPIWrapper";
-import { useEditFileModalStore, useExplorerHistory, useNotificationStore } from "../../../zustand";
+import { rename } from "@tauriAPI";
+import { isErrorMessage } from "@utils";
+import { useEditFileModalStore, useExplorerHistory, useNotificationStore } from "@zustand";
 
 import styles from "./EditFileModal.module.scss";
-import { isErrorMessage } from "../../../utils";
 
 type Inputs = {
     filename: string;

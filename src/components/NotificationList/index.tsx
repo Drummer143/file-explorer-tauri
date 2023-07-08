@@ -1,7 +1,7 @@
 import React from "react";
 
 import AppNotificationComponent from "./Notification";
-import { useAppState, useNotificationStore } from "../../zustand";
+import { useAppState, useNotificationStore } from "@zustand";
 
 import styles from "./NotificationList.module.scss";
 

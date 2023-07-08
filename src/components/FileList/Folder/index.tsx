@@ -2,9 +2,9 @@ import React from "react";
 import { sep } from "@tauri-apps/api/path";
 
 import FileListItemButton from "../../customs/FileListItemButton";
-import { CTXTypes } from "../../../utils";
-import { FolderSVG } from "../../../assets";
-import { useExplorerHistory } from "../../../zustand";
+import { CTXTypes } from "@utils";
+import { FolderSVG } from "@assets";
+import { useExplorerHistory } from "@zustand";
 
 import styles from "./Folder.module.scss";
 

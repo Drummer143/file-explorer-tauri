@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 
 import FileContextMenu from "./FileContextMenu";
 import ExplorerContextMenu from "./ExplorerContextMenu";
-import { DataSetKeys } from "../../utils";
+import { DataSetKeys } from "@utils";
 
 import styles from "./ContextMenu.module.scss";
 

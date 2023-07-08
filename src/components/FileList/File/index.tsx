@@ -4,10 +4,10 @@ import { sep } from "@tauri-apps/api/path";
 import { convertFileSrc } from "@tauri-apps/api/tauri";
 
 import FileListItemButton from "../../customs/FileListItemButton";
-import { FileSVG } from "../../../assets";
-import { CTXTypes } from "../../../utils";
-import { openFile } from "../../../tauriAPIWrapper";
-import { useExplorerHistory } from "../../../zustand";
+import { FileSVG } from "@assets";
+import { CTXTypes } from "@utils";
+import { openFile } from "@tauriAPI";
+import { useExplorerHistory } from "@zustand";
 
 import styles from "./File.module.scss";
 

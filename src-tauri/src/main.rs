@@ -3,11 +3,9 @@
     windows_subsystem = "windows"
 )]
 
-use std::path::Path;
-use tauri::Manager;
-
 mod cfs;
-// mod old_cfs;
+
+use std::path::Path;
 
 #[tauri::command(async)]
 fn open_file(path_to_dir: String) -> Result<(), String> {
@@ -28,21 +26,29 @@ fn open_file(path_to_dir: String) -> Result<(), String> {
     }
 }
 
+// #[tauri::command(async)]
+// fn sw<R: Runtime>(app_handle: AppHandle<R>) -> Result<(), ErrorMessage> {
+//     let result = tauri::WindowBuilder::new(
+//         &app_handle,
+//         "file-exists",
+//         tauri::WindowUrl::App("file-exists.html".into()),
+//     )
+//     .build();
+
+//     if let Err(error) = result {
+//         Err(ErrorMessage::new_all(
+//             "Can't open second window".into(),
+//             error.to_string(),
+//         ))
+//     } else {
+//         Ok(())
+//     }
+// }
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![open_file])
         .plugin(cfs::init())
-        .setup(|app|{
-            let w = app.get_window("main");
-
-            if let Some(window) = w {
-                if !window.is_devtools_open() {
-                    window.open_devtools();
-                }
-            }
-
-            Ok(())
-        })
         .run(tauri::generate_context!())
         .expect("Can't run app.");
 }

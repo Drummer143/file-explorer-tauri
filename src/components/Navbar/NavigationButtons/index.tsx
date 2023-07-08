@@ -1,8 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-import { useExplorerHistory } from "../../../zustand";
-import { LeftArrowSVG, ReloadSVG, RightArrowSVG, UpArrowSVG } from "../../../assets/other";
+import { useExplorerHistory } from "@zustand";
+import { LeftArrowSVG, ReloadSVG, RightArrowSVG, UpArrowSVG } from "@assets";
 
 import styles from "./NavigationButtons.module.scss";
 

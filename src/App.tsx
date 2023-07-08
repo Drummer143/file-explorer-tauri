@@ -1,8 +1,7 @@
 import React, { useEffect } from "react";
-import { RouterProvider } from "react-router-dom";
 
-import router from "./router";
-import { useNotificationStore } from "./zustand";
+import Layout from "./components/Layout";
+import { useNotificationStore } from "@zustand";
 
 const App: React.FC = () => {
     const { addNotification } = useNotificationStore();
@@ -20,9 +19,9 @@ const App: React.FC = () => {
                 });
             }
         });
-    }, []);
+    }, [addNotification]);
 
-    return <RouterProvider router={router} />;
+    return <Layout />;
 };
 
 export default App;
