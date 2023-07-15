@@ -11,7 +11,7 @@ const ExplorerContextMenu: React.FC = () => {
 
     const handleOpenInExplorer = () => openFile(currentPath);
 
-    const handleMovePasteFile = () => {
+    const handleMovePasteFile = async () => {
         const { copiedFile, clipboardAction } = document.documentElement.dataset;
 
         if (!copiedFile || !clipboardAction) {
@@ -19,7 +19,7 @@ const ExplorerContextMenu: React.FC = () => {
         }
 
         if (clipboardAction === "copy") {
-            pasteFile(currentPath);
+            pasteFile({ to: currentPath });
         } else {
             console.info(`moving "${copiedFile} to ${currentPath}`);
 

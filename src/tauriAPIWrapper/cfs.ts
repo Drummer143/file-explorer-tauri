@@ -31,4 +31,10 @@ export const rename = (oldName: string, newName: string) => invoke<void>("plugin
 
 export const pathExists = (path: string) => invoke<boolean>("plugin:cfs|exists", { pathToFile: path });
 
-export const copy = (from: string, to: string) => invoke("plugin:cfs|copy", { from, to });
+export const copyFile = (from: string, to: string, copyOptions: FileCopyOptions) =>
+    invoke("plugin:cfs|copy_file", {
+        from,
+        to,
+        // eslint-disable-next-line camelcase
+        copyOptions: { overwrite: copyOptions.overwrite, skip_exist: copyOptions.skipExist }
+    });

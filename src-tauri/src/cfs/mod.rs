@@ -74,16 +74,16 @@ fn remove<R: Runtime>(window: Window<R>, path_to_file: String) -> Result<(), Err
     }
 }
 
-#[tauri::command(async)]
-fn copy<R: Runtime>(window: Window<R>, from: String, to: String) -> Result<(), ErrorMessage> {
-    let path = Path::new(&from);
+// #[tauri::command(async)]
+// fn copy<R: Runtime>(window: Window<R>, from: String, to: String) -> Result<(), ErrorMessage> {
+//     let path = Path::new(&from);
 
-    if path.is_file() {
-        copy_file(window, from, to)
-    } else {
-        Err(ErrorMessage::new_message("Can copy only files".into()))
-    }
-}
+//     if path.is_file() {
+//         copy_file(window, from, to)
+//     } else {
+//         Err(ErrorMessage::new_message("Can copy only files".into()))
+//     }
+// }
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("cfs")
@@ -97,7 +97,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             read_dir,
             rename,
             exists,
-            copy,
+            // copy,
             copy_file,
         ])
         .setup(|app| {

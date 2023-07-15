@@ -10,6 +10,24 @@
         "version": "0.0.0"
     },
     "tauri": {
+        "cli": {
+            "args": [
+                {
+                    "name": "path",
+                    "short": "p",
+                    "takesValue": true,
+                    "description": "Start path",
+                    "multiple": false
+                },
+                {
+                    "name": "focused",
+                    "short": "f",
+                    "takesValue": true,
+                    "description": "Filename of focused element. Must be relative",
+                    "multiple": false
+                }
+            ]
+        },
         "allowlist": {
             "all": true,
             "protocol": {

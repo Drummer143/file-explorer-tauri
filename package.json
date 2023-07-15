@@ -5,6 +5,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
+        "dev:args": "npm run tauri dev -- -- -- -p C:\\Users\\berge\\source\\repos\\file-explorer\\src-tauri\\target -f release",
         "dev:tools": "concurrently \"npm run tauri dev\" \"npm run devtools\"",
         "devtools": "react-devtools",
         "build": "tsc && vite build",

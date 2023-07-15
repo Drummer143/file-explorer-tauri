@@ -54,3 +54,8 @@ type ChangesInDirectoryPayload =
 type Events = {
     "changes-in-dir": ChangesInDirectoryPayload;
 };
+
+interface FileCopyOptions {
+    skipExist: boolean;
+    overwrite: boolean
+}

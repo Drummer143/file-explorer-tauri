@@ -4,9 +4,9 @@ import { sep } from "@tauri-apps/api/path";
 import Disk from "./Disk";
 import File from "./File";
 import Folder from "./Folder";
-import { EditFileModal } from "./../modals";
 import { useExplorerHistory } from "@zustand";
 import { CTXTypes, copyFile, cutFile } from "@utils";
+import { EditFileModal, FileExistModal } from "./../modals";
 import { useResizeObserver, useWatchPathChange, usePasteFile } from "@hooks";
 
 import styles from "./FileList.module.scss";
@@ -45,17 +45,19 @@ const FileList: React.FC = () => {
             case "KeyX": {
                 const canMoveTarget = target.dataset.contextMenuType !== "disk";
                 const filename = target.dataset.contextMenuAdditionalInfo;
+                const filetype = target.dataset.contextMenuType;
 
-                if (canMoveTarget && filename) {
-                    cutFile(currentPath, filename);
+                if (canMoveTarget && filename && filetype) {
+                    cutFile(currentPath, filename, filetype);
                 }
                 break;
             }
             case "KeyC": {
                 const filename = target.dataset.contextMenuAdditionalInfo;
+                const filetype = target.dataset.contextMenuType;
 
-                if (filename) {
-                    copyFile(currentPath + sep + filename);
+                if (filename && filetype) {
+                    copyFile(currentPath + sep + filename, filetype);
                 }
 
                 break;
@@ -63,12 +65,13 @@ const FileList: React.FC = () => {
             case "KeyV": {
                 let to = currentPath;
                 const possibleFocusedFileName = (document.activeElement as HTMLElement | null)?.dataset.contextMenuAdditionalInfo;
+                const isNotFile = (document.activeElement as HTMLElement | null)?.dataset.contextMenuType !== "file";
 
-                if (possibleFocusedFileName) {
+                if (possibleFocusedFileName && isNotFile) {
                     to = to + sep + possibleFocusedFileName;
                 }
 
-                pasteFile(to);
+                pasteFile({ to });
             }
         }
     }, [currentPath, pasteFile]);
@@ -107,6 +110,7 @@ const FileList: React.FC = () => {
             </div>
 
             <EditFileModal />
+            <FileExistModal />
         </>
     );
 };

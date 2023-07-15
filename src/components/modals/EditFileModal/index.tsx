@@ -1,13 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Modal from "react-modal";
 import { sep } from "@tauri-apps/api/path";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { rename } from "@tauriAPI";
 import { isErrorMessage } from "@utils";
-import { useEditFileModalStore, useExplorerHistory, useNotificationStore } from "@zustand";
+import { useExplorerHistory, useNotificationStore } from "@zustand";
 
 import styles from "./EditFileModal.module.scss";
+import { useDisclosure } from "@hooks";
 
 type Inputs = {
     filename: string;
@@ -16,25 +17,28 @@ type Inputs = {
 const EditFileModal: React.FC = () => {
     const { currentPath } = useExplorerHistory();
     const { addNotification } = useNotificationStore();
-    const { closeModal, isOpened, editFilename } = useEditFileModalStore();
 
-    const { register, formState: { errors }, handleSubmit } = useForm<Inputs>({
+    const { value: isOpen, setTrue: openModal, setFalse: closeModal } = useDisclosure();
+
+    const [currentFilename, setCurrentFilename] = useState<string | undefined>();
+
+    const { register, formState: { errors }, handleSubmit, setValue } = useForm<Inputs>({
         defaultValues: {
-            filename: editFilename
+            filename: ""
         },
         values: {
-            filename: editFilename
+            filename: ""
         }
     });
 
     const onSubmit: SubmitHandler<Inputs> = async (data) => {
         const { filename } = data;
 
-        if (filename === editFilename) {
+        if (filename === currentFilename) {
             return closeModal();
         }
 
-        const oldPathToFile = currentPath + sep + editFilename;
+        const oldPathToFile = currentPath + sep + currentFilename;
         const newPathToFile = currentPath + sep + filename;
 
         console.log(oldPathToFile, newPathToFile);
@@ -60,9 +64,33 @@ const EditFileModal: React.FC = () => {
         closeModal();
     };
 
+    const handleCustomValidate = (value: string) => {
+        const selector = `[data-context-menu-additional-info-lowercased="${value.toLowerCase()}"]`;
+        const elementWithGivenFilename = document.querySelector(selector);
+        const isEqualsSelf = currentFilename === value;
+
+        if (elementWithGivenFilename && !isEqualsSelf) {
+            return "This name is already taken";
+        }
+    };
+
+    useEffect(() => {
+        const handleOpenModal = (e: CustomEventMap["openEditFileModal"]) => {
+            setCurrentFilename(e.detail.filename);
+            setValue("filename", e.detail.filename, { shouldDirty: true, shouldTouch: false, shouldValidate: false });
+            openModal();
+        };
+
+        document.addEventListener("openEditFileModal", handleOpenModal);
+
+        return () => {
+            document.removeEventListener("openEditFileModal", handleOpenModal);
+        };
+    }, [openModal, setValue]);
+
     return (
         <Modal
-            isOpen={isOpened}
+            isOpen={isOpen}
             onRequestClose={closeModal}
             shouldCloseOnEsc
             shouldCloseOnOverlayClick
@@ -71,10 +99,8 @@ const EditFileModal: React.FC = () => {
             overlayClassName={styles.overlay}
             className={styles.modalBody}
             portalClassName={styles.portal}
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            appElement={document.getElementById("modal-root")!}
         >
-            <h2 className={styles.heading}>Editing &quot;{editFilename}&quot;</h2>
+            <h2 className={styles.heading}>Editing &quot;{currentFilename}&quot;</h2>
 
             <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
                 <label className={styles.inputLabel}>
@@ -85,14 +111,7 @@ const EditFileModal: React.FC = () => {
                         className={styles.input}
                         {...register("filename", {
                             required: true,
-                            validate: (v) => {
-                                const isNameTaken = document.querySelector(`[data-context-menu-additional-info-lowercased="${v.toLowerCase()}"]`);
-                                const isEqualsSelf = editFilename === v;
-
-                                if (isNameTaken && !isEqualsSelf) {
-                                    return "This name is already taken";
-                                }
-                            }
+                            validate: handleCustomValidate
                         })}
                     />
 

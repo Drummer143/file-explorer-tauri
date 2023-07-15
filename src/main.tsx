@@ -7,6 +7,9 @@ import "./defaultColorTheme.scss";
 
 import App from "./App";
 import i18n from "@i18n";
+import ReactModal from "react-modal";
+
+ReactModal.setAppElement(document.getElementById("root") as HTMLElement);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     // <React.StrictMode>

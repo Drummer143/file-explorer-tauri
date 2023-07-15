@@ -8,3 +8,4 @@ File component (div tag):
 html tag:
 1. data-copied-file (copiedFile) - path to copied file/folder
 2. data-clipboard-action (clipboardAction) - cutting or copying file
+3. data-copied-file-type (copiedFileType) - type of copied file
