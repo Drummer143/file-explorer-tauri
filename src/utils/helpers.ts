@@ -13,3 +13,14 @@ export const isErrorMessage = (error: unknown): error is ErrorMessage => {
 
     return false;
 };
+
+export const parseTauriErrorForNotification = (error: unknown): Omit<AppNotification, "type"> | void => {
+    if (isErrorMessage(error)) {
+        const message = error.message || error.error || "Unexpected error";
+        const reason = error.message && error.error ? error.error : undefined;
+
+        return { message, reason };
+    } else if (typeof error === "string") {
+        return { message: error };
+    }
+};

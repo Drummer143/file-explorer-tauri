@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactModal from "react-modal";
-import { sep } from "@tauri-apps/api/path";
+import { sep, extname, basename } from "@tauri-apps/api/path";
 
 import { pathExists } from "@tauriAPI";
 import { usePasteFile } from "@hooks";
@@ -17,26 +17,32 @@ const FileExistModal: React.FC = () => {
 
     const pasteFile = usePasteFile();
 
-    const handleRenameFile = useCallback(async () => {
-        if (!pathInfo) {
-            return;
-        }
-
+    const addIndexToFilename = async (pathInfo: CustomEventMap["openExistFileModal"]["detail"]) => {
         let currentNumber = 1;
-        let numberedPath = `${pathInfo.filename} (${currentNumber})`;
-        let exists = true;
+        let ext: string;
 
-        while (exists) {
-            if (await pathExists(numberedPath)) {
-                currentNumber++;
-                numberedPath = `${pathInfo.filename} (${currentNumber})`;
-            } else {
-                exists = false;
-            }
+        try {
+            ext = "." + (await extname(pathInfo.filename));
+        } catch (error) {
+            ext = "";
         }
 
-        return numberedPath;
-    }, [pathInfo]);
+        const filenameNoExt = await basename(pathInfo.filename, ext);
+
+        const concatIndex = () => filenameNoExt + ` (${currentNumber})` + ext;
+        const concatPath = () => pathInfo.dirname + sep + filename;
+
+        let filename = concatIndex();
+        let numberedPath = concatPath();
+
+        while (await pathExists(numberedPath)) {
+            currentNumber++;
+            filename = concatIndex();
+            numberedPath = concatPath();
+        }
+
+        return filename;
+    };
 
     const handleClick = async (action: "overwrite" | "save-both" | "cancel") => {
         if (action === "cancel" || !pathInfo) {
@@ -48,14 +54,10 @@ const FileExistModal: React.FC = () => {
             overwrite: false
         };
 
-        let to = pathInfo.filename;
+        let filename = pathInfo.filename;
 
         if (action === "save-both") {
-            const newName = await handleRenameFile();
-
-            if(newName) {
-                to = newName;
-            }
+            filename = await addIndexToFilename(pathInfo);
         } else {
             options.overwrite = true;
         }
@@ -63,12 +65,7 @@ const FileExistModal: React.FC = () => {
         const filetype = document.documentElement.dataset.copiedFileType;
 
         if (filetype === "file") {
-            pasteFile({
-                to,
-                copyOptions: options
-            })
-                .then(res => console.log(res))
-                .catch(error => console.error(error));
+            pasteFile({ dirname: pathInfo.dirname, filename }, options);
         } else {
             addNotification({ message: "Can copy only files", type: "error" });
         }

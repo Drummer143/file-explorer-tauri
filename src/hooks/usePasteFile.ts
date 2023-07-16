@@ -1,87 +1,97 @@
 import { sep } from "@tauri-apps/api/path";
 import { useCallback } from "react";
 
-import { isErrorMessage } from "@utils";
+import { clearClipboard, dispatchCustomEvent } from "@utils";
 import { copyFile, pathExists } from "@tauriAPI";
-import { useExplorerHistory, /* useModalStore, */ useNotificationStore } from "@zustand";
-
-interface PasteProps {
-    to: string,
-    copyOptions?: FileCopyOptions
-}
+import { useExplorerHistory, useNotificationStore } from "@zustand";
 
 export const usePasteFile = () => {
     const { currentPath } = useExplorerHistory();
-    const { addNotification } = useNotificationStore();
-    // const { openModal } = useModalStore();
+    const { addNotificationFromError } = useNotificationStore();
 
-    const checkExist = useCallback(async (to: string) => {
-        const { copiedFile, clipboardAction } = document.documentElement.dataset;
-
-        if (!copiedFile || !clipboardAction) {
-            return;
-        }
-
-        const exists = await pathExists(to + sep + copiedFile.split(sep).at(-1));
+    const checkExist = useCallback(async (newPathToFile: string, dirname: string, filename: string) => {
+        const exists = await pathExists(newPathToFile);
 
         if (exists) {
-            const event = new CustomEvent(
-                "openExistFileModal",
-                { detail: { dirname: currentPath, filename: copiedFile } }
-            );
-
-            return document.dispatchEvent(event);
+            dispatchCustomEvent("openExistFileModal", { dirname, filename });
         }
-    }, [currentPath]);
 
-    const paste = useCallback(async ({
-        to,
+        return exists;
+    }, []);
+
+    const checkData = useCallback(async (
+        to: { dirname: string, filename?: string },
         copyOptions = { overwrite: false, skipExist: false }
-    }: PasteProps) => {
-        const { copiedFile, clipboardAction, copiedFileType } = document.documentElement.dataset;
+    ) => {
+        const {
+            copiedFileType,
+            pathToCopiedFile,
+            clipboardAction
+        } = document.documentElement.dataset;
+        let copiedFilename = document.documentElement.dataset.copiedFilename;
 
-        if (!copiedFile || !clipboardAction) {
+        if (!copiedFileType || !pathToCopiedFile || !clipboardAction) {
+            return false;
+        }
+
+        if (to.filename) {
+            copiedFilename = to.filename;
+        } else if (!copiedFilename) {
+            return false;
+        }
+
+        if (pathToCopiedFile === to.dirname + sep + copiedFilename) {
+            return false;
+        }
+
+        const newPathToFile = to.dirname + sep + copiedFilename;
+        const skipExist = !copyOptions.skipExist || !copyOptions.overwrite;
+
+        if (skipExist && await checkExist(newPathToFile, to.dirname, copiedFilename)) {
+            return false;
+        }
+
+        return {
+            copiedFileType,
+            copiedFilename,
+            pathToCopiedFile,
+            clipboardAction,
+            newPathToFile
+        };
+    }, [checkExist]);
+
+    const paste = useCallback(async (
+        to: { dirname: string, filename?: string },
+        copyOptions = { overwrite: false, skipExist: false }
+    ) => {
+        const isOk = await checkData(to, copyOptions);
+
+        if(!isOk) {
             return;
         }
 
-        if (!copyOptions.skipExist) {
-            const exists = await checkExist(to);
-
-            if (exists) {
-                return;
-            }
-        }
+        const {
+            copiedFileType,
+            copiedFilename,
+            pathToCopiedFile,
+            clipboardAction,
+            newPathToFile
+        } = isOk;
 
         try {
-            console.log({ from: copiedFile, to, copyOptions });
-
-            console.log(copyOptions);
-
             if (clipboardAction === "copy") {
                 if (copiedFileType === "file") {
-                    await copyFile(copiedFile, to, copyOptions);
+                    await copyFile(pathToCopiedFile, newPathToFile, copyOptions);
                 }
             } else {
-                console.info(`moving "${copiedFile} to ${currentPath}`);
+                console.info(`moving "${copiedFilename} to ${currentPath}`);
 
-                document.documentElement.dataset.copiedFile = undefined;
-                document.documentElement.dataset.clipboardAction = undefined;
+                clearClipboard();
             }
         } catch (error) {
-            if (isErrorMessage(error)) {
-                if (!isErrorMessage(error)) {
-                    return;
-                }
-
-                const message = error.message || error.error || "Unexpected error";
-                const reason = error.message && error.error ? error.error : undefined;
-
-                addNotification({ message, type: "error", reason });
-            } else if (typeof error === "string") {
-                addNotification({ type: "error", message: error });
-            }
+            addNotificationFromError(error, "error");
         }
-    }, [addNotification, checkExist, currentPath]);
+    }, [addNotificationFromError, checkData, currentPath]);
 
     return paste;
 };

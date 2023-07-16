@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { getMatches } from "@tauri-apps/api/cli";
+import { WebviewWindow, getAll } from "@tauri-apps/api/window";
 
 import Layout from "./components/Layout";
 import { useNotificationStore } from "@zustand";
@@ -8,7 +9,7 @@ const App: React.FC = () => {
     const { addNotification } = useNotificationStore();
 
     useEffect(() => {
-        document.addEventListener("keydown", async (e) => {
+        const testKeyDown = async (e: KeyboardEvent) => {
             if (e.code !== "KeyY") {
                 return;
             }
@@ -19,14 +20,20 @@ const App: React.FC = () => {
 
             const m = await getMatches();
 
-            console.log(m);
+            console.info(m);
 
             addNotification({
                 message: JSON.stringify(m.args),
                 reason: JSON.stringify(m.subcommand),
                 type: "info"
             });
-        });
+        };
+
+        document.addEventListener("keydown", testKeyDown);
+
+        return () => {
+            document.removeEventListener("keydown", testKeyDown);
+        };
     }, [addNotification]);
 
     return <Layout />;

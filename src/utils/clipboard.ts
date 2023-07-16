@@ -1,16 +1,26 @@
-import { sep } from "@tauri-apps/api/path";
-
-export const copyFile = (copiedFile: string, filetype: string) => {
+export const addFileInClipboard = (
+    pathToCopiedFile: string,
+    filename: string,
+    filetype: string,
+    action: "copy" | "cut"
+) => {
     document.documentElement.dataset.copiedFileType = filetype;
-    document.documentElement.dataset.copiedFile = copiedFile;
-    document.documentElement.dataset.clipboardAction = "copy";
+    document.documentElement.dataset.copiedFilename = filename;
+    document.documentElement.dataset.pathToCopiedFile = pathToCopiedFile;
+    document.documentElement.dataset.clipboardAction = action;
+
     document.querySelector<HTMLElement>(".cut-file")?.classList.remove("cut-file");
+
+    if (action === "cut") {
+        document.querySelector<HTMLElement>(`[data-context-menu-additional-info="${filename}"]`)?.classList.add("cut-file");
+    }
 };
 
-export const cutFile = (dirname: string, filename: string, filetype: string) => {
-    document.documentElement.dataset.copiedFileType = filetype;
-    document.documentElement.dataset.copiedFile = dirname + sep + filename;
-    document.documentElement.dataset.clipboardAction = "cut";
+export const clearClipboard = () => {
+    document.documentElement.dataset.copiedFileType = undefined;
+    document.documentElement.dataset.copiedFilename = undefined;
+    document.documentElement.dataset.pathToCopiedFile = undefined;
+    document.documentElement.dataset.clipboardAction = undefined;
+
     document.querySelector<HTMLElement>(".cut-file")?.classList.remove("cut-file");
-    document.querySelector<HTMLElement>(`[data-context-menu-additional-info="${filename}"]`)?.classList.add("cut-file");
 };

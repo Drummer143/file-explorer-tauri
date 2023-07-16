@@ -11,22 +11,7 @@ const ExplorerContextMenu: React.FC = () => {
 
     const handleOpenInExplorer = () => openFile(currentPath);
 
-    const handleMovePasteFile = async () => {
-        const { copiedFile, clipboardAction } = document.documentElement.dataset;
-
-        if (!copiedFile || !clipboardAction) {
-            return;
-        }
-
-        if (clipboardAction === "copy") {
-            pasteFile({ to: currentPath });
-        } else {
-            console.info(`moving "${copiedFile} to ${currentPath}`);
-
-            document.documentElement.dataset.copiedFile = undefined;
-            document.documentElement.dataset.clipboardAction = undefined;
-        }
-    };
+    const handleMovePasteFile = async () => pasteFile({ dirname: currentPath });
 
     if (!currentPath) {
         return <></>;

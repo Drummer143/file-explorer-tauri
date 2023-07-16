@@ -3,7 +3,7 @@ import { sep } from "@tauri-apps/api/path";
 
 import { usePasteFile } from "@hooks";
 import { openFile, remove } from "@tauriAPI";
-import { copyFile, cutFile, isErrorMessage } from "@utils";
+import { addFileInClipboard, isErrorMessage } from "@utils";
 import { useExplorerHistory, useNotificationStore } from "@zustand";
 
 type FileContextMenuProps = {
@@ -77,11 +77,10 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
     const handleRenameFile = () =>
         document.dispatchEvent(new CustomEvent("openEditFileModal", { detail: { filename } }));
 
-    const handleCopyFile = () => copyFile(currentPath + sep + filename, fileType);
+    const handleAddFileInClipboard = (action: "copy" | "cut") =>
+        addFileInClipboard(currentPath + sep + filename, filename, fileType, action);
 
-    const handleCutFile = () => cutFile(currentPath, filename, fileType);
-
-    const handleMovePasteFile = () => pasteFile({ to: currentPath + sep + filename });
+    const handleMovePasteFile = () => pasteFile({ dirname: currentPath + sep + filename });
 
     return (
         <>
@@ -95,9 +94,9 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
 
                     <button onClick={handleRenameFile}>Rename</button>
 
-                    <button onClick={handleCopyFile}>Copy</button>
+                    <button onClick={() => handleAddFileInClipboard("copy")}>Copy</button>
 
-                    <button onClick={handleCutFile}>Сut</button>
+                    <button onClick={() => handleAddFileInClipboard("cut")}>Сut</button>
                 </>
             )}
 

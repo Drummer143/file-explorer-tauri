@@ -1,3 +1,4 @@
+import { parseTauriErrorForNotification } from "@utils";
 import { v4 } from "uuid";
 import { create } from "zustand";
 
@@ -6,6 +7,7 @@ interface NotificationState {
     notificationLimit: number
 
     addNotification: (notification: AppNotification) => void
+    addNotificationFromError: (error: unknown, type: AppNotification["type"]) => void
     removeNotification: (index?: string) => void
 }
 
@@ -14,6 +16,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     notificationLimit: 5,
 
     addNotification: (newNotification) => {
+        // eslint-disable-next-line no-console
         console[newNotification.type](newNotification);
 
         const { notificationLimit, notifications } = get();
@@ -31,6 +34,14 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         });
     },
 
+    addNotificationFromError: (error, type) => {
+        const notificationBody = parseTauriErrorForNotification(error);
+
+        if (notificationBody) {
+            get().addNotification({ ...notificationBody, type });
+        }
+    },
+
     removeNotification: (index) => {
         const { notifications } = get();
 
@@ -46,6 +57,5 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         set({
             notifications: updatedNotifications
         });
-
     }
 }));

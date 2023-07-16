@@ -5,7 +5,7 @@ import Disk from "./Disk";
 import File from "./File";
 import Folder from "./Folder";
 import { useExplorerHistory } from "@zustand";
-import { CTXTypes, copyFile, cutFile } from "@utils";
+import { CTXTypes, addFileInClipboard } from "@utils";
 import { EditFileModal, FileExistModal } from "./../modals";
 import { useResizeObserver, useWatchPathChange, usePasteFile } from "@hooks";
 
@@ -48,8 +48,9 @@ const FileList: React.FC = () => {
                 const filetype = target.dataset.contextMenuType;
 
                 if (canMoveTarget && filename && filetype) {
-                    cutFile(currentPath, filename, filetype);
+                    addFileInClipboard(currentPath + sep + filename, filename, filetype, "cut");
                 }
+
                 break;
             }
             case "KeyC": {
@@ -57,7 +58,7 @@ const FileList: React.FC = () => {
                 const filetype = target.dataset.contextMenuType;
 
                 if (filename && filetype) {
-                    copyFile(currentPath + sep + filename, filetype);
+                    addFileInClipboard(currentPath + sep + filename, filename, filetype, "copy");
                 }
 
                 break;
@@ -71,7 +72,7 @@ const FileList: React.FC = () => {
                     to = to + sep + possibleFocusedFileName;
                 }
 
-                pasteFile({ to });
+                pasteFile({ dirname: to });
             }
         }
     }, [currentPath, pasteFile]);
