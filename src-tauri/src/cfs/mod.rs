@@ -27,6 +27,7 @@ use get_disks::*;
 #[derive(Default, Debug)]
 pub struct CFSState {
     watcher: Mutex<HashMap<usize, (RecommendedWatcher, String)>>,
+    copy_processes: Mutex<HashMap<usize, tauri::EventHandler>>
 }
 
 ///  10 Megabytes
@@ -85,6 +86,11 @@ fn remove<R: Runtime>(window: Window<R>, path_to_file: String) -> Result<(), Err
 //     }
 // }
 
+#[tauri::command(async)] 
+fn print_state(state: tauri::State<'_, CFSState>) {
+    println!("{:#?}", state);
+}
+
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("cfs")
         .invoke_handler(tauri::generate_handler![
@@ -94,11 +100,13 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             unwatch,
             watch_dir,
             get_disks,
+            remove_copy_process_from_state,
             read_dir,
             rename,
             exists,
             // copy,
             copy_file,
+            print_state,
         ])
         .setup(|app| {
             // setup plugin specific state here

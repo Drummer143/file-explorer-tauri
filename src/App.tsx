@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { getMatches } from "@tauri-apps/api/cli";
-import { WebviewWindow, getAll } from "@tauri-apps/api/window";
+import { WebviewWindow, WebviewWindowHandle, getAll } from "@tauri-apps/api/window";
 
 import Layout from "./components/Layout";
 import { useNotificationStore } from "@zustand";

@@ -1,4 +1,4 @@
-import { invoke, event } from "@tauri-apps/api";
+import { invoke, event, globalShortcut } from "@tauri-apps/api";
 
 export const unwatchDir = (id: number) => invoke<void>("plugin:cfs|unwatch", { id });
 
@@ -31,10 +31,18 @@ export const rename = (oldName: string, newName: string) => invoke<void>("plugin
 
 export const pathExists = (path: string) => invoke<boolean>("plugin:cfs|exists", { pathToFile: path });
 
-export const copyFile = (from: string, to: string, copyOptions: FileCopyOptions) =>
+export const copyFile = (from: string, to: string, eventId: number, copyOptions: FileCopyOptions): Promise<void> =>
     invoke("plugin:cfs|copy_file", {
         from,
         to,
+        eventId,
         // eslint-disable-next-line camelcase
         copyOptions: { overwrite: copyOptions.overwrite, skip_exist: copyOptions.skipExist }
     });
+
+export const removeCopyProcessFromState = (id: number): Promise<void> =>
+    invoke("plugin:cfs|remove_copy_process_from_state", { id });
+
+export const printCFSState = (): Promise<void> => invoke("plugin:cfs|print_state");
+
+globalShortcut.register("CmdOrControl+Shift+S", printCFSState);

@@ -1,6 +1,6 @@
-import { parseTauriErrorForNotification } from "@utils";
 import { v4 } from "uuid";
 import { create } from "zustand";
+import { parseTauriErrorForNotification } from "@utils";
 
 interface NotificationState {
     notifications: (AppNotification & { index: string })[]
