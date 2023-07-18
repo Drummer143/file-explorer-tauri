@@ -43,6 +43,8 @@ impl CopyActions {
 
 fn spawn_copy_thread<R: Runtime>(
     window: Window<R>,
+    copy_speed: u64,
+    buffer_size: usize,
     path_from: String,
     path_to: String,
     event_id: usize,
@@ -70,11 +72,9 @@ fn spawn_copy_thread<R: Runtime>(
     let mut file_to = file_to.unwrap();
     let progress_event_name = format!("copy-progress//{}", event_id);
     let finish_event_name = format!("copy-finished//{}", event_id);
-    let buffer_size_bytes = 64 * 1024;
-    let speed_limit_bytes_per_second = 12 * 1024 * 1024;
     let file_size = file_from.metadata().unwrap().len();
     let mut total_bytes_copied = 0;
-    let mut buffer = vec![0; buffer_size_bytes];
+    let mut buffer = vec![0; buffer_size];
     let start_time = Instant::now();
 
     thread::spawn(move || {
@@ -130,7 +130,7 @@ fn spawn_copy_thread<R: Runtime>(
             let elapsed_time = start_time.elapsed();
             let elapsed_seconds = elapsed_time.as_secs();
             let elapsed_bytes = total_bytes_copied;
-            let expected_bytes = speed_limit_bytes_per_second * elapsed_seconds;
+            let expected_bytes = copy_speed * elapsed_seconds;
 
             if elapsed_bytes > (expected_bytes as usize) {
                 let sleep_duration = Duration::from_secs(1);
@@ -204,6 +204,9 @@ pub fn copy_file<R: Runtime>(
         }
     });
 
+    let copy_speed = state.app_config.filesystem.copy_speed_limit_bytes_per_second;
+    let buffer_size = state.app_config.filesystem.copy_buffer_size_bytes;
+
     state
         .copy_processes
         .lock()
@@ -212,6 +215,8 @@ pub fn copy_file<R: Runtime>(
 
     spawn_copy_thread(
         window.clone(),
+        copy_speed as u64,
+        buffer_size,
         from.clone(),
         to.clone(),
         event_id,

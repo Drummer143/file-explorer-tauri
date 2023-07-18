@@ -4,7 +4,7 @@ import { sep } from "@tauri-apps/api/path";
 import { usePasteFile } from "@hooks";
 import { openFile, remove } from "@tauriAPI";
 import { useExplorerHistory } from "@zustand";
-import { addFileInClipboard, addNotificationFromError, dispatchCustomEvent } from "@utils";
+import { addFileInClipboard, addNotificationFromError } from "@utils";
 
 type FileContextMenuProps = {
     filename: string;

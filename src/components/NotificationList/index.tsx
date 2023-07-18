@@ -2,13 +2,10 @@ import React, { useEffect, useState } from "react";
 import { v4 } from "uuid";
 
 import AppNotificationComponent from "./Notification";
-import { useAppState } from "@zustand";
 
 import styles from "./NotificationList.module.scss";
 
 const NotificationList: React.FC = () => {
-    const { notificationLiveTime, notificationTick, notificationLimit } = useAppState();
-
     const [notifications, setNotifications] = useState<(AppNotification & { index: string })[]>([]);
 
     const handleRemoveNotification = (index: string) => setNotifications(prev => prev.filter(n => n.index !== index));
@@ -18,7 +15,7 @@ const NotificationList: React.FC = () => {
             const index = v4();
 
             setNotifications(prev => {
-                if (prev.length >= notificationLimit) {
+                if (prev.length >= appConfig.notification.limit) {
                     prev.shift();
                 }
 
@@ -31,15 +28,15 @@ const NotificationList: React.FC = () => {
         return () => {
             document.removeEventListener("addNotification", handleAddNotification);
         };
-    }, [notificationLimit]);
+    }, [notifications]);
 
     return (
         <div
             className={styles.wrapper}
             style={
                 {
-                    "--notification-live-time": notificationLiveTime,
-                    "--notification-tick-speed": notificationTick + "ms"
+                    "--notification-live-time": appConfig.notification.lifetime_ms,
+                    "--notification-tick-speed": appConfig.notification.tickspeed_ms + "ms"
                 } as React.CSSProperties
             }
         >

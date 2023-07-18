@@ -9,9 +9,11 @@ import App from "./App";
 import i18n from "@i18n";
 import ReactModal from "react-modal";
 
-ReactModal.setAppElement(document.getElementById("root") as HTMLElement);
+const root = document.getElementById("root") as HTMLElement;
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+ReactModal.setAppElement(root);
+
+ReactDOM.createRoot(root).render(
     // <React.StrictMode>
     <I18nextProvider i18n={i18n}>
         <App />

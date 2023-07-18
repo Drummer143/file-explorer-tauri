@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { CloseSVG } from "@assets";
-import { useAppState } from "@zustand";
 
 import styles from "./Notification.module.scss";
 
@@ -11,8 +10,6 @@ type NotificationComponentProps = AppNotification & {
 };
 
 const NotificationComponent: React.FC<NotificationComponentProps> = ({ message, type, index, reason, onRemove }) => {
-    const { notificationLiveTime, notificationTick } = useAppState();
-
     const [isOpened, setIsOpened] = useState(false);
 
     const updateInterval = useRef<NodeJS.Timer | null>(null);
@@ -22,12 +19,12 @@ const NotificationComponent: React.FC<NotificationComponentProps> = ({ message, 
     const mountInterval = useCallback(
         () =>
             setInterval(() => {
-                if (currentTime.current < notificationLiveTime) {
-                    currentTime.current += notificationTick;
+                if (currentTime.current < appConfig.notification.lifetime_ms) {
+                    currentTime.current += appConfig.notification.tickspeed_ms;
 
                     notificationRef.current?.style.setProperty(
                         "--current-percentage",
-                        (currentTime.current / notificationLiveTime) * 100 + "%"
+                        (currentTime.current / appConfig.notification.lifetime_ms) * 100 + "%"
                     );
                 } else {
                     if (updateInterval.current) {
@@ -36,8 +33,8 @@ const NotificationComponent: React.FC<NotificationComponentProps> = ({ message, 
 
                     onRemove(index);
                 }
-            }, notificationTick),
-        [index, notificationLiveTime, notificationTick, onRemove]
+            }, appConfig.notification.tickspeed_ms),
+        [index, onRemove]
     );
 
     const handleCloseNotification = () => {
@@ -80,7 +77,7 @@ const NotificationComponent: React.FC<NotificationComponentProps> = ({ message, 
                 clearInterval(updateInterval.current);
             }
         };
-    }, [mountInterval, notificationLiveTime, notificationTick, onRemove]);
+    }, [mountInterval, onRemove]);
 
     return (
         <div

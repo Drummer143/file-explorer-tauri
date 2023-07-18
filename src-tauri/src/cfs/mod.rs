@@ -1,40 +1,52 @@
+pub mod app_config;
 pub mod copy_file;
+pub mod get_disks;
 pub mod read_dir;
 pub mod remove_directory;
 pub mod remove_file;
+pub mod rename;
 pub mod types;
 pub mod watch_dir;
-pub mod rename;
-pub mod get_disks;
 
 use notify::RecommendedWatcher;
 use std::{collections::HashMap, ffi::OsStr, path::Path, sync::Mutex};
-use tauri::Window;
 use tauri::{
     plugin::{Builder, TauriPlugin},
     Manager, Runtime,
 };
+use tauri::{Config, Window};
 
 use copy_file::*;
+use get_disks::*;
 use read_dir::*;
 use remove_directory::*;
 use remove_file::*;
+use rename::*;
 use types::*;
 use watch_dir::*;
-use rename::*;
-use get_disks::*;
 
 #[derive(Default, Debug)]
 pub struct CFSState {
     watcher: Mutex<HashMap<usize, (RecommendedWatcher, String)>>,
-    copy_processes: Mutex<HashMap<usize, tauri::EventHandler>>
+    copy_processes: Mutex<HashMap<usize, tauri::EventHandler>>,
+    app_config: AppConfig,
+}
+
+impl CFSState {
+    pub fn new_app_config(app_config: AppConfig) -> Self {
+        Self {
+            watcher: Mutex::default(),
+            copy_processes: Mutex::default(),
+            app_config,
+        }
+    }
 }
 
 ///  10 Megabytes
-const FILE_SIZE_TRASHCAN_LIMIT: u64 = 10 * 8 * 1024 * 1024;
 const DISPLAYABLE_IMAGE_EXTENSIONS: [&str; 13] = [
     "jpg", "jpeg", "jpe", "jif", "jfif", "jfi", "webp", "png", "gif", "svg", "svgz", "bmp", "dib",
 ];
+const APP_CONFIG_NAME: &str = "app_config.json";
 
 fn get_file_type(path_to_file: &Path) -> FileTypes {
     if path_to_file.is_dir() {
@@ -59,13 +71,17 @@ fn exists(path_to_file: String) -> bool {
 }
 
 #[tauri::command(async)]
-fn remove<R: Runtime>(window: Window<R>, path_to_file: String) -> Result<(), ErrorMessage> {
+fn remove<R: Runtime>(
+    window: Window<R>,
+    state: tauri::State<'_, CFSState>,
+    path_to_file: String,
+) -> Result<(), ErrorMessage> {
     let path = Path::new(&path_to_file);
 
     if path.is_dir() {
         remove_directory(window, path_to_file)
     } else if path.is_file() {
-        remove_file(window, path_to_file)
+        remove_file(window, state, path_to_file)
     } else {
         let filename = path.file_name().unwrap().to_string_lossy();
 
@@ -86,12 +102,16 @@ fn remove<R: Runtime>(window: Window<R>, path_to_file: String) -> Result<(), Err
 //     }
 // }
 
-#[tauri::command(async)] 
+#[tauri::command(async)]
 fn print_state(state: tauri::State<'_, CFSState>) {
     println!("{:#?}", state);
 }
 
-pub fn init<R: Runtime>() -> TauriPlugin<R> {
+pub fn init<R: Runtime>(config: &Config) -> TauriPlugin<R> {
+    let (js_init_script, app_config) = app_config::init(config, APP_CONFIG_NAME);
+
+    println!("{}", js_init_script);
+
     Builder::new("cfs")
         .invoke_handler(tauri::generate_handler![
             remove,
@@ -109,9 +129,10 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             print_state,
         ])
         .setup(|app| {
-            app.manage(CFSState::default());
+            app.manage(CFSState::new_app_config(app_config));
 
             Ok(())
         })
+        .js_init_script(js_init_script)
         .build()
 }

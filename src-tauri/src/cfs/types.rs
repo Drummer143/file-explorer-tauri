@@ -111,3 +111,43 @@ pub struct CopyCutProgress {
     pub total: usize,
     pub done: usize,
 }
+
+#[derive(serde::Deserialize, serde::Serialize, Debug)]
+pub struct NotificationConfig {
+    pub limit: usize,
+    pub tickspeed_ms: usize,
+    pub lifetime_ms: usize,
+}
+
+impl Default for NotificationConfig {
+    fn default() -> Self {
+        Self {
+            limit: 5,
+            tickspeed_ms: 200,
+            lifetime_ms: 10000,
+        }
+    }
+}
+
+#[derive(serde::Deserialize, serde::Serialize, Debug)]
+pub struct FilesystemConfig {
+    pub file_size_in_trashcan_limit_in_bytes: usize,
+    pub copy_speed_limit_bytes_per_second: usize,
+    pub copy_buffer_size_bytes: usize,
+}
+
+impl Default for FilesystemConfig {
+    fn default() -> Self {
+        Self {
+            file_size_in_trashcan_limit_in_bytes: 10485760,
+            copy_speed_limit_bytes_per_second: 12582912,
+            copy_buffer_size_bytes: 65536,
+        }
+    }
+}
+
+#[derive(Default, serde::Deserialize, serde::Serialize, Debug)]
+pub struct AppConfig {
+    pub notification: NotificationConfig,
+    pub filesystem: FilesystemConfig,
+}

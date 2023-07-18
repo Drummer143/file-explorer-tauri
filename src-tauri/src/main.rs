@@ -47,9 +47,11 @@ fn open_file(path_to_dir: String) -> Result<(), String> {
 // }
 
 fn main() {
+    let ctx = tauri::generate_context!();
+
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![open_file, raw_fs::remove])
-        .plugin(cfs::init())
-        .run(tauri::generate_context!())
+        .plugin(cfs::init(ctx.config()))
+        .run(ctx)
         .expect("Can't run app.");
 }

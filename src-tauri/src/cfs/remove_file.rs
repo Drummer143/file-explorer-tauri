@@ -1,7 +1,7 @@
 use std::{ffi::OsStr, fs, os::windows::prelude::MetadataExt, path::Path};
 use tauri::{api::dialog, Runtime, Window};
 
-use super::{types::ErrorMessage, FILE_SIZE_TRASHCAN_LIMIT};
+use super::types::ErrorMessage;
 
 enum RemoveFileOptions {
     Permanent,
@@ -70,6 +70,7 @@ fn confirm_deletion<R: Runtime>(
 #[tauri::command(async)]
 pub fn remove_file<R: Runtime>(
     window: Window<R>,
+    state: tauri::State<'_, super::CFSState>,
     path_to_file: String,
 ) -> Result<(), ErrorMessage> {
     let path_to_file = Path::new(&path_to_file);
@@ -94,7 +95,7 @@ pub fn remove_file<R: Runtime>(
         &window,
         filename,
         file_size > 0,
-        file_size >= FILE_SIZE_TRASHCAN_LIMIT,
+        file_size >= state.app_config.filesystem.file_size_in_trashcan_limit_in_bytes as u64,
     ) {
         RemoveFileOptions::Cancel => Ok(()),
         RemoveFileOptions::Permanent => remove_file_permanently(path_to_file),
