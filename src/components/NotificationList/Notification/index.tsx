@@ -1,15 +1,17 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { CloseSVG } from "@assets";
-import { useAppState, useNotificationStore } from "@zustand";
+import { useAppState } from "@zustand";
 
 import styles from "./Notification.module.scss";
 
-type NotificationComponentProps = AppNotification & { index: string };
+type NotificationComponentProps = AppNotification & {
+    index: string
+    onRemove: (index: string) => void
+};
 
-const NotificationComponent: React.FC<NotificationComponentProps> = ({ message, type, index, reason }) => {
+const NotificationComponent: React.FC<NotificationComponentProps> = ({ message, type, index, reason, onRemove }) => {
     const { notificationLiveTime, notificationTick } = useAppState();
-    const { removeNotification } = useNotificationStore();
 
     const [isOpened, setIsOpened] = useState(false);
 
@@ -30,16 +32,16 @@ const NotificationComponent: React.FC<NotificationComponentProps> = ({ message, 
                 clearInterval(updateInterval.current);
             }
 
-            removeNotification(index);
+            onRemove(index);
         }
-    }, notificationTick), [index, notificationLiveTime, notificationTick, removeNotification]);
+    }, notificationTick), [index, notificationLiveTime, notificationTick, onRemove]);
 
     const handleCloseNotification = () => {
         if (updateInterval.current) {
             clearInterval(updateInterval.current);
         }
 
-        removeNotification(index);
+        onRemove(index);
     };
 
     const handleMouseEnter = () => {
@@ -74,7 +76,7 @@ const NotificationComponent: React.FC<NotificationComponentProps> = ({ message, 
                 clearInterval(updateInterval.current);
             }
         };
-    }, [mountInterval, notificationLiveTime, notificationTick, removeNotification]);
+    }, [mountInterval, notificationLiveTime, notificationTick, onRemove]);
 
     return (
         <div

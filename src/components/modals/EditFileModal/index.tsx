@@ -4,11 +4,11 @@ import { sep } from "@tauri-apps/api/path";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { rename } from "@tauriAPI";
-import { isErrorMessage } from "@utils";
-import { useExplorerHistory, useNotificationStore } from "@zustand";
+import { useDisclosure } from "@hooks";
+import { useExplorerHistory } from "@zustand";
+import { addNotificationFromError } from "@utils";
 
 import styles from "./EditFileModal.module.scss";
-import { useDisclosure } from "@hooks";
 
 type Inputs = {
     filename: string;
@@ -16,7 +16,6 @@ type Inputs = {
 
 const EditFileModal: React.FC = () => {
     const { currentPath } = useExplorerHistory();
-    const { addNotification } = useNotificationStore();
 
     const { value: isOpen, setTrue: openModal, setFalse: closeModal } = useDisclosure();
 
@@ -31,7 +30,7 @@ const EditFileModal: React.FC = () => {
         }
     });
 
-    const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    const onSubmit: SubmitHandler<Inputs> = (data) => {
         const { filename } = data;
 
         if (filename === currentFilename) {
@@ -41,25 +40,7 @@ const EditFileModal: React.FC = () => {
         const oldPathToFile = currentPath + sep + currentFilename;
         const newPathToFile = currentPath + sep + filename;
 
-        console.log(oldPathToFile, newPathToFile);
-
-        try {
-            await rename(oldPathToFile, newPathToFile);
-        } catch (error) {
-            console.log(error);
-            if (isErrorMessage(error)) {
-                if (!isErrorMessage(error)) {
-                    return;
-                }
-
-                const message = error.message || error.error || "Unexpected error";
-                const reason = error.message && error.error ? error.error : undefined;
-
-                addNotification({ message, type: "error", reason });
-            } else if (typeof error === "string") {
-                addNotification({ type: "error", message: error });
-            }
-        }
+        rename(oldPathToFile, newPathToFile).catch(addNotificationFromError);
 
         closeModal();
     };

@@ -10,9 +10,15 @@ const ClipboardActionTrackerList: React.FC = () => {
     const handleRemoveTracker = (id: number) => setTrackers(prev => prev.filter(t => t.eventId !== id));
 
     useEffect(() => {
-        document.addEventListener("startTrackingClipboardAction", e => {
+        const handleAddTracker: CustomEventHandler<"startTrackingClipboardAction"> = e => {
             setTrackers(prev => prev.concat(e.detail));
-        });
+        };
+
+        document.addEventListener("startTrackingClipboardAction", handleAddTracker);
+        
+        return () => {
+            document.removeEventListener("startTrackingClipboardAction", handleAddTracker);
+        };
     }, []);
 
     return (

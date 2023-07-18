@@ -2,18 +2,18 @@ import { sep } from "@tauri-apps/api/path";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react";
 
-import { useExplorerHistory, useNotificationStore } from "../zustand";
-import { readDir, getDisks, watchDir } from "../tauriAPIWrapper";
+import { useExplorerHistory } from "../zustand";
 import { Event as TauriEvent } from "@tauri-apps/api/event";
+import { addNotificationFromError } from "@utils";
+import { readDir, getDisks, watchDir } from "../tauriAPIWrapper";
 
 export const useWatchPathChange = () => {
+    const { currentPath } = useExplorerHistory();
+
     const [loading, setLoading] = useState(false);
     const [files, setFiles] = useState<CFile[]>([]);
 
-    const { currentPath } = useExplorerHistory();
-    const { addNotification } = useNotificationStore();
-
-    const u = useRef<{
+    const untrackCurrentDir = useRef<{
         unwatch: () => Promise<void>;
         unlisten: UnlistenFn;
     } | undefined>(undefined);
@@ -55,10 +55,10 @@ export const useWatchPathChange = () => {
     const getFilesInDirectory = useCallback(async () => {
         setLoading(true);
 
-        if (u.current) {
-            u.current.unlisten();
-            await u.current.unwatch();
-            u.current = undefined;
+        if (untrackCurrentDir.current) {
+            untrackCurrentDir.current.unlisten();
+            await untrackCurrentDir.current.unwatch();
+            untrackCurrentDir.current = undefined;
         }
 
         try {
@@ -67,25 +67,21 @@ export const useWatchPathChange = () => {
 
                 setFiles(await readDir(path));
 
-                u.current = await watchDir(path, (e) => updateFilesOnDirChange(e, setFiles));
+                untrackCurrentDir.current = await watchDir(path, (e) => updateFilesOnDirChange(e, setFiles));
             } else {
                 setFiles(await getDisks());
             }
         } catch (error) {
-            addNotification({
-                message: JSON.stringify(error),
-                type: "error"
-            });
-            console.error(error);
+            addNotificationFromError(error);
         }
 
         setLoading(false);
-    }, [addNotification, currentPath, updateFilesOnDirChange]);
+    }, [currentPath, updateFilesOnDirChange]);
 
     useEffect(() => {
-        if (u.current) {
-            u.current.unwatch();
-            u.current.unlisten();
+        if (untrackCurrentDir.current) {
+            untrackCurrentDir.current.unwatch();
+            untrackCurrentDir.current.unlisten();
         }
     }, []);
 

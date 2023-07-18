@@ -1,3 +1,5 @@
+import { dispatchCustomEvent } from "./dom";
+
 export const getDiskBackgroundColor = (value: number) => {
     value = value > 1 ? 1 : value < 0 ? 0 : value;
 
@@ -14,13 +16,16 @@ export const isErrorMessage = (error: unknown): error is ErrorMessage => {
     return false;
 };
 
-export const parseTauriErrorForNotification = (error: unknown): Omit<AppNotification, "type"> | void => {
+export const addNotificationFromError = (
+    error: unknown,
+    type: "error" | "warn" | "info" = "error"
+): Omit<AppNotification, "type"> | void => {
     if (isErrorMessage(error)) {
         const message = error.message || error.error || "Unexpected error";
         const reason = error.message && error.error ? error.error : undefined;
 
-        return { message, reason };
+        dispatchCustomEvent("addNotification", { type, message, reason });
     } else if (typeof error === "string") {
-        return { message: error };
+        dispatchCustomEvent("addNotification", { type, message: error });
     }
 };

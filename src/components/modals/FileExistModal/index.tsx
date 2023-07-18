@@ -4,13 +4,11 @@ import { sep, extname, basename } from "@tauri-apps/api/path";
 
 import { pathExists } from "@tauriAPI";
 import { usePasteFile } from "@hooks";
-import { useNotificationStore } from "@zustand";
+import { dispatchCustomEvent } from "@utils";
 
 import styles from "./FileExistModal.module.scss";
 
 const FileExistModal: React.FC = () => {
-    const { addNotification } = useNotificationStore();
-
     const [pathInfo, setPathInfo] = useState<CustomEventMap["openExistFileModal"]["detail"] | undefined>(undefined);
 
     const closeModal = () => setPathInfo(undefined);
@@ -67,7 +65,7 @@ const FileExistModal: React.FC = () => {
         if (filetype === "file") {
             pasteFile({ dirname: pathInfo.dirname, filename }, options);
         } else {
-            addNotification({ message: "Can copy only files", type: "error" });
+            dispatchCustomEvent("addNotification", { message: "Can copy only files", type: "error" });
         }
 
         closeModal();

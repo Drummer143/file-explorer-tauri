@@ -1,14 +1,10 @@
 import { dirname, sep } from "@tauri-apps/api/path";
 import { useCallback } from "react";
 
-import { useNotificationStore } from "@zustand";
 import { copyFile, pathExists } from "@tauriAPI";
-import { clearClipboard, dispatchCustomEvent } from "@utils";
+import { addNotificationFromError, clearClipboard, dispatchCustomEvent } from "@utils";
 
 export const usePasteFile = () => {
-    // const { currentPath } = useExplorerHistory();
-    const { addNotificationFromError } = useNotificationStore();
-
     const checkExist = useCallback(async (newPathToFile: string, dirname: string, filename: string) => {
         const exists = await pathExists(newPathToFile);
 
@@ -48,8 +44,6 @@ export const usePasteFile = () => {
         const skipExist = copyOptions.skipExist || copyOptions.overwrite;
         const exists = skipExist ? false : await checkExist(newPathToFile, to.dirname, copiedFilename);
 
-        console.log("exists: ", exists, "!skipExist: ", skipExist);
-
         if (exists) {
             return false;
         }
@@ -68,8 +62,6 @@ export const usePasteFile = () => {
         copyOptions = { overwrite: false, skipExist: false }
     ) => {
         const isOk = await checkData(to, copyOptions);
-
-        console.log(isOk);
 
         if (!isOk) {
             return;
@@ -105,9 +97,9 @@ export const usePasteFile = () => {
                     return console.error("unimplemented");
             }
         } catch (error) {
-            addNotificationFromError(error, "error");
+            addNotificationFromError(error);
         }
-    }, [addNotificationFromError, checkData]);
+    }, [checkData]);
 
     return paste;
 };

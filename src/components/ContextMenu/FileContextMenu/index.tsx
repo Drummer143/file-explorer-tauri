@@ -3,8 +3,8 @@ import { sep } from "@tauri-apps/api/path";
 
 import { usePasteFile } from "@hooks";
 import { openFile, remove } from "@tauriAPI";
-import { addFileInClipboard, isErrorMessage } from "@utils";
-import { useExplorerHistory, useNotificationStore } from "@zustand";
+import { useExplorerHistory } from "@zustand";
+import { addFileInClipboard, addNotificationFromError, dispatchCustomEvent } from "@utils";
 
 type FileContextMenuProps = {
     filename: string;
@@ -12,7 +12,6 @@ type FileContextMenuProps = {
 };
 
 const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType }) => {
-    const { addNotification } = useNotificationStore();
     const { currentPath, pushRoute } = useExplorerHistory();
 
     const pasteFile = usePasteFile();
@@ -44,34 +43,12 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
         }
 
         openFile(path)
-            .catch(error => {
-                if (isErrorMessage(error)) {
-                    if (!isErrorMessage(error)) {
-                        return;
-                    }
-
-                    const message = error.message || error.error || "Unexpected error";
-                    const reason = error.message && error.error ? error.error : undefined;
-
-                    addNotification({ message, type: "error", reason });
-                } else if (typeof error === "string") {
-                    addNotification({ type: "error", message: error });
-                }
-            });
+            .catch(addNotificationFromError);
     };
 
     const handleDeleteFile = () => {
         remove(currentPath + sep + filename)
-            .catch(error => {
-                if (!isErrorMessage(error)) {
-                    return;
-                }
-
-                const message = error.message || error.error || "Unexpected error";
-                const reason = error.message && error.error ? error.error : undefined;
-
-                addNotification({ message, type: "error", reason });
-            });
+            .catch(addNotificationFromError);
     };
 
     const handleRenameFile = () =>
