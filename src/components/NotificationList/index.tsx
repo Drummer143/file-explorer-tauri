@@ -11,8 +11,7 @@ const NotificationList: React.FC = () => {
 
     const [notifications, setNotifications] = useState<(AppNotification & { index: string })[]>([]);
 
-    const handleRemoveNotification = (index: string) =>
-        setNotifications(prev => prev.filter(n => n.index !== index));
+    const handleRemoveNotification = (index: string) => setNotifications(prev => prev.filter(n => n.index !== index));
 
     useEffect(() => {
         const handleAddNotification: CustomEventHandler<"addNotification"> = e => {
@@ -37,14 +36,16 @@ const NotificationList: React.FC = () => {
     return (
         <div
             className={styles.wrapper}
-            style={{
-                "--notification-live-time": notificationLiveTime,
-                "--notification-tick-speed": notificationTick + "ms"
-            } as React.CSSProperties}
+            style={
+                {
+                    "--notification-live-time": notificationLiveTime,
+                    "--notification-tick-speed": notificationTick + "ms"
+                } as React.CSSProperties
+            }
         >
-            {notifications.map(n =>
+            {notifications.map(n => (
                 <AppNotificationComponent key={n.index} {...n} onRemove={handleRemoveNotification} />
-            )}
+            ))}
         </div>
     );
 };

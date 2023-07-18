@@ -15,7 +15,7 @@ const ClipboardActionTrackerList: React.FC = () => {
         };
 
         document.addEventListener("startTrackingClipboardAction", handleAddTracker);
-        
+
         return () => {
             document.removeEventListener("startTrackingClipboardAction", handleAddTracker);
         };

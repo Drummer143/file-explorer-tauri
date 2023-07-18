@@ -28,10 +28,10 @@ interface AppNotification {
     message: string;
     type: "info" | "warn" | "error";
 
-    reason?: string
+    reason?: string;
 }
 
 interface ErrorMessage {
-    message?: string
-    error?: string
+    message?: string;
+    error?: string;
 }

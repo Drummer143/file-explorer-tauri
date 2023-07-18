@@ -21,7 +21,7 @@ interface ExplorerHistoryState {
 }
 
 export const useExplorerHistory = create<ExplorerHistoryState>()(
-    /* persist( */(set, get) => ({
+    /* persist( */ (set, get) => ({
         canGoBack: false,
         canGoForward: false,
         currentPath: "",

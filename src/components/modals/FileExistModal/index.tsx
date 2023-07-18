@@ -94,14 +94,21 @@ const FileExistModal: React.FC = () => {
             className={styles.modalBody}
             portalClassName={styles.portal}
         >
-            <p>{pathInfo?.filename.split(sep).at(-1)} already exists in {pathInfo?.dirname}. Choose an action:</p>
+            <p>
+                {pathInfo?.filename.split(sep).at(-1)} already exists in {pathInfo?.dirname}. Choose an action:
+            </p>
 
             <div className={styles.actionButtons}>
-                <button onClick={() => handleClick("overwrite")} type="button">Overwrite</button>
-                <button onClick={() => handleClick("save-both")} type="button">Save both</button>
-                <button onClick={() => handleClick("cancel")} type="button">Cancel</button>
+                <button onClick={() => handleClick("overwrite")} type="button">
+                    Overwrite
+                </button>
+                <button onClick={() => handleClick("save-both")} type="button">
+                    Save both
+                </button>
+                <button onClick={() => handleClick("cancel")} type="button">
+                    Cancel
+                </button>
             </div>
-
         </ReactModal>
     );
 };

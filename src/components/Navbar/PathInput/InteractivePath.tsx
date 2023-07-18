@@ -31,7 +31,9 @@ const InteractivePath: React.FC = () => {
                         className={styles.pathPart}
                         disabled={length - 1 === i}
                         onClick={() => handlePathPartClick(i)}
-                    >{pathPart}</button>
+                    >
+                        {pathPart}
+                    </button>
 
                     {length - 1 !== i && <p className={styles.pathSeparator}>{sep}</p>}
                 </React.Fragment>

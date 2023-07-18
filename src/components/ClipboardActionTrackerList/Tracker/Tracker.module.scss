@@ -26,7 +26,12 @@
 
         transition: width 50ms;
         pointer-events: none;
-        background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 70%, rgba(255, 255, 255, 0.3) 90%);
+        background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.2) 70%,
+            rgba(255, 255, 255, 0.3) 90%
+        );
     }
 }
 
@@ -54,7 +59,7 @@
         display: flex;
     }
 
-    &>button {
+    & > button {
         height: 20px;
         width: 20px;
 
@@ -70,7 +75,7 @@
             background-color: rgba($color: #fff, $alpha: 0.2);
         }
 
-        &>svg {
+        & > svg {
             fill: white;
         }
     }

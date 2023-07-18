@@ -57,5 +57,5 @@ type Events = {
 
 interface FileCopyOptions {
     skipExist: boolean;
-    overwrite: boolean
+    overwrite: boolean;
 }

@@ -42,13 +42,11 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
                 path = currentPath + sep;
         }
 
-        openFile(path)
-            .catch(addNotificationFromError);
+        openFile(path).catch(addNotificationFromError);
     };
 
     const handleDeleteFile = () => {
-        remove(currentPath + sep + filename)
-            .catch(addNotificationFromError);
+        remove(currentPath + sep + filename).catch(addNotificationFromError);
     };
 
     const handleRenameFile = () =>

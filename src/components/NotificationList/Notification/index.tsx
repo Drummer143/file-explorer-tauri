@@ -6,8 +6,8 @@ import { useAppState } from "@zustand";
 import styles from "./Notification.module.scss";
 
 type NotificationComponentProps = AppNotification & {
-    index: string
-    onRemove: (index: string) => void
+    index: string;
+    onRemove: (index: string) => void;
 };
 
 const NotificationComponent: React.FC<NotificationComponentProps> = ({ message, type, index, reason, onRemove }) => {
@@ -19,22 +19,26 @@ const NotificationComponent: React.FC<NotificationComponentProps> = ({ message, 
     const currentTime = useRef<number>(0);
     const notificationRef = useRef<HTMLDivElement>(null);
 
-    const mountInterval = useCallback(() => setInterval(() => {
-        if (currentTime.current < notificationLiveTime) {
-            currentTime.current += notificationTick;
+    const mountInterval = useCallback(
+        () =>
+            setInterval(() => {
+                if (currentTime.current < notificationLiveTime) {
+                    currentTime.current += notificationTick;
 
-            notificationRef.current?.style.setProperty(
-                "--current-percentage",
-                (currentTime.current / notificationLiveTime * 100) + "%"
-            );
-        } else {
-            if (updateInterval.current) {
-                clearInterval(updateInterval.current);
-            }
+                    notificationRef.current?.style.setProperty(
+                        "--current-percentage",
+                        (currentTime.current / notificationLiveTime) * 100 + "%"
+                    );
+                } else {
+                    if (updateInterval.current) {
+                        clearInterval(updateInterval.current);
+                    }
 
-            onRemove(index);
-        }
-    }, notificationTick), [index, notificationLiveTime, notificationTick, onRemove]);
+                    onRemove(index);
+                }
+            }, notificationTick),
+        [index, notificationLiveTime, notificationTick, onRemove]
+    );
 
     const handleCloseNotification = () => {
         if (updateInterval.current) {
@@ -90,7 +94,9 @@ const NotificationComponent: React.FC<NotificationComponentProps> = ({ message, 
             <div className={styles.heading}>
                 <p className={styles.headingText}>{type}</p>
 
-                <button className={styles.closeButton} onClick={handleCloseNotification}><CloseSVG /></button>
+                <button className={styles.closeButton} onClick={handleCloseNotification}>
+                    <CloseSVG />
+                </button>
             </div>
 
             <div className={styles.body} onClick={toggleReason}>

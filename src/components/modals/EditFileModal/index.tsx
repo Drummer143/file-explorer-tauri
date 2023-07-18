@@ -12,7 +12,7 @@ import styles from "./EditFileModal.module.scss";
 
 type Inputs = {
     filename: string;
-}
+};
 
 const EditFileModal: React.FC = () => {
     const { currentPath } = useExplorerHistory();
@@ -21,7 +21,12 @@ const EditFileModal: React.FC = () => {
 
     const [currentFilename, setCurrentFilename] = useState<string | undefined>();
 
-    const { register, formState: { errors }, handleSubmit, setValue } = useForm<Inputs>({
+    const {
+        register,
+        formState: { errors },
+        handleSubmit,
+        setValue
+    } = useForm<Inputs>({
         defaultValues: {
             filename: ""
         },
@@ -30,7 +35,7 @@ const EditFileModal: React.FC = () => {
         }
     });
 
-    const onSubmit: SubmitHandler<Inputs> = (data) => {
+    const onSubmit: SubmitHandler<Inputs> = data => {
         const { filename } = data;
 
         if (filename === currentFilename) {
@@ -96,12 +101,18 @@ const EditFileModal: React.FC = () => {
                         })}
                     />
 
-                    {errors.filename && <p>{errors.filename.type} - {errors.filename.message}</p>}
+                    {errors.filename && (
+                        <p>
+                            {errors.filename.type} - {errors.filename.message}
+                        </p>
+                    )}
                 </label>
 
-                <button className={styles.submitButton} type="submit">Save</button>
+                <button className={styles.submitButton} type="submit">
+                    Save
+                </button>
             </form>
-        </Modal >
+        </Modal>
     );
 };
 

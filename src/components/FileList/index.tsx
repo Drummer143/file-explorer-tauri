@@ -34,48 +34,53 @@ const FileList: React.FC = () => {
 
     const { files } = useWatchPathChange();
 
-    const handleCopyCutPasteFile = useCallback((e: KeyboardEvent) => {
-        const target = e.target as HTMLElement;
+    const handleCopyCutPasteFile = useCallback(
+        (e: KeyboardEvent) => {
+            const target = e.target as HTMLElement;
 
-        if (!e.ctrlKey || !target) {
-            return;
-        }
-
-        switch (e.code) {
-            case "KeyX": {
-                const canMoveTarget = target.dataset.contextMenuType !== "disk";
-                const filename = target.dataset.contextMenuAdditionalInfo;
-                const filetype = target.dataset.contextMenuType;
-
-                if (canMoveTarget && filename && filetype) {
-                    addFileInClipboard(currentPath + sep + filename, filename, filetype, "cut");
-                }
-
-                break;
+            if (!e.ctrlKey || !target) {
+                return;
             }
-            case "KeyC": {
-                const filename = target.dataset.contextMenuAdditionalInfo;
-                const filetype = target.dataset.contextMenuType;
 
-                if (filename && filetype) {
-                    addFileInClipboard(currentPath + sep + filename, filename, filetype, "copy");
+            switch (e.code) {
+                case "KeyX": {
+                    const canMoveTarget = target.dataset.contextMenuType !== "disk";
+                    const filename = target.dataset.contextMenuAdditionalInfo;
+                    const filetype = target.dataset.contextMenuType;
+
+                    if (canMoveTarget && filename && filetype) {
+                        addFileInClipboard(currentPath + sep + filename, filename, filetype, "cut");
+                    }
+
+                    break;
                 }
+                case "KeyC": {
+                    const filename = target.dataset.contextMenuAdditionalInfo;
+                    const filetype = target.dataset.contextMenuType;
 
-                break;
-            }
-            case "KeyV": {
-                let to = currentPath;
-                const possibleFocusedFileName = (document.activeElement as HTMLElement | null)?.dataset.contextMenuAdditionalInfo;
-                const isNotFile = (document.activeElement as HTMLElement | null)?.dataset.contextMenuType !== "file";
+                    if (filename && filetype) {
+                        addFileInClipboard(currentPath + sep + filename, filename, filetype, "copy");
+                    }
 
-                if (possibleFocusedFileName && isNotFile) {
-                    to = to + sep + possibleFocusedFileName;
+                    break;
                 }
+                case "KeyV": {
+                    let to = currentPath;
+                    const possibleFocusedFileName = (document.activeElement as HTMLElement | null)?.dataset
+                        .contextMenuAdditionalInfo;
+                    const isNotFile =
+                        (document.activeElement as HTMLElement | null)?.dataset.contextMenuType !== "file";
 
-                pasteFile({ dirname: to });
+                    if (possibleFocusedFileName && isNotFile) {
+                        to = to + sep + possibleFocusedFileName;
+                    }
+
+                    pasteFile({ dirname: to });
+                }
             }
-        }
-    }, [currentPath, pasteFile]);
+        },
+        [currentPath, pasteFile]
+    );
 
     useEffect(() => {
         document.addEventListener("keydown", handleCopyCutPasteFile);
@@ -102,11 +107,7 @@ const FileList: React.FC = () => {
 
     return (
         <>
-            <div
-                ref={listContainerRef}
-                className={styles.wrapper}
-                data-context-menu-type={CTXTypes.explorer}
-            >
+            <div ref={listContainerRef} className={styles.wrapper} data-context-menu-type={CTXTypes.explorer}>
                 {files.map(mapFiles)}
             </div>
 

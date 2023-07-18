@@ -13,44 +13,47 @@ export const useWatchPathChange = () => {
     const [loading, setLoading] = useState(false);
     const [files, setFiles] = useState<CFile[]>([]);
 
-    const untrackCurrentDir = useRef<{
-        unwatch: () => Promise<void>;
-        unlisten: UnlistenFn;
-    } | undefined>(undefined);
+    const untrackCurrentDir = useRef<
+        | {
+              unwatch: () => Promise<void>;
+              unlisten: UnlistenFn;
+          }
+        | undefined
+    >(undefined);
 
-    const updateFilesOnDirChange = useCallback((
-        { payload }: TauriEvent<ChangesInDirectoryPayload>,
-        handleFiles: Dispatch<SetStateAction<CFile[]>>
-    ) => {
-        switch (payload.type) {
-            case "remove": {
-                handleFiles(prev => prev.filter(f => f.name !== payload.name));
+    const updateFilesOnDirChange = useCallback(
+        ({ payload }: TauriEvent<ChangesInDirectoryPayload>, handleFiles: Dispatch<SetStateAction<CFile[]>>) => {
+            switch (payload.type) {
+                case "remove": {
+                    handleFiles(prev => prev.filter(f => f.name !== payload.name));
 
-                break;
-            }
-            case "create": {
-                handleFiles(prev => prev.concat(payload.fileInfo));
-
-                break;
-            }
-            case "modify":
-                if (payload.kind.modify.kind === "rename") {
-                    if (payload.kind.modify.mode === "from") {
-                        handleFiles(prev => prev.filter(f => f.name !== payload.name));
-                    } else {
-                        handleFiles(prev => prev.concat(payload.fileInfo));
-                    }
-                } else {
-                    handleFiles(prev => prev.filter(f => f.name !== payload.name).concat(payload.fileInfo));
+                    break;
                 }
+                case "create": {
+                    handleFiles(prev => prev.concat(payload.fileInfo));
 
-                break;
-            case "any":
-            case "other":
-            case "access":
-                console.warn("unhandled dir change: ", payload);
-        }
-    }, []);
+                    break;
+                }
+                case "modify":
+                    if (payload.kind.modify.kind === "rename") {
+                        if (payload.kind.modify.mode === "from") {
+                            handleFiles(prev => prev.filter(f => f.name !== payload.name));
+                        } else {
+                            handleFiles(prev => prev.concat(payload.fileInfo));
+                        }
+                    } else {
+                        handleFiles(prev => prev.filter(f => f.name !== payload.name).concat(payload.fileInfo));
+                    }
+
+                    break;
+                case "any":
+                case "other":
+                case "access":
+                    console.warn("unhandled dir change: ", payload);
+            }
+        },
+        []
+    );
 
     const getFilesInDirectory = useCallback(async () => {
         setLoading(true);
@@ -67,7 +70,7 @@ export const useWatchPathChange = () => {
 
                 setFiles(await readDir(path));
 
-                untrackCurrentDir.current = await watchDir(path, (e) => updateFilesOnDirChange(e, setFiles));
+                untrackCurrentDir.current = await watchDir(path, e => updateFilesOnDirChange(e, setFiles));
             } else {
                 setFiles(await getDisks());
             }

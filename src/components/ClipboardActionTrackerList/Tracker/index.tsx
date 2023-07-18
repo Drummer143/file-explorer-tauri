@@ -18,16 +18,14 @@ const Tracker: React.FC<TrackerProps> = ({ eventId, filename, from, to, onRemove
 
     const trackerRef = useRef<HTMLDivElement | null>(null);
     const untrack = useRef<{
-        progress: UnlistenFn
-        finished: UnlistenFn
+        progress: UnlistenFn;
+        finished: UnlistenFn;
     } | null>(null);
 
     const mountListeners = useCallback(async () => {
         // const u1 = await appWindow.listen(`copy-started//${eventId}`, e => console.log(e));
-        const progress = await appWindow.listen<
-            { done: number, total: number }
-        >(`copy-progress//${eventId}`, e => {
-            trackerRef.current?.style.setProperty("--action-progress", (e.payload.done / e.payload.total * 100) + "%");
+        const progress = await appWindow.listen<{ done: number; total: number }>(`copy-progress//${eventId}`, e => {
+            trackerRef.current?.style.setProperty("--action-progress", (e.payload.done / e.payload.total) * 100 + "%");
         });
 
         const finished = await appWindow.once(`copy-finished//${eventId}`, () => {
@@ -76,20 +74,32 @@ const Tracker: React.FC<TrackerProps> = ({ eventId, filename, from, to, onRemove
         <div ref={trackerRef} className={styles.wrapper}>
             {!askDelete ? (
                 <>
-                    <p title={`Copying ${filename} from ${from} to ${to}`} className={styles.text}>Copying {filename} from {from} to {to}</p>
+                    <p title={`Copying ${filename} from ${from} to ${to}`} className={styles.text}>
+                        Copying {filename} from {from} to {to}
+                    </p>
 
                     <div className={styles.buttons}>
-                        <button type="button" onClick={togglePause}>{paused ? <PlaySVG /> : <PauseSVG />}</button>
-                        <button type="button" onClick={handleTerminateAction}><CloseSVG strokeWidth={2} width={14} height={14} /></button>
+                        <button type="button" onClick={togglePause}>
+                            {paused ? <PlaySVG /> : <PauseSVG />}
+                        </button>
+                        <button type="button" onClick={handleTerminateAction}>
+                            <CloseSVG strokeWidth={2} width={14} height={14} />
+                        </button>
                     </div>
                 </>
             ) : (
                 <>
-                    <p title="Delete copied file?" className={styles.text}>Delete copied file?</p>
+                    <p title="Delete copied file?" className={styles.text}>
+                        Delete copied file?
+                    </p>
 
                     <div className={styles.buttons}>
-                        <button type="button" onClick={handleRemoveTrackerAndDeleteCopiedFile}><CheckMarkSVG /></button>
-                        <button type="button" onClick={handleRemoveTracker}><CloseSVG strokeWidth={2} width={14} height={14} /></button>
+                        <button type="button" onClick={handleRemoveTrackerAndDeleteCopiedFile}>
+                            <CheckMarkSVG />
+                        </button>
+                        <button type="button" onClick={handleRemoveTracker}>
+                            <CloseSVG strokeWidth={2} width={14} height={14} />
+                        </button>
                     </div>
                 </>
             )}

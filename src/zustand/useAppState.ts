@@ -3,7 +3,7 @@ import { create } from "zustand";
 interface AppState {
     notificationLiveTime: number;
     notificationTick: number;
-    notificationLimit: number
+    notificationLimit: number;
 }
 
 export const useAppState = create<AppState>(() => ({

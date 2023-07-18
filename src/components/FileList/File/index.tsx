@@ -27,9 +27,7 @@ const File: React.FC<FileProps> = ({ name, size, type }) => {
             data-context-menu-additional-info-lowercased={name.toLocaleLowerCase()}
         >
             <div className={styles.icon}>
-                {type === "file" ? <FileSVG /> : (
-                    <img src={convertFileSrc(currentPath + sep + name)} />
-                )}
+                {type === "file" ? <FileSVG /> : <img src={convertFileSrc(currentPath + sep + name)} />}
             </div>
 
             <div className={styles.description}>
