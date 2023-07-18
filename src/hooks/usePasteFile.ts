@@ -1,12 +1,9 @@
-import { sep } from "@tauri-apps/api/path";
+import { dirname, sep } from "@tauri-apps/api/path";
 import { useCallback } from "react";
 
+import { useNotificationStore } from "@zustand";
+import { copyFile, pathExists } from "@tauriAPI";
 import { clearClipboard, dispatchCustomEvent } from "@utils";
-import { copyFile, pathExists, removeCopyProcessFromState } from "@tauriAPI";
-import { useExplorerHistory, useNotificationStore } from "@zustand";
-import { appWindow } from "@tauri-apps/api/window";
-import { Event as tauriEvent } from "@tauri-apps/api/event";
-import { v4 } from "uuid";
 
 export const usePasteFile = () => {
     // const { currentPath } = useExplorerHistory();
@@ -33,24 +30,27 @@ export const usePasteFile = () => {
         } = document.documentElement.dataset;
         let copiedFilename = document.documentElement.dataset.copiedFilename;
 
-        if (!copiedFileType || !pathToCopiedFile || !clipboardAction) {
+        // "clipboard" must have all these field
+        if (!copiedFileType || !pathToCopiedFile || !clipboardAction || !copiedFilename) {
             return false;
         }
 
         if (to.filename) {
             copiedFilename = to.filename;
-        } else if (!copiedFilename) {
-            return false;
         }
 
+        // if user is pasting file in the same folder where he copied file
         if (pathToCopiedFile === to.dirname + sep + copiedFilename) {
             return false;
         }
 
         const newPathToFile = to.dirname + sep + copiedFilename;
-        const skipExist = !copyOptions.skipExist || !copyOptions.overwrite;
+        const skipExist = copyOptions.skipExist || copyOptions.overwrite;
+        const exists = skipExist ? false : await checkExist(newPathToFile, to.dirname, copiedFilename);
 
-        if (skipExist && await checkExist(newPathToFile, to.dirname, copiedFilename)) {
+        console.log("exists: ", exists, "!skipExist: ", skipExist);
+
+        if (exists) {
             return false;
         }
 
@@ -69,6 +69,8 @@ export const usePasteFile = () => {
     ) => {
         const isOk = await checkData(to, copyOptions);
 
+        console.log(isOk);
+
         if (!isOk) {
             return;
         }
@@ -76,6 +78,7 @@ export const usePasteFile = () => {
         const {
             copiedFileType,
             pathToCopiedFile,
+            copiedFilename,
             clipboardAction,
             newPathToFile
         } = isOk;
@@ -85,52 +88,9 @@ export const usePasteFile = () => {
         const action: ClipboardAction = (clipboardAction === "copy" ? "c" : "m") + (copiedFileType === "file" ? "f" : "d") as ClipboardAction;
         const id = Math.floor(Math.random() * 1000);
 
-        const handleKeyDown = (e: KeyboardEvent) => {
-            console.log("before e.shiftKey", e);
+        const dirnameFrom = await dirname(pathToCopiedFile);
 
-            if (!e.shiftKey) {
-                return;
-            }
-
-            console.log("after e.shiftKey", e);
-            
-            switch (e.code) {
-                case "KeyP":
-                    return appWindow.emit(`copy-change-state//${id}`, "pause");
-                case "KeyR":
-                    return appWindow.emit(`copy-change-state//${id}`, "run");
-                case "KeyE":
-                    return appWindow.emit(`copy-change-state//${id}`, "exit");
-            }
-        };
-
-        let canLog = true;
-
-        const u1 = await appWindow.listen(`copy-started//${id}`, e => console.log(e));
-        const u2 = await appWindow.listen(`copy-progress//${id}`, e => {
-            if(canLog) {
-                console.log(e);
-
-                canLog = false;
-
-                setTimeout(() => {
-                    canLog = true;
-                }, 2000);
-            }
-        });
-
-        appWindow.once(`copy-finished//${id}`, e => {
-            console.log(e);
-
-            removeCopyProcessFromState(id);
-
-            document.removeEventListener("keydown", handleKeyDown);
-
-            u1();
-            u2();
-        });
-
-        document.addEventListener("keydown", handleKeyDown);
+        dispatchCustomEvent("startTrackingClipboardAction", {eventId: id, from: dirnameFrom, to: to.dirname, filename: copiedFilename });
 
         try {
             switch (action) {

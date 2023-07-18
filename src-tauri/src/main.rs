@@ -4,6 +4,7 @@
 )]
 
 mod cfs;
+mod raw_fs;
 
 use std::path::Path;
 
@@ -47,7 +48,7 @@ fn open_file(path_to_dir: String) -> Result<(), String> {
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![open_file])
+        .invoke_handler(tauri::generate_handler![open_file, raw_fs::remove])
         .plugin(cfs::init())
         .run(tauri::generate_context!())
         .expect("Can't run app.");

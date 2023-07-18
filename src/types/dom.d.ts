@@ -1,6 +1,7 @@
 interface CustomEventMap {
     "openEditFileModal": CustomEvent<{ filename: string }>;
     "openExistFileModal": CustomEvent<{ dirname: string, filename: string }>
+    "startTrackingClipboardAction": CustomEvent<{ eventId: number, filename: string, from: string, to: string }>
 }
 
 interface Document {

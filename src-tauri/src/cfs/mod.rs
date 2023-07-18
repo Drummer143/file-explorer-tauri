@@ -109,8 +109,8 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             print_state,
         ])
         .setup(|app| {
-            // setup plugin specific state here
             app.manage(CFSState::default());
+
             Ok(())
         })
         .build()

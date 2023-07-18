@@ -1,4 +1,8 @@
+use std::io::Error;
+use std::time::{Duration, Instant};
 use std::{
+    fs::File,
+    io::{Read, Write},
     path::Path,
     sync::{Arc, Condvar, Mutex},
     thread,
@@ -41,75 +45,114 @@ fn spawn_copy_thread<R: Runtime>(
     window: Window<R>,
     path_from: String,
     path_to: String,
-    options: &CopyOptions,
     event_id: usize,
     pair: Arc<(Mutex<CopyActions>, Condvar)>,
-) {
-    let copy_options = fs_extra::file::CopyOptions::new()
-        .overwrite(options.overwrite)
-        .skip_exist(options.skip_exist);
+) -> Result<(), ErrorMessage> {
+    let file_from = File::open(&path_from);
+
+    if let Err(error) = file_from {
+        return Err(ErrorMessage::new_all(
+            "Can't open target file".into(),
+            error.to_string(),
+        ));
+    }
+
+    let mut file_from = file_from.unwrap();
+    let file_to = File::create(path_to);
+
+    if let Err(error) = file_to {
+        return Err(ErrorMessage::new_all(
+            "Can't create file file".into(),
+            error.to_string(),
+        ));
+    }
+
+    let mut file_to = file_to.unwrap();
+    let progress_event_name = format!("copy-progress//{}", event_id);
+    let finish_event_name = format!("copy-finished//{}", event_id);
+    let buffer_size_bytes = 64 * 1024;
+    let speed_limit_bytes_per_second = 12 * 1024 * 1024;
+    let file_size = file_from.metadata().unwrap().len();
+    let mut total_bytes_copied = 0;
+    let mut buffer = vec![0; buffer_size_bytes];
+    let start_time = Instant::now();
 
     thread::spawn(move || {
-        let progress_event_name = format!("copy-progress//{}", event_id);
-        let finish_event_name = format!("copy-progress//{}", event_id);
-        // let start_event_name = format!("copy-started//{}", event_id);
+        let result: Option<Error> = loop {
+            let &(ref lock, ref cvar) = &*pair;
+            let mut state = lock.lock().unwrap();
 
-        // window
-        //     .emit(&start_event_name, event_id)
-        //     .unwrap();
-
-        let result =
-            fs_extra::file::copy_with_progress(path_from, path_to, &copy_options, |progress| {
-                let &(ref lock, ref cvar) = &*pair;
-                let mut state = lock.lock().unwrap();
-
-                window
-                    .emit(
-                        &progress_event_name,
-                        CopyCutProgress {
-                            done: progress.copied_bytes as usize,
-                            total: progress.total_bytes as usize,
-                        },
-                    )
-                    .unwrap();
-
-                match *state {
-                    CopyActions::Run => {}
-                    CopyActions::Pause => {
-                        println!("paused before while");
-
-                        while *state == CopyActions::Pause {
-                            println!("paused in while");
-                            state = cvar.wait(state).unwrap();
-                        }
-                    }
-                    CopyActions::Exit => {
-                        println!("exit");
-
-                        window.emit(&finish_event_name, -2).unwrap();
-
-                        todo!("Terminate thread here");
+            match *state {
+                CopyActions::Run => {
+                    window
+                        .emit(
+                            &progress_event_name,
+                            CopyCutProgress {
+                                done: total_bytes_copied as usize,
+                                total: file_size as usize,
+                            },
+                        )
+                        .unwrap();
+                }
+                CopyActions::Pause => {
+                    while *state == CopyActions::Pause {
+                        state = cvar.wait(state).unwrap();
                     }
                 }
-            });
+                CopyActions::Exit => {
+                    window.emit(&finish_event_name, -2).unwrap();
 
-        match result {
-            Ok(res) => {
-                window.emit(&finish_event_name, res).unwrap();
+                    break None;
+                }
             }
-            Err(error) => {
-                window
-                    .emit(
-                        &finish_event_name,
-                        ErrorMessage::new_all(
-                            "Error while copying files".into(),
-                            error.to_string(),
-                        ),
-                    )
-                    .unwrap();
+
+            let bytes_read = file_from.read(&mut buffer);
+
+            if let Err(error) = bytes_read {
+                break Some(error);
             }
+
+            let bytes_read = bytes_read.unwrap();
+
+            if bytes_read == 0 {
+                // Достигнут конец файла
+                break None;
+            }
+
+            let result = file_to.write_all(&buffer[..bytes_read]);
+
+            if let Err(error) = result {
+                break Some(error);
+            }
+
+            total_bytes_copied += bytes_read;
+
+            let elapsed_time = start_time.elapsed();
+            let elapsed_seconds = elapsed_time.as_secs();
+            let elapsed_bytes = total_bytes_copied;
+            let expected_bytes = speed_limit_bytes_per_second * elapsed_seconds;
+
+            if elapsed_bytes > (expected_bytes as usize) {
+                let sleep_duration = Duration::from_secs(1);
+                thread::sleep(sleep_duration);
+            }
+        };
+
+        println!("finished");
+
+        if let Some(error) = result {
+            window
+                .emit(
+                    &finish_event_name,
+                    ErrorMessage::new_all("Error while copying files".into(), error.to_string()),
+                )
+                .unwrap();
+        } else {
+            window.emit(&finish_event_name, 0).unwrap();
         }
     });
+
+    Ok(())
 }
 
 #[tauri::command(async)]
@@ -161,22 +204,19 @@ pub fn copy_file<R: Runtime>(
         }
     });
 
-    spawn_copy_thread(
-        window.clone(),
-        from.clone(),
-        to.clone(),
-        &copy_options,
-        event_id,
-        pair_clone,
-    );
-
     state
         .copy_processes
         .lock()
         .unwrap()
         .insert(event_id, listener_id);
 
-    Ok(())
+    spawn_copy_thread(
+        window.clone(),
+        from.clone(),
+        to.clone(),
+        event_id,
+        pair_clone,
+    )
 }
 
 #[tauri::command(async)]

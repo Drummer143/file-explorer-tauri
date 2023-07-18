@@ -5,6 +5,7 @@ import FileList from "../FileList";
 import WindowFrame from "../WindowFrame";
 import ContextMenu from "../ContextMenu";
 import NotificationList from "../NotificationList";
+import ClipboardActionTrackerList from "../ClipboardActionTrackerList";
 
 import styles from "./Layout.module.scss";
 
@@ -22,7 +23,12 @@ const Layout: React.FC = () => {
             </div>
 
             <ContextMenu />
-            <NotificationList />
+
+            <div className={styles.popupZone}>
+                <NotificationList />
+
+                <ClipboardActionTrackerList />
+            </div>
         </>
     );
 };

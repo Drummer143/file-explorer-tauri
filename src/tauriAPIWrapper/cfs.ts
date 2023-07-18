@@ -1,4 +1,4 @@
-import { invoke, event, globalShortcut } from "@tauri-apps/api";
+import { invoke, event } from "@tauri-apps/api";
 
 export const unwatchDir = (id: number) => invoke<void>("plugin:cfs|unwatch", { id });
 
@@ -44,5 +44,3 @@ export const removeCopyProcessFromState = (id: number): Promise<void> =>
     invoke("plugin:cfs|remove_copy_process_from_state", { id });
 
 export const printCFSState = (): Promise<void> => invoke("plugin:cfs|print_state");
-
-globalShortcut.register("CmdOrControl+Shift+S", printCFSState);

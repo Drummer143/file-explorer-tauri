@@ -53,7 +53,7 @@ const WindowControlButtons: React.FC = () => {
                 onClick={close}
                 title={t("windowControlButtons.close")}
             >
-                <CloseSVG />
+                <CloseSVG width={16} height={16} />
             </button>
         </div>
     );
