@@ -1,6 +1,5 @@
 .wrapper {
     width: 100%;
-    max-height: 100%;
 
     padding: 2rem;
 
@@ -10,6 +9,10 @@
     grid-auto-rows: min-content;
     justify-content: center;
 
-    overflow-x: hidden;
-    overflow-y: auto;
+    // overflow-x: hidden;
+    // overflow-y: auto;
+
+    ::-webkit-scrollbar {
+        appearance: none;
+    }
 }

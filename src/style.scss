@@ -71,3 +71,22 @@ body {
 .cut-file * {
     opacity: 0.75;
 }
+
+.os-scrollbar {
+    width: 16px;
+}
+
+.os-scrollbar-vertical .os-scrollbar-handle {
+    max-height: 50%;
+
+    border-radius: 2px;
+    background-color: rgba(#404040, 0.5);
+
+    &:hover {
+        background-color: rgba(#404040, 1);
+    }
+}
+
+.os-scrollbar-horizontal .os-scrollbar-handle {
+    display: none;
+}

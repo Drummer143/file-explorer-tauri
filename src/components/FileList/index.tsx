@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { sep } from "@tauri-apps/api/path";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 
 import Disk from "./Disk";
 import File from "./File";
@@ -16,7 +17,7 @@ const FileList: React.FC = () => {
 
     const pasteFile = usePasteFile();
 
-    const listContainerRef = useRef<HTMLDivElement>(null);
+    const listContainerRef = useRef<HTMLDivElement | null>(null);
 
     const mapFiles = (file: CFile) => {
         switch (file.type) {
@@ -107,9 +108,23 @@ const FileList: React.FC = () => {
 
     return (
         <>
-            <div ref={listContainerRef} className={styles.wrapper} data-context-menu-type={CTXTypes.explorer}>
-                {files.map(mapFiles)}
-            </div>
+            <OverlayScrollbarsComponent
+                element="div"
+                defer
+                options={{
+                    overflow: {
+                        x: "hidden"
+                    },
+                    scrollbars: {
+                        autoHide: "leave",
+                        autoHideDelay: 150
+                    }
+                }}
+            >
+                <div ref={listContainerRef} className={styles.wrapper} data-context-menu-type={CTXTypes.explorer}>
+                    {files.map(mapFiles)}
+                </div>
+            </OverlayScrollbarsComponent>
 
             <EditFileModal />
             <FileExistModal />

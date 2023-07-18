@@ -27,8 +27,8 @@ declare global {
     type CustomEventHandler<T extends keyof CustomEventMap> = (event: CustomEventMap[T]) => void;
 
     interface Window {
-        appConfig: AppConfig
+        appConfig: AppConfig;
     }
 }
 
-export { };
+export {};
