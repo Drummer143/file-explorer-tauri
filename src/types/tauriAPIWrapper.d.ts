@@ -58,4 +58,5 @@ type Events = {
 interface FileCopyOptions {
     skipExist: boolean;
     overwrite: boolean;
+    removeTargetOnFinish?: boolean;
 }

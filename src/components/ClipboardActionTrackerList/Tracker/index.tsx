@@ -8,11 +8,11 @@ import { PlaySVG, PauseSVG, CloseSVG, CheckMarkSVG } from "@assets";
 
 import styles from "./Tracker.module.scss";
 
-type TrackerProps = CustomEventMap["startTrackingClipboardAction"]["detail"] & {
+type TrackerProps = StartTrackingClipboardActionDetail & {
     onRemove: (id: number) => void;
 };
 
-const Tracker: React.FC<TrackerProps> = ({ eventId, filename, from, to, onRemove }) => {
+const Tracker: React.FC<TrackerProps> = ({ eventId, filename, from, to, onRemove, action }) => {
     const [paused, setPaused] = useState(true);
     const [askDelete, setAskDelete] = useState(false);
 
@@ -75,7 +75,7 @@ const Tracker: React.FC<TrackerProps> = ({ eventId, filename, from, to, onRemove
             {!askDelete ? (
                 <>
                     <p title={`Copying ${filename} from ${from} to ${to}`} className={styles.text}>
-                        Copying {filename} from {from} to {to}
+                        {action === "copy" ? "Copying" : "Moving"} {filename} from {from} to {to}
                     </p>
 
                     <div className={styles.buttons}>

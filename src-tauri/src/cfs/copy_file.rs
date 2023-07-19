@@ -18,6 +18,7 @@ use super::{
 pub struct CopyOptions {
     pub overwrite: bool,
     pub skip_exist: bool,
+    pub remove_target_on_finish: bool,
 }
 
 #[derive(serde::Deserialize, PartialEq, Clone, Copy, Debug)]
@@ -49,6 +50,7 @@ fn spawn_copy_thread<R: Runtime>(
     path_to: String,
     event_id: usize,
     pair: Arc<(Mutex<CopyActions>, Condvar)>,
+    remove_target_on_finish: bool,
 ) -> Result<(), ErrorMessage> {
     let file_from = File::open(&path_from);
 
@@ -138,17 +140,31 @@ fn spawn_copy_thread<R: Runtime>(
             }
         };
 
-        println!("finished");
-
         if let Some(error) = result {
-            window
-                .emit(
-                    &finish_event_name,
-                    ErrorMessage::new_all("Error while copying files".into(), error.to_string()),
-                )
-                .unwrap();
+            let message =
+                ErrorMessage::new_all("Error while copying files".into(), error.to_string());
+
+            window.emit(&finish_event_name, message).unwrap();
+
+            println!("error while copying");
+
+            return;
+        }
+
+        println!("copied successfully");
+
+        if !remove_target_on_finish {
+            return;
+        }
+
+        if let Err(error) = crate::raw_fs::remove(path_from) {
+            window.emit(&finish_event_name, error).unwrap();
+
+            println!("error while deleting after copy");
         } else {
-            window.emit(&finish_event_name, 0).unwrap();
+            window.emit(&finish_event_name, ()).unwrap();
+
+            println!("removed after copy successfully");
         }
     });
 
@@ -204,7 +220,10 @@ pub fn copy_file<R: Runtime>(
         }
     });
 
-    let copy_speed = state.app_config.filesystem.copy_speed_limit_bytes_per_second;
+    let copy_speed = state
+        .app_config
+        .filesystem
+        .copy_speed_limit_bytes_per_second;
     let buffer_size = state.app_config.filesystem.copy_buffer_size_bytes;
 
     state
@@ -221,6 +240,7 @@ pub fn copy_file<R: Runtime>(
         to.clone(),
         event_id,
         pair_clone,
+        copy_options.remove_target_on_finish,
     )
 }
 

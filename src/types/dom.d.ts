@@ -1,10 +1,27 @@
 declare global {
     const appConfig: AppConfig;
 
+    interface OpenEditFileModalDetail {
+        filename: string
+    }
+
+    interface OpenExistFileModalDetail {
+        dirname: string;
+        filename: string
+    }
+
+    interface StartTrackingClipboardActionDetail {
+        eventId: number;
+        filename: string;
+        from: string;
+        to: string;
+        action: "copy" | "cut"
+    }
+
     interface CustomEventMap {
-        openEditFileModal: CustomEvent<{ filename: string }>;
-        openExistFileModal: CustomEvent<{ dirname: string; filename: string }>;
-        startTrackingClipboardAction: CustomEvent<{ eventId: number; filename: string; from: string; to: string }>;
+        openEditFileModal: CustomEvent<OpenEditFileModalDetail>;
+        openExistFileModal: CustomEvent<OpenExistFileModalDetail>;
+        startTrackingClipboardAction: CustomEvent<StartTrackingClipboardActionDetail>;
         addNotification: CustomEvent<AppNotification>;
     }
 
@@ -31,4 +48,4 @@ declare global {
     }
 }
 
-export {};
+export { };

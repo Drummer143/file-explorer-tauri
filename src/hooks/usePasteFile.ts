@@ -53,47 +53,44 @@ export const usePasteFile = () => {
         [checkExist]
     );
 
-    const paste = useCallback(
-        async (to: { dirname: string; filename?: string }, copyOptions = { overwrite: false, skipExist: false }) => {
-            const isOk = await checkData(to, copyOptions);
+    const paste = useCallback(async (
+        to: { dirname: string; filename?: string },
+        copyOptions: FileCopyOptions = { overwrite: false, skipExist: false }
+    ) => {
+        const isOk = await checkData(to, copyOptions);
 
-            if (!isOk) {
-                return;
+        if (!isOk) {
+            return;
+        }
+
+        const { copiedFileType, pathToCopiedFile, copiedFilename, clipboardAction, newPathToFile } = isOk;
+
+        const id = Math.floor(Math.random() * 1000);
+
+        const dirnameFrom = await dirname(pathToCopiedFile);
+
+        dispatchCustomEvent("startTrackingClipboardAction", {
+            eventId: id,
+            from: dirnameFrom,
+            to: to.dirname,
+            filename: copiedFilename,
+            action: clipboardAction as "copy" | "cut"
+        });
+
+        copyOptions.removeTargetOnFinish = clipboardAction === "cut";
+
+        try {
+            if (copiedFileType === "file") {
+                copyFile(pathToCopiedFile, newPathToFile, id, copyOptions);
+            } else {
+                clearClipboard();
+
+                return console.error("unimplemented");
             }
-
-            const { copiedFileType, pathToCopiedFile, copiedFilename, clipboardAction, newPathToFile } = isOk;
-
-            type ClipboardAction = "cf" | "cd" | "mf" | "md";
-
-            const action: ClipboardAction = ((clipboardAction === "copy" ? "c" : "m") +
-                (copiedFileType === "file" ? "f" : "d")) as ClipboardAction;
-            const id = Math.floor(Math.random() * 1000);
-
-            const dirnameFrom = await dirname(pathToCopiedFile);
-
-            dispatchCustomEvent("startTrackingClipboardAction", {
-                eventId: id,
-                from: dirnameFrom,
-                to: to.dirname,
-                filename: copiedFilename
-            });
-
-            try {
-                switch (action) {
-                    case "cf":
-                        return copyFile(pathToCopiedFile, newPathToFile, id, copyOptions);
-                    case "cd":
-                        return console.error("unimplemented");
-                    case "mf":
-                    case "md":
-                        clearClipboard();
-
-                        return console.error("unimplemented");
-                }
-            } catch (error) {
-                addNotificationFromError(error);
-            }
-        },
+        } catch (error) {
+            addNotificationFromError(error);
+        }
+    },
         [checkData]
     );
 

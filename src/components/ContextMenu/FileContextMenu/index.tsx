@@ -75,8 +75,11 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
                 </>
             )}
 
-            {fileType === "folder" && document.documentElement.dataset.copiedFile && (
-                <button onClick={handleMovePasteFile}>Paste in this folder</button>
+            {fileType === "folder" && document.documentElement.dataset.pathToCopiedFile && (
+                <button onClick={handleMovePasteFile}>
+                    {document.documentElement.dataset.clipboardAction === "copy" ? "Copy " : "Move "}
+                    in this folder
+                </button>
             )}
         </>
     );

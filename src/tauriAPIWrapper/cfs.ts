@@ -36,8 +36,13 @@ export const copyFile = (from: string, to: string, eventId: number, copyOptions:
         from,
         to,
         eventId,
-        // eslint-disable-next-line camelcase
-        copyOptions: { overwrite: copyOptions.overwrite, skip_exist: copyOptions.skipExist }
+        copyOptions: { 
+            overwrite: copyOptions.overwrite, 
+            // eslint-disable-next-line camelcase
+            skip_exist: copyOptions.skipExist ,
+            // eslint-disable-next-line camelcase
+            remove_target_on_finish: copyOptions.removeTargetOnFinish || false
+        }
     });
 
 export const removeCopyProcessFromState = (id: number): Promise<void> =>

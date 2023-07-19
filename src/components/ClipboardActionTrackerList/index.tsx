@@ -5,7 +5,7 @@ import Tracker from "./Tracker";
 import styles from "./ClipboardActionTrackerList.module.scss";
 
 const ClipboardActionTrackerList: React.FC = () => {
-    const [trackers, setTrackers] = useState<CustomEventMap["startTrackingClipboardAction"]["detail"][]>([]);
+    const [trackers, setTrackers] = useState<StartTrackingClipboardActionDetail[]>([]);
 
     const handleRemoveTracker = (id: number) => setTrackers(prev => prev.filter(t => t.eventId !== id));
 

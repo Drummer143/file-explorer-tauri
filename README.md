@@ -35,9 +35,9 @@ TODO:
             -   [ ] Algorithm
         -   [ ] Backend
             -   [x] Copy file
-            -   [ ] Cut file
+            -   [x] Move file
             -   [ ] Copy directory
-            -   [ ] Cut Directory
+            -   [ ] Move Directory
     -   [ ] Create file/directory
     -   [x] Watch changes in current directory
     -   [ ] symlinks
