@@ -9,6 +9,8 @@ TODO:
     -   [ ] Different file list appearance
     -   [ ] Files Sorting
     -   [ ] Files grouping
+    -   [ ] Navigation through list using arrow keys
+    -   [ ] If no element is focused, focus on the element that starts with the entered letters
     -   [ ] Extended icons for files - ?
         -   [ ] Icons with file extensions - ?
         -   [ ] Unique icons for specific files - ?
@@ -53,6 +55,7 @@ TODO:
 -   [x] Error Notifications
     - [ ] Call notifications on every error
 -   [ ] Search files in file system
+-   [ ] 
 -   [ ] Tests
 -   [ ] Interactivity
     -   [ ] Show loader while dir is scanning
@@ -61,6 +64,9 @@ TODO:
     -   [ ] Button in native explorer context menu
     -   [ ] CLI
 -   [ ] Handle empty path
+-   [ ] Track all long-term actions
+    -   [x] File copying/moving
+    -   [ ] Folder copying/moving/deleting(if not empty)
 
 BUGS:
 
