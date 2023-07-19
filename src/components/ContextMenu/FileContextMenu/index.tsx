@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { sep } from "@tauri-apps/api/path";
 
 import { usePasteFile } from "@hooks";
@@ -7,19 +7,24 @@ import { useExplorerHistory } from "@zustand";
 import { addFileInClipboard, addNotificationFromError } from "@utils";
 
 type FileContextMenuProps = {
-    filename: string;
-    fileType: "disk" | "file" | "folder" | "image";
+    ctxTarget: HTMLElement
 };
 
-const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType }) => {
+const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
     const { currentPath, pushRoute } = useExplorerHistory();
 
     const pasteFile = usePasteFile();
 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const [filename] = useState(ctxTarget.dataset.filename!);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const [filetype] = useState(ctxTarget.dataset.fileType!);
+    const [readonly] = useState(ctxTarget.dataset.readonly);
+
     const handleOpenFile = () => {
         const path = currentPath ? currentPath + sep + filename : filename;
 
-        if (fileType === "file") {
+        if (filetype === "file") {
             openFile(path);
         } else {
             pushRoute(path);
@@ -29,7 +34,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
     const handleOpenInExplorer = () => {
         let path: string;
 
-        switch (fileType) {
+        switch (filetype) {
             case "disk":
                 path = filename + sep;
                 break;
@@ -37,7 +42,6 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
                 path = currentPath + sep + filename;
                 break;
             case "file":
-            case "image":
             default:
                 path = currentPath + sep;
         }
@@ -53,7 +57,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
         document.dispatchEvent(new CustomEvent("openEditFileModal", { detail: { filename } }));
 
     const handleAddFileInClipboard = (action: "copy" | "cut") =>
-        addFileInClipboard(currentPath + sep + filename, filename, fileType, action);
+        addFileInClipboard(currentPath + sep + filename, filename, filetype, action);
 
     const handleMovePasteFile = () => pasteFile({ dirname: currentPath + sep + filename });
 
@@ -61,9 +65,9 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
         <>
             <button onClick={handleOpenFile}>Open</button>
 
-            <button onClick={handleOpenInExplorer}>{fileType === "file" ? "Show" : "Open"} in explorer</button>
+            <button onClick={handleOpenInExplorer}>{filetype === "file" ? "Show" : "Open"} in explorer</button>
 
-            {fileType !== "disk" && (
+            {!readonly && (
                 <>
                     <button onClick={handleDeleteFile}>Delete</button>
 
@@ -75,7 +79,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ filename, fileType })
                 </>
             )}
 
-            {fileType === "folder" && document.documentElement.dataset.pathToCopiedFile && (
+            {filetype === "folder" && document.documentElement.dataset.pathToCopiedFile && !readonly && (
                 <button onClick={handleMovePasteFile}>
                     {document.documentElement.dataset.clipboardAction === "copy" ? "Copy " : "Move "}
                     in this folder

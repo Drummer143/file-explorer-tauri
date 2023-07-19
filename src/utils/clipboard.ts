@@ -13,8 +13,7 @@ export const addFileInClipboard = (
 
     if (action === "cut") {
         document
-            .querySelector<HTMLElement>(`[data-context-menu-additional-info="${filename}"]`)
-            ?.classList.add("cut-file");
+            .querySelector<HTMLElement>(`[data-filename="${filename}"]`)?.classList.add("cut-file");
     }
 };
 

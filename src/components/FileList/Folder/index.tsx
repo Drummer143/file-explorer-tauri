@@ -10,7 +10,7 @@ import styles from "./Folder.module.scss";
 
 type FolderProps = ExplorerDirectory;
 
-const Folder: React.FC<FolderProps> = ({ name }) => {
+const Folder: React.FC<FolderProps> = ({ name, isRemovable }) => {
     const { currentPath, pushRoute } = useExplorerHistory();
 
     const handleAction: React.MouseEventHandler<HTMLButtonElement> = () => {
@@ -21,9 +21,11 @@ const Folder: React.FC<FolderProps> = ({ name }) => {
         <FileListItemButton
             onAction={handleAction}
             className={styles.wrapper}
-            data-context-menu-type={CTXTypes.folder}
-            data-context-menu-additional-info={name}
-            data-context-menu-additional-info-lowercased={name.toLocaleLowerCase()}
+            data-file-type="file"
+            data-readonly={isRemovable ? true : ""}
+            data-context-menu-type={CTXTypes.file}
+            data-filename={name}
+            data-filename-lowercased={name.toLocaleLowerCase()}
         >
             <div className={styles.icon}>
                 <FolderSVG />

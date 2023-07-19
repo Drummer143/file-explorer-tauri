@@ -1,7 +1,5 @@
 export const CTXTypes = {
     file: "file",
-    disk: "disk",
-    folder: "folder",
     explorer: "explorer"
 };
 

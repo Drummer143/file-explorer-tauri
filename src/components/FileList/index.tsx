@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { sep } from "@tauri-apps/api/path";
-import { OverlayScrollbarsComponent, OverlayScrollbarsComponentRef } from "overlayscrollbars-react";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 
 import Disk from "./Disk";
 import File from "./File";
 import Folder from "./Folder";
 import { useExplorerHistory } from "@zustand";
 import { CTXTypes, addFileInClipboard } from "@utils";
-import { EditFileModal, FileExistModal } from "./../modals";
+import { EditFileModal, FileExistModal } from "../modals";
 import { useResizeObserver, useWatchPathChange, usePasteFile } from "@hooks";
 
 import styles from "./FileList.module.scss";
@@ -18,7 +18,6 @@ const FileList: React.FC = () => {
     const pasteFile = usePasteFile();
 
     const listContainerRef = useRef<HTMLDivElement | null>(null);
-    const scrollOverlayRef = useRef<OverlayScrollbarsComponentRef<"div"> | null>(null);
 
     const mapFiles = (file: CFile) => {
         switch (file.type) {
@@ -27,7 +26,6 @@ const FileList: React.FC = () => {
             case "folder":
                 return <Folder key={file.name} {...file} />;
             case "file":
-            case "image":
                 return <File key={file.name} {...file} />;
             default:
                 console.error("unhandled file", file);
@@ -36,7 +34,7 @@ const FileList: React.FC = () => {
 
     const { files } = useWatchPathChange({
         onBeforeChange: () => {
-            scrollOverlayRef.current?.getElement()?.scrollTo({ top: 0 });
+            listContainerRef.current?.parentElement?.scrollTo({ top: 0 });
         }
     });
 
@@ -51,8 +49,8 @@ const FileList: React.FC = () => {
             switch (e.code) {
                 case "KeyX": {
                     const canMoveTarget = target.dataset.contextMenuType !== "disk";
-                    const filename = target.dataset.contextMenuAdditionalInfo;
-                    const filetype = target.dataset.contextMenuType;
+                    const filename = target.dataset.filename;
+                    const filetype = target.dataset.fileType;
 
                     if (canMoveTarget && filename && filetype) {
                         addFileInClipboard(currentPath + sep + filename, filename, filetype, "cut");
@@ -61,8 +59,8 @@ const FileList: React.FC = () => {
                     break;
                 }
                 case "KeyC": {
-                    const filename = target.dataset.contextMenuAdditionalInfo;
-                    const filetype = target.dataset.contextMenuType;
+                    const filename = target.dataset.filename;
+                    const filetype = target.dataset.fileType;
 
                     if (filename && filetype) {
                         addFileInClipboard(currentPath + sep + filename, filename, filetype, "copy");
@@ -116,7 +114,6 @@ const FileList: React.FC = () => {
             <OverlayScrollbarsComponent
                 element="div"
                 defer
-                ref={scrollOverlayRef}
                 data-file-list-scrollbar
                 options={{
                     overflow: {
@@ -128,7 +125,12 @@ const FileList: React.FC = () => {
                     }
                 }}
             >
-                <div ref={listContainerRef} className={styles.wrapper} data-context-menu-type={CTXTypes.explorer}>
+                <div
+                    ref={listContainerRef}
+                    className={styles.wrapper}
+                    data-context-menu-type={CTXTypes.explorer}
+                    data-readonly={currentPath ? "" : true}
+                >
                     {files.map(mapFiles)}
                 </div>
             </OverlayScrollbarsComponent>

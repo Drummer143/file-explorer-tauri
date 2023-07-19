@@ -13,7 +13,7 @@ import styles from "./File.module.scss";
 
 type FileProps = ExplorerFile;
 
-const File: React.FC<FileProps> = ({ name, size, type }) => {
+const File: React.FC<FileProps> = ({ name, size, subtype }) => {
     const { currentPath } = useExplorerHistory();
 
     const handleAction = () => openFile(currentPath + sep + name).catch(error => console.error(error));
@@ -22,12 +22,14 @@ const File: React.FC<FileProps> = ({ name, size, type }) => {
         <FileListItemButton
             onAction={handleAction}
             className={styles.wrapper}
+            data-file-type="file"
+            data-file-subtype={subtype}
             data-context-menu-type={CTXTypes.file}
-            data-context-menu-additional-info={name}
-            data-context-menu-additional-info-lowercased={name.toLocaleLowerCase()}
+            data-filename={name}
+            data-filename-lowercased={name.toLocaleLowerCase()}
         >
             <div className={styles.icon}>
-                {type === "file" ? <FileSVG /> : <img src={convertFileSrc(currentPath + sep + name)} />}
+                {subtype === "image" ? <img src={convertFileSrc(currentPath + sep + name)} /> : <FileSVG />}
             </div>
 
             <div className={styles.description}>

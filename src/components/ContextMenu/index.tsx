@@ -2,19 +2,18 @@ import React, { useEffect, useRef, useState } from "react";
 
 import FileContextMenu from "./FileContextMenu";
 import ExplorerContextMenu from "./ExplorerContextMenu";
-import { DataSetKeys } from "@utils";
 
 import styles from "./ContextMenu.module.scss";
 
 type ContextMenuInfo =
     | {
-          CTXComponent: React.ReactNode;
-          opacity: 0 | 1;
-          coordinates: {
-              x: number;
-              y: number;
-          };
-      }
+        CTXComponent: React.ReactNode;
+        opacity: 0 | 1;
+        coordinates: {
+            x: number;
+            y: number;
+        };
+    }
     | undefined;
 
 const ContextMenu: React.FC = () => {
@@ -22,14 +21,17 @@ const ContextMenu: React.FC = () => {
 
     const ctxContainerRef = useRef<HTMLDivElement>(null);
 
-    const selectContextMenu = (contextMenuType?: string, contextMenuAdditionalInfo?: string) => {
+    const selectContextMenu = (ctxTarget: HTMLElement) => {
+        const contextMenuType = ctxTarget.dataset.contextMenuType;
+        const filename = ctxTarget.dataset.filename;
+
         // TODO:
         switch (contextMenuType) {
             case "file":
             case "disk":
             case "folder":
-                if (contextMenuAdditionalInfo) {
-                    return <FileContextMenu fileType={contextMenuType} filename={contextMenuAdditionalInfo} />;
+                if (filename) {
+                    return <FileContextMenu ctxTarget={ctxTarget} />;
                 } else {
                     return <></>;
                 }
@@ -60,9 +62,11 @@ const ContextMenu: React.FC = () => {
 
             const composedPath = e.composedPath() as HTMLElement[];
             const contextMenuTarget = composedPath.find(el => (el as HTMLElement)?.dataset?.contextMenuType);
-            const contextMenuType = contextMenuTarget?.dataset[DataSetKeys.contextMenuType];
-            const contextMenuAdditionalInfo = contextMenuTarget?.dataset[DataSetKeys.contextMenuAdditionalInfo];
-            const CTXComponent = selectContextMenu(contextMenuType, contextMenuAdditionalInfo);
+            let CTXComponent: JSX.Element | undefined;
+
+            if (contextMenuTarget) {
+                CTXComponent = selectContextMenu(contextMenuTarget as HTMLElement);
+            }
 
             if (!CTXComponent) {
                 return setContextMenuInfo(undefined);
@@ -129,13 +133,13 @@ const ContextMenu: React.FC = () => {
             style={
                 contextMenuInfo
                     ? {
-                          top: contextMenuInfo.coordinates.y + "px",
-                          left: contextMenuInfo.coordinates.x + "px",
-                          opacity: !contextMenuInfo.opacity ? 0 : undefined
-                      }
+                        top: contextMenuInfo.coordinates.y + "px",
+                        left: contextMenuInfo.coordinates.x + "px",
+                        opacity: !contextMenuInfo.opacity ? 0 : undefined
+                    }
                     : {
-                          display: "none"
-                      }
+                        display: "none"
+                    }
             }
         >
             {!!contextMenuInfo && contextMenuInfo.CTXComponent}

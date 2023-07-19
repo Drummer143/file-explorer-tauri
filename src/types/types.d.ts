@@ -1,7 +1,8 @@
-type FileTypes = "disk" | "folder" | "file" | "image";
+type FileTypes = "disk" | "folder" | "file";
 
 interface ExplorerFile {
-    type: "file" | "image";
+    type: "file";
+    subtype?: "image"
     name: string;
     size: number;
     isRemovable: boolean;

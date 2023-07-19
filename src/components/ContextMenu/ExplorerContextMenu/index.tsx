@@ -23,7 +23,7 @@ const ExplorerContextMenu: React.FC = () => {
 
             {currentPath && document.documentElement.dataset.pathToCopiedFile && (
                 <button onClick={handleMovePasteFile}>
-                    {document.documentElement.dataset.clipboardAction === "copy" ? "Copy " : "Move "}
+                    {document.documentElement.dataset.clipboardAction === "copy" ? "Paste " : "Move "}
                     here
                 </button>
             )}
