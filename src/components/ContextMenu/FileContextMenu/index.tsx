@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { sep } from "@tauri-apps/api/path";
 
 import { usePasteFile } from "@hooks";
-import { openFile, remove } from "@tauriAPI";
 import { useExplorerHistory } from "@zustand";
+import { openInExplorer, openFile, remove } from "@tauriAPI";
 import { addFileInClipboard, addNotificationFromError } from "@utils";
 
 type FileContextMenuProps = {
@@ -39,14 +39,13 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
                 path = filename + sep;
                 break;
             case "folder":
-                path = currentPath + sep + filename;
-                break;
             case "file":
             default:
-                path = currentPath + sep;
+                path = currentPath + sep + filename;
+                break;
         }
 
-        openFile(path).catch(addNotificationFromError);
+        openInExplorer(path).catch(addNotificationFromError);
     };
 
     const handleDeleteFile = () => {
