@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef } from "react";
 import { sep } from "@tauri-apps/api/path";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
+import { OverlayScrollbarsComponent, OverlayScrollbarsComponentRef } from "overlayscrollbars-react";
 
 import Disk from "./Disk";
 import File from "./File";
@@ -18,6 +18,7 @@ const FileList: React.FC = () => {
     const pasteFile = usePasteFile();
 
     const listContainerRef = useRef<HTMLDivElement | null>(null);
+    const scrollOverlayRef = useRef<OverlayScrollbarsComponentRef<"div"> | null>(null);
 
     const mapFiles = (file: CFile) => {
         switch (file.type) {
@@ -33,7 +34,11 @@ const FileList: React.FC = () => {
         }
     };
 
-    const { files } = useWatchPathChange();
+    const { files } = useWatchPathChange({
+        onBeforeChange: () => {
+            scrollOverlayRef.current?.getElement()?.scrollTo({ top: 0 });
+        }
+    });
 
     const handleCopyCutPasteFile = useCallback(
         (e: KeyboardEvent) => {
@@ -111,6 +116,8 @@ const FileList: React.FC = () => {
             <OverlayScrollbarsComponent
                 element="div"
                 defer
+                ref={scrollOverlayRef}
+                data-file-list-scrollbar
                 options={{
                     overflow: {
                         x: "hidden"
