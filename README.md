@@ -1,7 +1,7 @@
 TODO:
 
 -   [ ] Files view
-    -   [x] Show list
+    -   [x] List displaying
     -   [x] Actions on click on item
         -   [x] directory
         -   [x] disk
@@ -23,7 +23,7 @@ TODO:
     -   [x] Move to parent directory button
 -   [x] Frame
     -   [x] Window Controls
--   [x] Explorer history
+-   [ ] Explorer history
     -   [ ] Limit length of history - ?
 -   [ ] Interaction with filesystem
     -   [x] Open file
@@ -52,7 +52,7 @@ TODO:
 -   [ ] Custom scrollbar
 -   [ ] Hotkeys
 -   [ ] Customization
--   [x] Error Notifications
+-   [ ] Error Notifications
     - [ ] Call notifications on every error
 -   [ ] Search files in file system
 -   [ ] 
@@ -71,4 +71,5 @@ TODO:
 BUGS:
 
 1. [x] Maximizing/restoring to window doesn't change icon in middle window control button 
-2. [ ] path input form submit with empty input value path checker says that path does'nt exist
+2. [ ] Path input form submit with empty input value path checker says that path does'nt exist
+3. [ ] When a button labeled 'cancel' is pressed in the file copying tracker, the confirmation menu for file deletion is skipped

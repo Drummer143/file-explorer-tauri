@@ -18,7 +18,7 @@ pub enum FileTypes {
     Image,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Clone)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct ErrorMessage {
     pub message: Option<String>,

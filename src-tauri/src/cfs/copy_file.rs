@@ -1,18 +1,13 @@
-use std::io::Error;
-use std::time::{Duration, Instant};
 use std::{
-    fs::File,
-    io::{Read, Write},
     path::Path,
     sync::{Arc, Condvar, Mutex},
     thread,
 };
 use tauri::{Runtime, State, Window};
 
-use super::{
-    types::{CopyCutProgress, ErrorMessage},
-    CFSState,
-};
+use super::copy_file_with_progress::{copy_file_with_progress, CopyResult};
+use super::types::ErrorMessage;
+use super::CFSState;
 
 #[derive(serde::Deserialize)]
 pub struct CopyOptions {
@@ -21,8 +16,7 @@ pub struct CopyOptions {
     pub remove_target_on_finish: bool,
 }
 
-#[derive(serde::Deserialize, PartialEq, Clone, Copy, Debug)]
-#[serde(rename_all = "camelCase")]
+#[derive(PartialEq, Clone, Copy, Debug)]
 pub enum CopyActions {
     Pause,
     Exit,
@@ -46,126 +40,54 @@ fn spawn_copy_thread<R: Runtime>(
     window: Window<R>,
     copy_speed: u64,
     buffer_size: usize,
-    path_from: String,
-    path_to: String,
+    from: String,
+    to: String,
     event_id: usize,
-    pair: Arc<(Mutex<CopyActions>, Condvar)>,
+    control_vars: Arc<(Mutex<CopyActions>, Condvar)>,
     remove_target_on_finish: bool,
 ) -> Result<(), ErrorMessage> {
-    let file_from = File::open(&path_from);
-
-    if let Err(error) = file_from {
-        return Err(ErrorMessage::new_all(
-            "Can't open target file".into(),
-            error.to_string(),
-        ));
-    }
-
-    let mut file_from = file_from.unwrap();
-    let file_to = File::create(path_to);
-
-    if let Err(error) = file_to {
-        return Err(ErrorMessage::new_all(
-            "Can't create file file".into(),
-            error.to_string(),
-        ));
-    }
-
-    let mut file_to = file_to.unwrap();
-    let progress_event_name = format!("copy-progress//{}", event_id);
     let finish_event_name = format!("copy-finished//{}", event_id);
-    let file_size = file_from.metadata().unwrap().len();
-    let mut total_bytes_copied = 0;
-    let mut buffer = vec![0; buffer_size];
-    let start_time = Instant::now();
 
     thread::spawn(move || {
-        let result: Option<Error> = loop {
-            let &(ref lock, ref cvar) = &*pair;
-            let mut state = lock.lock().unwrap();
+        let result = copy_file_with_progress(
+            &window,
+            &from,
+            &to,
+            event_id,
+            buffer_size,
+            copy_speed,
+            control_vars,
+        );
 
-            match *state {
-                CopyActions::Run => {
-                    window
-                        .emit(
-                            &progress_event_name,
-                            CopyCutProgress {
-                                done: total_bytes_copied as usize,
-                                total: file_size as usize,
-                            },
-                        )
-                        .unwrap();
-                }
-                CopyActions::Pause => {
-                    while *state == CopyActions::Pause {
-                        state = cvar.wait(state).unwrap();
-                    }
-                }
-                CopyActions::Exit => {
-                    window.emit(&finish_event_name, -2).unwrap();
+        if result != CopyResult::Ok || !remove_target_on_finish {
+            let payload = if let CopyResult::Error(error) = result {
+                Some(error)
+            } else {
+                None
+            };
 
-                    break None;
-                }
-            }
+            window
+                .emit(&finish_event_name, payload)
+                .expect("Can't send message to window");
 
-            let bytes_read = file_from.read(&mut buffer);
+            return;
+        }
 
-            if let Err(error) = bytes_read {
-                break Some(error);
-            }
-
-            let bytes_read = bytes_read.unwrap();
-
-            if bytes_read == 0 {
-                // Достигнут конец файла
-                break None;
-            }
-
-            let result = file_to.write_all(&buffer[..bytes_read]);
-
-            if let Err(error) = result {
-                break Some(error);
-            }
-
-            total_bytes_copied += bytes_read;
-
-            let elapsed_time = start_time.elapsed();
-            let elapsed_seconds = elapsed_time.as_secs();
-            let elapsed_bytes = total_bytes_copied;
-            let expected_bytes = copy_speed * elapsed_seconds;
-
-            if elapsed_bytes > (expected_bytes as usize) {
-                let sleep_duration = Duration::from_secs(1);
-                thread::sleep(sleep_duration);
-            }
+        let remove_file_payload = if let Err(error) = crate::raw_fs::remove(from) {
+            Some(error)
+        } else {
+            None
         };
 
-        if let Some(error) = result {
-            let message =
-                ErrorMessage::new_all("Error while copying files".into(), error.to_string());
-
-            window.emit(&finish_event_name, message).unwrap();
-
-            println!("error while copying");
-
-            return;
-        }
-
-        println!("copied successfully");
-
-        if !remove_target_on_finish {
-            return;
-        }
-
-        if let Err(error) = crate::raw_fs::remove(path_from) {
-            window.emit(&finish_event_name, error).unwrap();
-
+        if remove_file_payload.is_none() {
             println!("error while deleting after copy");
         } else {
-            window.emit(&finish_event_name, ()).unwrap();
-
             println!("removed after copy successfully");
         }
+
+        window
+            .emit(&finish_event_name, remove_file_payload)
+            .expect("Can't send message to window");
     });
 
     Ok(())
@@ -184,6 +106,25 @@ pub fn copy_file<R: Runtime>(
     // let path_from = Path::new(&from);
     let path_to = Path::new(&to);
 
+    let control_vars = Arc::new((Mutex::new(CopyActions::Pause), Condvar::new()));
+    let control_vars_clone = control_vars.clone();
+
+    let listener_id = window.listen(format!("copy-change-state//{}", event_id), move |e| {
+        let payload = e.payload();
+
+        let &(ref lock, ref cvar) = &*control_vars;
+        let mut state = lock.lock().unwrap();
+
+        if let Some(payload) = payload {
+            let parsed_value = CopyActions::from_window_event_payload(payload);
+
+            if let Ok(parsed) = parsed_value {
+                *state = parsed;
+                cvar.notify_one();
+            }
+        }
+    });
+
     if copy_options.overwrite && path_to.exists() {
         let result: Result<(), std::io::Error>;
 
@@ -200,25 +141,6 @@ pub fn copy_file<R: Runtime>(
             ));
         }
     }
-
-    let pair = Arc::new((Mutex::new(CopyActions::Pause), Condvar::new()));
-    let pair_clone = pair.clone();
-
-    let listener_id = window.listen(format!("copy-change-state//{}", event_id), move |e| {
-        let payload = e.payload();
-
-        let &(ref lock, ref cvar) = &*pair;
-        let mut state = lock.lock().unwrap();
-
-        if let Some(payload) = payload {
-            let parsed_value = CopyActions::from_window_event_payload(payload);
-
-            if let Ok(parsed) = parsed_value {
-                *state = parsed;
-                cvar.notify_one();
-            }
-        }
-    });
 
     let copy_speed = state
         .app_config
@@ -239,7 +161,7 @@ pub fn copy_file<R: Runtime>(
         from.clone(),
         to.clone(),
         event_id,
-        pair_clone,
+        control_vars_clone,
         copy_options.remove_target_on_finish,
     )
 }

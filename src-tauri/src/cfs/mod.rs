@@ -7,6 +7,7 @@ pub mod remove_file;
 pub mod rename;
 pub mod types;
 pub mod watch_dir;
+mod copy_file_with_progress;
 
 use notify::RecommendedWatcher;
 use std::{collections::HashMap, ffi::OsStr, path::Path, sync::Mutex};
