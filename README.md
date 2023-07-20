@@ -72,4 +72,4 @@ BUGS:
 
 1. [x] Maximizing/restoring to window doesn't change icon in middle window control button 
 2. [ ] Path input form submit with empty input value path checker says that path does'nt exist
-3. [ ] When a button labeled 'cancel' is pressed in the file copying tracker, the confirmation menu for file deletion is skipped
+3. [x] When a button labeled 'cancel' is pressed in the file copying tracker, the confirmation menu for file deletion is skipped

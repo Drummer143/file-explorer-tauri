@@ -39,12 +39,6 @@ const Tracker: React.FC<TrackerProps> = ({ eventId, filename, from, to, onRemove
         untrack.current = { progress, finished };
     }, [eventId, onRemove]);
 
-    const handleTerminateAction = () => {
-        appWindow.emit(`copy-change-state//${eventId}`, "exit");
-
-        setTimeout(() => setAskDelete(true));
-    };
-
     const togglePause = useCallback(() => {
         setPaused(prev => {
             appWindow.emit(`copy-change-state//${eventId}`, prev ? "run" : "pause");
@@ -53,12 +47,16 @@ const Tracker: React.FC<TrackerProps> = ({ eventId, filename, from, to, onRemove
         });
     }, [eventId]);
 
-    const handleRemoveTracker = () => {
+    const handleTerminateAction = () => {
         untrack.current?.progress();
         untrack.current?.finished();
 
-        onRemove(eventId);
+        appWindow.emit(`copy-change-state//${eventId}`, "exit");
+
+        setTimeout(() => setAskDelete(true));
     };
+
+    const handleRemoveTracker = () => onRemove(eventId);
 
     const handleRemoveTrackerAndDeleteCopiedFile = () => {
         handleRemoveTracker();
@@ -97,7 +95,7 @@ const Tracker: React.FC<TrackerProps> = ({ eventId, filename, from, to, onRemove
                         <button type="button" onClick={handleRemoveTrackerAndDeleteCopiedFile}>
                             <CheckMarkSVG />
                         </button>
-                        <button type="button" onClick={handleRemoveTracker}>
+                        <button type="button" onMouseDown={handleRemoveTracker}>
                             <CloseSVG strokeWidth={2} width={14} height={14} />
                         </button>
                     </div>
