@@ -18,6 +18,8 @@ const FileList: React.FC = () => {
     const pasteFile = usePasteFile();
 
     const listContainerRef = useRef<HTMLDivElement | null>(null);
+    const searchPattern = useRef("");
+    const beforeResetPatternTimeout = useRef<NodeJS.Timeout | null>(null);
 
     const mapFiles = (file: CFile) => {
         switch (file.type) {
@@ -38,48 +40,68 @@ const FileList: React.FC = () => {
         }
     });
 
-    const handleCopyCutPasteFile = useCallback(
+    const handleKeyDown = useCallback(
         (e: KeyboardEvent) => {
             const target = e.target as HTMLElement;
 
-            if (!e.ctrlKey || !target) {
+            if (e.altKey || e.shiftKey || e.metaKey) {
                 return;
             }
 
-            switch (e.code) {
-                case "KeyX": {
-                    const canMoveTarget = target.dataset.contextMenuType !== "disk";
-                    const filename = target.dataset.filename;
-                    const filetype = target.dataset.fileType;
+            if (e.ctrlKey && target) {
+                switch (e.code) {
+                    case "KeyX": {
+                        const canMoveTarget = target.dataset.contextMenuType !== "disk";
+                        const filename = target.dataset.filename;
+                        const filetype = target.dataset.fileType;
 
-                    if (canMoveTarget && filename && filetype) {
-                        addFileInClipboard(currentPath + sep + filename, filename, filetype, "cut");
+                        if (canMoveTarget && filename && filetype) {
+                            addFileInClipboard(currentPath + sep + filename, filename, filetype, "cut");
+                        }
+
+                        break;
                     }
+                    case "KeyC": {
+                        const filename = target.dataset.filename;
+                        const filetype = target.dataset.fileType;
 
-                    break;
+                        if (filename && filetype) {
+                            addFileInClipboard(currentPath + sep + filename, filename, filetype, "copy");
+                        }
+
+                        break;
+                    }
+                    case "KeyV": {
+                        let to = currentPath;
+                        const possibleFocusedFileName = (document.activeElement as HTMLElement | null)?.dataset
+                            .contextMenuAdditionalInfo;
+                        const isNotFile =
+                            (document.activeElement as HTMLElement | null)?.dataset.contextMenuType !== "file";
+
+                        if (possibleFocusedFileName && isNotFile) {
+                            to = to + sep + possibleFocusedFileName;
+                        }
+
+                        pasteFile({ dirname: to });
+                    }
                 }
-                case "KeyC": {
-                    const filename = target.dataset.filename;
-                    const filetype = target.dataset.fileType;
-
-                    if (filename && filetype) {
-                        addFileInClipboard(currentPath + sep + filename, filename, filetype, "copy");
+            } else {
+                if (e.code.startsWith("Key") && listContainerRef.current) {
+                    if (beforeResetPatternTimeout.current) {
+                        clearTimeout(beforeResetPatternTimeout.current);
                     }
 
-                    break;
-                }
-                case "KeyV": {
-                    let to = currentPath;
-                    const possibleFocusedFileName = (document.activeElement as HTMLElement | null)?.dataset
-                        .contextMenuAdditionalInfo;
-                    const isNotFile =
-                        (document.activeElement as HTMLElement | null)?.dataset.contextMenuType !== "file";
+                    searchPattern.current += e.key;
 
-                    if (possibleFocusedFileName && isNotFile) {
-                        to = to + sep + possibleFocusedFileName;
-                    }
+                    Array
+                        .from(listContainerRef.current.children as unknown as HTMLElement[])
+                        .find(el => el.dataset.filenameLowercased?.startsWith(searchPattern.current))
+                        ?.focus();
 
-                    pasteFile({ dirname: to });
+                    beforeResetPatternTimeout.current = setTimeout(() => {
+                        searchPattern.current = "";
+                        beforeResetPatternTimeout.current = null;
+                    }, 2000);
                 }
             }
         },
@@ -87,12 +109,12 @@ const FileList: React.FC = () => {
     );
 
     useEffect(() => {
-        document.addEventListener("keydown", handleCopyCutPasteFile);
+        document.addEventListener("keydown", handleKeyDown);
 
         return () => {
-            document.removeEventListener("keydown", handleCopyCutPasteFile);
+            document.removeEventListener("keydown", handleKeyDown);
         };
-    }, [handleCopyCutPasteFile]);
+    }, [handleKeyDown]);
 
     useResizeObserver({
         target: listContainerRef.current,

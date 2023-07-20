@@ -10,7 +10,7 @@ TODO:
     -   [ ] Files Sorting
     -   [ ] Files grouping
     -   [ ] Navigation through list using arrow keys
-    -   [ ] If no element is focused, focus on the element that starts with the entered letters
+    -   [x] Focus on the element that starts with the entered letters
     -   [ ] Extended icons for files - ?
         -   [ ] Icons with file extensions - ?
         -   [ ] Unique icons for specific files - ?
@@ -23,7 +23,7 @@ TODO:
     -   [x] Move to parent directory button
 -   [x] Frame
     -   [x] Window Controls
--   [ ] Explorer history
+-   [x] Explorer history
     -   [ ] Limit length of history - ?
 -   [ ] Interaction with filesystem
     -   [x] Open file
