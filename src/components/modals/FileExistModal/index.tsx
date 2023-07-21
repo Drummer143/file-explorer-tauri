@@ -60,9 +60,9 @@ const FileExistModal: React.FC = () => {
             options.overwrite = true;
         }
 
-        const filetype = document.documentElement.dataset.copiedFileType;
+        const isFile = document.documentElement.dataset.copiedFileInfo?.includes("\"filetype\":\"file\"");
 
-        if (filetype === "file") {
+        if (isFile) {
             pasteFile({ dirname: pathInfo.dirname, filename }, options);
         } else {
             dispatchCustomEvent("addNotification", { message: "Can copy only files", type: "error" });

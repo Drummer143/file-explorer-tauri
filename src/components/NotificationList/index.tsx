@@ -12,6 +12,9 @@ const NotificationList: React.FC = () => {
 
     useEffect(() => {
         const handleAddNotification: CustomEventHandler<"addNotification"> = e => {
+            // eslint-disable-next-line no-console
+            console[e.detail.type]("ERROR\nMessage: ", e.detail.message, "\nReason: ", e.detail.reason);
+
             const index = v4();
 
             setNotifications(prev => {

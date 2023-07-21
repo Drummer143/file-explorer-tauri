@@ -49,3 +49,10 @@ interface AppConfig {
         copy_buffer_size_bytes: number;
     };
 }
+
+interface CopiedFileInfo {
+    dirname: string;
+    filename: string;
+    filetype: Exclude<FileTypes, "disk">
+    action: "cut" | "copy"
+}

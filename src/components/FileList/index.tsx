@@ -34,11 +34,7 @@ const FileList: React.FC = () => {
         }
     };
 
-    const { files } = useWatchPathChange({
-        onBeforeChange: () => {
-            listContainerRef.current?.parentElement?.scrollTo({ top: 0 });
-        }
-    });
+    const { files } = useWatchPathChange();
 
     const handleKeyDown = useCallback(
         (e: KeyboardEvent) => {
@@ -55,9 +51,16 @@ const FileList: React.FC = () => {
                         const filename = target.dataset.filename;
                         const filetype = target.dataset.fileType;
 
-                        if (canMoveTarget && filename && filetype) {
-                            addFileInClipboard(currentPath + sep + filename, filename, filetype, "cut");
+                        if (!canMoveTarget || !filename || filetype !== "file" && filetype !== "folder") {
+                            return;
                         }
+
+                        addFileInClipboard({
+                            dirname: currentPath,
+                            filename,
+                            filetype,
+                            action: "cut"
+                        });
 
                         break;
                     }
@@ -65,9 +68,16 @@ const FileList: React.FC = () => {
                         const filename = target.dataset.filename;
                         const filetype = target.dataset.fileType;
 
-                        if (filename && filetype) {
-                            addFileInClipboard(currentPath + sep + filename, filename, filetype, "copy");
+                        if (!filename || filetype !== "file" && filetype !== "folder") {
+                            return;
                         }
+
+                        addFileInClipboard({
+                            dirname: currentPath,
+                            filename,
+                            filetype,
+                            action: "copy"
+                        });
 
                         break;
                     }
@@ -107,6 +117,10 @@ const FileList: React.FC = () => {
         },
         [currentPath, pasteFile]
     );
+
+    useEffect(() => {
+        listContainerRef.current?.scrollTo({ top: 0 });
+    }, [currentPath]);
 
     useEffect(() => {
         document.addEventListener("keydown", handleKeyDown);

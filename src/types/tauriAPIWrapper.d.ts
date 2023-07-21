@@ -60,3 +60,10 @@ interface FileCopyOptions {
     overwrite: boolean;
     removeTargetOnFinish?: boolean;
 }
+
+interface DirectoryCopyOptions {
+    skipExist: boolean;
+    ifExists: "cancel" | "overwrite" | "merge";
+    ifNestedFileExist: "overwrite" | "saveBoth" | "ask" | "skip"
+    removeTargetOnFinish?: boolean;
+}

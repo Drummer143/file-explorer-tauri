@@ -7,11 +7,7 @@ import { Event as TauriEvent } from "@tauri-apps/api/event";
 import { addNotificationFromError } from "@utils";
 import { readDir, getDisks, watchDir } from "../tauriAPIWrapper";
 
-interface UseWatchPathChangeProps {
-    onBeforeChange?: () => void;
-}
-
-export const useWatchPathChange = ({ onBeforeChange }: UseWatchPathChangeProps) => {
+export const useWatchPathChange = () => {
     const { currentPath } = useExplorerHistory();
 
     const [loading, setLoading] = useState(false);
@@ -66,11 +62,6 @@ export const useWatchPathChange = ({ onBeforeChange }: UseWatchPathChangeProps) 
             untrackCurrentDir.current.unlisten();
             await untrackCurrentDir.current.unwatch();
             untrackCurrentDir.current = undefined;
-        }
-
-        if (onBeforeChange) {
-            console.log("onBeforeChange", onBeforeChange);
-            onBeforeChange();
         }
 
         try {

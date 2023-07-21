@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { sep } from "@tauri-apps/api/path";
 import { appWindow } from "@tauri-apps/api/window";
 import { UnlistenFn } from "@tauri-apps/api/event";
@@ -22,7 +22,7 @@ const Tracker: React.FC<TrackerProps> = ({ eventId, filename, from, to, onRemove
         finished: UnlistenFn;
     } | null>(null);
 
-    const mountListeners = useCallback(async () => {
+    const mountListeners = async () => {
         // const u1 = await appWindow.listen(`copy-started//${eventId}`, e => console.log(e));
         const progress = await appWindow.listen<{ done: number; total: number }>(`copy-progress//${eventId}`, e => {
             trackerRef.current?.style.setProperty("--action-progress", (e.payload.done / e.payload.total) * 100 + "%");
@@ -37,15 +37,15 @@ const Tracker: React.FC<TrackerProps> = ({ eventId, filename, from, to, onRemove
         });
 
         untrack.current = { progress, finished };
-    }, [eventId, onRemove]);
+    };
 
-    const togglePause = useCallback(() => {
+    const togglePause = () => {
         setPaused(prev => {
             appWindow.emit(`copy-change-state//${eventId}`, prev ? "run" : "pause");
 
             return !prev;
         });
-    }, [eventId]);
+    };
 
     const handleTerminateAction = () => {
         untrack.current?.progress();
@@ -66,7 +66,8 @@ const Tracker: React.FC<TrackerProps> = ({ eventId, filename, from, to, onRemove
 
     useEffect(() => {
         mountListeners().then(togglePause);
-    }, [eventId, togglePause, mountListeners]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return (
         <div ref={trackerRef} className={styles.wrapper}>

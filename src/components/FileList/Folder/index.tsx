@@ -21,7 +21,7 @@ const Folder: React.FC<FolderProps> = ({ name, isRemovable }) => {
         <FileListItemButton
             onAction={handleAction}
             className={styles.wrapper}
-            data-file-type="file"
+            data-file-type="folder"
             data-readonly={isRemovable ? true : ""}
             data-context-menu-type={CTXTypes.file}
             data-filename={name}
