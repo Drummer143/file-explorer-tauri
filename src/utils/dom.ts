@@ -11,3 +11,18 @@ export const dispatchCustomEvent = <T extends keyof CustomEventMap>(
     // @ts-ignore
     document.dispatchEvent(event);
 };
+
+type LayerSwitchKeys = "shiftKey" | "ctrlKey" | "metaKey" | "altKey";
+
+export const findActiveLayerKeys = (
+    e: KeyboardEvent,
+    searchIn: LayerSwitchKeys | LayerSwitchKeys[] = ["altKey", "ctrlKey", "metaKey", "shiftKey"]
+) => {
+    if (!Array.isArray(searchIn)) {
+        searchIn = [searchIn];
+    }
+
+    const activeKeys = searchIn.filter(k => e[k]);
+
+    return activeKeys;
+};

@@ -8,7 +8,7 @@ import Folder from "./Folder";
 import { useExplorerHistory } from "@zustand";
 import { EditFileModal, FileExistModal } from "../modals";
 import { useResizeObserver, useWatchPathChange } from "@hooks";
-import { CTXTypes, addFileInClipboard, dispatchCustomEvent, pasteFile } from "@utils";
+import { CTXTypes, addFileInClipboard, findActiveLayerKeys, pasteFile } from "@utils";
 
 import styles from "./FileList.module.scss";
 
@@ -17,9 +17,10 @@ const FileList: React.FC = () => {
 
     const listContainerRef = useRef<HTMLDivElement | null>(null);
     const searchPattern = useRef("");
+    const gridWidth = useRef(0);
     const beforeResetPatternTimeout = useRef<NodeJS.Timeout | null>(null);
 
-    const mapFiles = (file: CFile) => {
+    const selectFileComponent = (file: CFile) => {
         switch (file.type) {
             case "disk":
                 return <Disk key={file.mountPoint} {...file} />;
@@ -40,11 +41,11 @@ const FileList: React.FC = () => {
 
             const canSearchFile = !document.documentElement.dataset.ctxOpened && !document.documentElement.dataset.modalOpened;
 
-            if (e.altKey || e.shiftKey || e.metaKey || !canSearchFile) {
+            if (findActiveLayerKeys(e, ["altKey", "metaKey", "shiftKey"]).length > 0 || !canSearchFile) {
                 return;
             }
 
-            if (e.ctrlKey && target) {
+            if (e.ctrlKey) {
                 switch (e.code) {
                     case "KeyX": {
                         const canMoveTarget = target.dataset.contextMenuType !== "disk";
@@ -96,7 +97,11 @@ const FileList: React.FC = () => {
                     }
                 }
             } else {
-                if (e.code.startsWith("Key") && listContainerRef.current) {
+                if (!listContainerRef.current) {
+                    return;
+                }
+
+                if (e.code.startsWith("Key")) {
                     if (beforeResetPatternTimeout.current) {
                         clearTimeout(beforeResetPatternTimeout.current);
                     }
@@ -112,10 +117,55 @@ const FileList: React.FC = () => {
                         searchPattern.current = "";
                         beforeResetPatternTimeout.current = null;
                     }, 2000);
+                } else if ((document.activeElement as HTMLElement)?.dataset.filename) {
+                    e.preventDefault();
+
+                    let focusedElementIndex = Array.from(listContainerRef.current.children as unknown as HTMLElement[])
+                        .findIndex(e => e.dataset.filename === (document.activeElement as HTMLElement)?.dataset.filename);
+
+                    if (focusedElementIndex === -1) {
+                        return;
+                    }
+
+                    switch (e.code) {
+                        case "ArrowLeft": {
+                            const modIndex = focusedElementIndex % gridWidth.current;
+
+                            if (!modIndex) {
+                                return;
+                            } else {
+                                focusedElementIndex--;
+                            }
+
+                            break;
+                        }
+                        case "ArrowRight": {
+                            const modIndex = focusedElementIndex % gridWidth.current;
+
+                            if (modIndex === gridWidth.current - 1) {
+                                return;
+                            } else {
+                                focusedElementIndex++;
+                            }
+
+                            break;
+                        }
+                        case "ArrowUp":
+                            focusedElementIndex -= gridWidth.current;
+                            break;
+                        case "ArrowDown":
+                            focusedElementIndex += gridWidth.current;
+
+                            if (focusedElementIndex >= listContainerRef.current.children.length) {
+                                focusedElementIndex = listContainerRef.current.children.length - 1;
+                            }
+                            break;
+                    }
+
+                    (listContainerRef.current.children.item(focusedElementIndex) as HTMLElement | null)?.focus();
                 }
             }
-        },
-        [currentPath]
+        }, [currentPath]
     );
 
     useEffect(() => {
@@ -139,9 +189,9 @@ const FileList: React.FC = () => {
                 return console.error("Can't get width of item in file list");
             }
 
-            const countOfColumns = Math.floor(e.contentRect.width / itemWidth);
+            gridWidth.current = Math.floor(e.contentRect.width / itemWidth);
 
-            listContainerRef.current?.style.setProperty("--count-of-columns", countOfColumns.toString());
+            listContainerRef.current?.style.setProperty("--count-of-columns", gridWidth.current.toString());
         }
     });
 
@@ -167,7 +217,7 @@ const FileList: React.FC = () => {
                     data-context-menu-type={CTXTypes.explorer}
                     data-readonly={currentPath ? "" : true}
                 >
-                    {files.map(mapFiles)}
+                    {files.map(selectFileComponent)}
                 </div>
             </OverlayScrollbarsComponent>
 
