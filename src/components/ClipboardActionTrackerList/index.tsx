@@ -1,13 +1,25 @@
 import React, { useEffect, useState } from "react";
 
-import Tracker from "./Tracker";
+import FileCopyingTracker from "./FileCopyingTracker";
 
 import styles from "./ClipboardActionTrackerList.module.scss";
+import FolderCopyingTracker from "./FolderCopyingTracker";
+
+type Trackers = (StartTrackingClipboardActionDetail)[];
 
 const ClipboardActionTrackerList: React.FC = () => {
-    const [trackers, setTrackers] = useState<StartTrackingClipboardActionDetail[]>([]);
+    const [trackers, setTrackers] = useState<Trackers>([]);
 
     const handleRemoveTracker = (id: number) => setTrackers(prev => prev.filter(t => t.eventId !== id));
+
+    const selectTracker = (t: CustomEventMap["startTrackingClipboardAction"]["detail"]) => {
+        switch (t.type) {
+            case "file":
+                return <FileCopyingTracker key={t.eventId} {...t} onRemove={handleRemoveTracker} />;
+            case "folder":
+                return <FolderCopyingTracker key={t.eventId} {...t} onRemove={handleRemoveTracker} />;
+        }
+    };
 
     useEffect(() => {
         const handleAddTracker: CustomEventHandler<"startTrackingClipboardAction"> = e => {
@@ -23,9 +35,7 @@ const ClipboardActionTrackerList: React.FC = () => {
 
     return (
         <div className={styles.wrapper}>
-            {trackers.map(t => (
-                <Tracker key={t.eventId} {...t} onRemove={handleRemoveTracker} />
-            ))}
+            {trackers.map(selectTracker)}
         </div>
     );
 };

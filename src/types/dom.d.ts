@@ -16,6 +16,7 @@ declare global {
         from: string;
         to: string;
         action: "copy" | "cut"
+        type: "file" | "folder"
     }
 
     interface CustomEventMap {

@@ -1,13 +1,11 @@
 import React from "react";
 
 import { openFile } from "@tauriAPI";
-import { usePasteFile } from "@hooks";
+import { pasteFile } from "@utils";
 import { useExplorerHistory } from "@zustand";
 
 const ExplorerContextMenu: React.FC = () => {
     const { currentPath } = useExplorerHistory();
-
-    const pasteFile = usePasteFile();
 
     const handleOpenInExplorer = () => openFile(currentPath);
 
