@@ -40,7 +40,9 @@ const FileList: React.FC = () => {
         (e: KeyboardEvent) => {
             const target = e.target as HTMLElement;
 
-            if (e.altKey || e.shiftKey || e.metaKey) {
+            const canSearchFile = !document.documentElement.dataset.ctxOpened && !document.documentElement.dataset.modalOpened;
+
+            if (e.altKey || e.shiftKey || e.metaKey || !canSearchFile) {
                 return;
             }
 

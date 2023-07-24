@@ -60,6 +60,10 @@ const EditFileModal: React.FC = () => {
         }
     };
 
+    const handleAfterOpen = () => document.documentElement.dataset.modalOpened = "true";
+
+    const handleAfterClose = () => document.documentElement.removeAttribute("data-modal-opened");
+
     useEffect(() => {
         const handleOpenModal = (e: CustomEventMap["openEditFileModal"]) => {
             setCurrentFilename(e.detail.filename);
@@ -78,6 +82,8 @@ const EditFileModal: React.FC = () => {
         <Modal
             isOpen={isOpen}
             onRequestClose={closeModal}
+            onAfterOpen={handleAfterOpen}
+            onAfterClose={handleAfterClose}
             shouldCloseOnEsc
             shouldCloseOnOverlayClick
             shouldFocusAfterRender

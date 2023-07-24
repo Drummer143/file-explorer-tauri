@@ -43,6 +43,8 @@ const ContextMenu: React.FC = () => {
     const closeCTX = () => {
         setContextMenuInfo(undefined);
 
+        document.documentElement.removeAttribute("data-ctx-opened");
+
         document.removeEventListener("click", closeCTXOnOuterClick);
         window.removeEventListener("resize", closeCTX);
     };
@@ -71,6 +73,8 @@ const ContextMenu: React.FC = () => {
             if (!CTXComponent) {
                 return setContextMenuInfo(undefined);
             }
+
+            document.documentElement.dataset.ctxOpened = "true";
 
             setContextMenuInfo({
                 CTXComponent,

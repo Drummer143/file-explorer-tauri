@@ -71,6 +71,10 @@ const FileExistModal: React.FC = () => {
         closeModal();
     };
 
+    const handleAfterOpen = () => document.documentElement.dataset.modalOpened = "true";
+
+    const handleAfterClose = () => document.documentElement.removeAttribute("data-modal-opened");
+
     useEffect(() => {
         const handleOpenModal = (e: CustomEventMap["openExistFileModal"]) => {
             setPathInfo(e.detail);
@@ -87,6 +91,8 @@ const FileExistModal: React.FC = () => {
         <ReactModal
             isOpen={!!pathInfo}
             onRequestClose={closeModal}
+            onAfterOpen={handleAfterOpen}
+            onAfterClose={handleAfterClose}
             shouldCloseOnEsc
             shouldFocusAfterRender
             shouldCloseOnOverlayClick
