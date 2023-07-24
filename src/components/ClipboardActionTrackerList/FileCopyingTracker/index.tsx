@@ -6,13 +6,13 @@ import { UnlistenFn } from "@tauri-apps/api/event";
 import { removeCopyProcessFromState, removeRaw } from "@tauriAPI";
 import { PlaySVG, PauseSVG, CloseSVG, CheckMarkSVG } from "@assets";
 
-import styles from "./Tracker.module.scss";
+import styles from "./FileCopyingTracker.module.scss";
 
-type TrackerProps = StartTrackingClipboardActionDetail & {
+type FileCopyingTrackerProps = StartTrackingClipboardActionDetail & {
     onRemove: (id: number) => void;
 };
 
-const Tracker: React.FC<TrackerProps> = ({ eventId, filename, from, to, onRemove, action }) => {
+const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filename, from, to, onRemove, action }) => {
     const [paused, setPaused] = useState(true);
     const [askDelete, setAskDelete] = useState(false);
 
@@ -106,4 +106,4 @@ const Tracker: React.FC<TrackerProps> = ({ eventId, filename, from, to, onRemove
     );
 };
 
-export default Tracker;
+export default FileCopyingTracker;

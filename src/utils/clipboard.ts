@@ -1,5 +1,7 @@
 import { sep } from "@tauri-apps/api/path";
-import { pathExists } from "@tauriAPI";
+import { dispatchCustomEvent } from "./dom";
+import { copyFile, pathExists } from "@tauriAPI";
+import { addNotificationFromError } from "./helpers";
 
 export const addFileInClipboard = (
     info: CopiedFileInfo
@@ -57,5 +59,48 @@ export const checkDataBeforeCopy = async (
         };
     } catch (_) {
         return false;
+    }
+};
+
+export const pasteFile = async (
+    to: { dirname: string; filename?: string },
+    copyOptions: FileCopyOptions = { overwrite: false, skipExist: false }
+) => {
+    const isOk = await checkDataBeforeCopy(to, copyOptions);
+
+    if (!isOk) {
+        return;
+    }
+
+    const { action, dirname, filename, filetype, newPathToFile, pathToSourceFile, exists } = isOk;
+
+    if (exists) {
+        if (filetype === "folder")
+        return dispatchCustomEvent("openExistFileModal", { dirname: to.dirname, filename });
+    }
+
+    const id = Math.floor(Math.random() * 1000);
+
+    dispatchCustomEvent("startTrackingClipboardAction", {
+        eventId: id,
+        from: dirname,
+        to: to.dirname,
+        filename,
+        action,
+        type: filetype
+    });
+
+    copyOptions.removeTargetOnFinish = action === "cut";
+
+    try {
+        if (filetype === "file") {
+            copyFile(pathToSourceFile, newPathToFile, id, copyOptions);
+        } else {
+            clearClipboard();
+
+            return console.error("unimplemented");
+        }
+    } catch (error) {
+        addNotificationFromError(error);
     }
 };

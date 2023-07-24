@@ -18,7 +18,7 @@ pub enum FileTypes {
     Image,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ErrorMessage {
     pub message: Option<String>,
@@ -150,4 +150,31 @@ impl Default for FilesystemConfig {
 pub struct AppConfig {
     pub notification: NotificationConfig,
     pub filesystem: FilesystemConfig,
+}
+
+#[derive(PartialEq, Clone, Copy, Debug)]
+pub enum CopyActions {
+    Pause,
+    Exit,
+    Run,
+}
+
+impl CopyActions {
+    pub fn from_window_event_payload(s: &str) -> Result<Self, ()> {
+        let lowercased: &str = &s.to_ascii_lowercase();
+
+        match lowercased {
+            "\"exit\"" => Ok(CopyActions::Exit),
+            "\"pause\"" => Ok(CopyActions::Pause),
+            "\"run\"" => Ok(CopyActions::Run),
+            _ => Err(()),
+        }
+    }
+}
+
+#[derive(PartialEq)]
+pub enum CopyResult {
+    Ok,
+    Stop,
+    Error(ErrorMessage),
 }

@@ -6,16 +6,14 @@ import Disk from "./Disk";
 import File from "./File";
 import Folder from "./Folder";
 import { useExplorerHistory } from "@zustand";
-import { CTXTypes, addFileInClipboard } from "@utils";
 import { EditFileModal, FileExistModal } from "../modals";
-import { useResizeObserver, useWatchPathChange, usePasteFile } from "@hooks";
+import { useResizeObserver, useWatchPathChange } from "@hooks";
+import { CTXTypes, addFileInClipboard, dispatchCustomEvent, pasteFile } from "@utils";
 
 import styles from "./FileList.module.scss";
 
 const FileList: React.FC = () => {
     const { currentPath } = useExplorerHistory();
-
-    const pasteFile = usePasteFile();
 
     const listContainerRef = useRef<HTMLDivElement | null>(null);
     const searchPattern = useRef("");
@@ -41,7 +39,16 @@ const FileList: React.FC = () => {
             const target = e.target as HTMLElement;
 
             if (e.altKey || e.shiftKey || e.metaKey) {
-                return;
+                if(e.code === "KeyT") {
+                    dispatchCustomEvent("startTrackingClipboardAction", {
+                        type: "folder",
+                        action: "copy",
+                        eventId: 2,
+                        filename: "filename",
+                        from: "FROM",
+                        to: "TO"
+                    });
+                }
             }
 
             if (e.ctrlKey && target) {
@@ -115,7 +122,7 @@ const FileList: React.FC = () => {
                 }
             }
         },
-        [currentPath, pasteFile]
+        [currentPath]
     );
 
     useEffect(() => {

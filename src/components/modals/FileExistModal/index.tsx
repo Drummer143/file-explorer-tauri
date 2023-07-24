@@ -3,8 +3,7 @@ import ReactModal from "react-modal";
 import { sep, extname, basename } from "@tauri-apps/api/path";
 
 import { pathExists } from "@tauriAPI";
-import { usePasteFile } from "@hooks";
-import { dispatchCustomEvent } from "@utils";
+import { dispatchCustomEvent, pasteFile } from "@utils";
 
 import styles from "./FileExistModal.module.scss";
 
@@ -12,8 +11,6 @@ const FileExistModal: React.FC = () => {
     const [pathInfo, setPathInfo] = useState<CustomEventMap["openExistFileModal"]["detail"] | undefined>(undefined);
 
     const closeModal = () => setPathInfo(undefined);
-
-    const pasteFile = usePasteFile();
 
     const addIndexToFilename = async (pathInfo: CustomEventMap["openExistFileModal"]["detail"]) => {
         let currentNumber = 1;

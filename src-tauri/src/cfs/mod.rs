@@ -1,22 +1,24 @@
 pub mod app_config;
+pub mod copy_directory;
 pub mod copy_file;
 pub mod get_disks;
+pub mod get_file_size;
 pub mod read_dir;
 pub mod remove_directory;
 pub mod remove_file;
 pub mod rename;
 pub mod types;
 pub mod watch_dir;
-mod copy_file_with_progress;
 
 use notify::RecommendedWatcher;
 use std::{collections::HashMap, ffi::OsStr, path::Path, sync::Mutex};
 use tauri::{
     plugin::{Builder, TauriPlugin},
-    Manager, Runtime,
+    Manager, Runtime, State,
 };
 use tauri::{Config, Window};
 
+use copy_directory::*;
 use copy_file::*;
 use get_disks::*;
 use read_dir::*;
@@ -104,8 +106,25 @@ fn remove<R: Runtime>(
 // }
 
 #[tauri::command(async)]
-fn print_state(state: tauri::State<'_, CFSState>) {
+fn print_state(state: State<'_, CFSState>) {
     println!("{:#?}", state);
+}
+
+#[tauri::command(async)]
+pub fn remove_copy_process_from_state<R: Runtime>(
+    state: State<'_, CFSState>,
+    window: Window<R>,
+    id: usize,
+) {
+    let state = state.copy_processes.lock();
+
+    if let Ok(mut state) = state {
+        let id = state.remove(&id);
+
+        if let Some(id) = id {
+            window.unlisten(id);
+        }
+    }
 }
 
 pub fn init<R: Runtime>(config: &Config) -> TauriPlugin<R> {
@@ -125,8 +144,8 @@ pub fn init<R: Runtime>(config: &Config) -> TauriPlugin<R> {
             read_dir,
             rename,
             exists,
-            // copy,
             copy_file,
+            copy_directory,
             print_state,
         ])
         .setup(|app| {

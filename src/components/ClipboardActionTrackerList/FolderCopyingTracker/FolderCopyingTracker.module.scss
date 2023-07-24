@@ -1,0 +1,96 @@
+.wrapper {
+    position: relative;
+
+    width: 250px;
+
+    background-color: black;
+    border-radius: 2px;
+    overflow: hidden;
+    font-size: 0.9em;
+
+    // &[data-waiting-action="true"] {
+    //     height: 50px;
+    // }
+
+    &::after {
+        content: "";
+
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 0;
+
+        width: var(--action-progress);
+
+        transition: width 50ms;
+        pointer-events: none;
+        background: linear-gradient(90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.2) 70%,
+                rgba(255, 255, 255, 0.3) 90%);
+    }
+}
+
+.info {
+    height: 25px;
+    width: 100%;
+
+    padding: 0 0.25rem;
+
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.text {
+    flex-grow: 1;
+
+    position: relative;
+    z-index: 1;
+
+    width: 100%;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-shadow: 0 0 2px #000;
+}
+
+.buttons {
+    display: none;
+    gap: 2px;
+    align-items: center;
+
+    .wrapper:hover & {
+        display: flex;
+    }
+
+    &>button {
+        height: 20px;
+        width: 20px;
+
+        padding: 3px;
+
+        border-radius: 2px;
+
+        &:hover {
+            background-color: rgba($color: #fff, $alpha: 0.3);
+        }
+
+        &:active {
+            background-color: rgba($color: #fff, $alpha: 0.2);
+        }
+
+        &>svg {
+            fill: white;
+        }
+    }
+}
+
+.copyProblemDisplayer {
+    width: 100%;
+    height: 25px;
+
+    padding: 0 0.25rem;
+}

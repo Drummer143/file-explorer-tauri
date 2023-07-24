@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { sep } from "@tauri-apps/api/path";
 
-import { usePasteFile } from "@hooks";
 import { useExplorerHistory } from "@zustand";
 import { openInExplorer, openFile, remove } from "@tauriAPI";
-import { addFileInClipboard, addNotificationFromError } from "@utils";
+import { addFileInClipboard, addNotificationFromError, pasteFile } from "@utils";
 
 type FileContextMenuProps = {
     ctxTarget: HTMLElement
@@ -12,8 +11,6 @@ type FileContextMenuProps = {
 
 const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
     const { currentPath, pushRoute } = useExplorerHistory();
-
-    const pasteFile = usePasteFile();
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const [filename] = useState(ctxTarget.dataset.filename!);
@@ -55,8 +52,13 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
     const handleRenameFile = () =>
         document.dispatchEvent(new CustomEvent("openEditFileModal", { detail: { filename } }));
 
-    const handleAddFileInClipboard = (action: "copy" | "cut") =>
-        addFileInClipboard(currentPath + sep + filename, filename, filetype, action);
+    const handleAddFileInClipboard = (action: "copy" | "cut") => {
+        if (filetype !== "file" && filetype !== "folder") {
+            return;
+        }
+
+        addFileInClipboard({ dirname: currentPath + sep + filename, filename, filetype, action });
+    };
 
     const handleMovePasteFile = () => pasteFile({ dirname: currentPath + sep + filename });
 
