@@ -6,7 +6,7 @@ import { openInExplorer, openFile, remove } from "@tauriAPI";
 import { addFileInClipboard, addNotificationFromError, pasteFile } from "@utils";
 
 type FileContextMenuProps = {
-    ctxTarget: HTMLElement
+    ctxTarget: HTMLElement;
 };
 
 const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {

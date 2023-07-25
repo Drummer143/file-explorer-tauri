@@ -36,10 +36,10 @@ export const copyFile = (from: string, to: string, eventId: number, copyOptions:
         from,
         to,
         eventId,
-        copyOptions: { 
-            overwrite: copyOptions.overwrite, 
+        copyOptions: {
+            overwrite: copyOptions.overwrite,
             // eslint-disable-next-line camelcase
-            skip_exist: copyOptions.skipExist ,
+            skip_exist: copyOptions.skipExist,
             // eslint-disable-next-line camelcase
             remove_target_on_finish: copyOptions.removeTargetOnFinish || false
         }

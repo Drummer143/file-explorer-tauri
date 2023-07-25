@@ -5,7 +5,7 @@ import FileCopyingTracker from "./FileCopyingTracker";
 import styles from "./ClipboardActionTrackerList.module.scss";
 import FolderCopyingTracker from "./FolderCopyingTracker";
 
-type Trackers = (StartTrackingClipboardActionDetail)[];
+type Trackers = StartTrackingClipboardActionDetail[];
 
 const ClipboardActionTrackerList: React.FC = () => {
     const [trackers, setTrackers] = useState<Trackers>([]);
@@ -33,11 +33,7 @@ const ClipboardActionTrackerList: React.FC = () => {
         };
     }, []);
 
-    return (
-        <div className={styles.wrapper}>
-            {trackers.map(selectTracker)}
-        </div>
-    );
+    return <div className={styles.wrapper}>{trackers.map(selectTracker)}</div>;
 };
 
 export default ClipboardActionTrackerList;

@@ -15,9 +15,9 @@ export const useWatchPathChange = () => {
 
     const untrackCurrentDir = useRef<
         | {
-            unwatch: () => Promise<void>;
-            unlisten: UnlistenFn;
-        }
+              unwatch: () => Promise<void>;
+              unlisten: UnlistenFn;
+          }
         | undefined
     >(undefined);
 

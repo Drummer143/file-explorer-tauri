@@ -11,7 +11,7 @@ import styles from "./FolderCopyingTracker.module.scss";
 type CopyStatus = "preparing" | "waiting-action" | "copying" | "copy-canceled";
 
 type FolderCopyingTrackerProps = StartTrackingClipboardActionDetail & {
-    onRemove: (eventId: number) => void
+    onRemove: (eventId: number) => void;
 };
 
 const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
@@ -108,18 +108,12 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
     }, []);
 
     return (
-        <div
-            ref={trackerRef}
-            data-waiting-action={status === "waiting-action"}
-            className={styles.wrapper}
-        >
+        <div ref={trackerRef} data-waiting-action={status === "waiting-action"} className={styles.wrapper}>
             <div className={styles.info}>
                 {status !== "copy-canceled" ? (
                     <>
                         {status === "preparing" ? (
-                            <p className={styles.text}>
-                                Preparing to copy folder
-                            </p>
+                            <p className={styles.text}>Preparing to copy folder</p>
                         ) : (
                             <p title={`Copying ${filename} from ${from} to ${to}`} className={styles.text}>
                                 {action === "copy" ? "Copying" : "Moving"} {filename} from {from} to {to}

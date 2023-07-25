@@ -2,12 +2,12 @@ declare global {
     const appConfig: AppConfig;
 
     interface OpenEditFileModalDetail {
-        filename: string
+        filename: string;
     }
 
     interface OpenExistFileModalDetail {
         dirname: string;
-        filename: string
+        filename: string;
     }
 
     interface StartTrackingClipboardActionDetail {
@@ -15,8 +15,8 @@ declare global {
         filename: string;
         from: string;
         to: string;
-        action: "copy" | "cut"
-        type: "file" | "folder"
+        action: "copy" | "cut";
+        type: "file" | "folder";
     }
 
     interface CustomEventMap {
@@ -49,4 +49,4 @@ declare global {
     }
 }
 
-export { };
+export {};

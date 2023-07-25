@@ -7,13 +7,13 @@ import styles from "./ContextMenu.module.scss";
 
 type ContextMenuInfo =
     | {
-        CTXComponent: React.ReactNode;
-        opacity: 0 | 1;
-        coordinates: {
-            x: number;
-            y: number;
-        };
-    }
+          CTXComponent: React.ReactNode;
+          opacity: 0 | 1;
+          coordinates: {
+              x: number;
+              y: number;
+          };
+      }
     | undefined;
 
 const ContextMenu: React.FC = () => {
@@ -137,13 +137,13 @@ const ContextMenu: React.FC = () => {
             style={
                 contextMenuInfo
                     ? {
-                        top: contextMenuInfo.coordinates.y + "px",
-                        left: contextMenuInfo.coordinates.x + "px",
-                        opacity: !contextMenuInfo.opacity ? 0 : undefined
-                    }
+                          top: contextMenuInfo.coordinates.y + "px",
+                          left: contextMenuInfo.coordinates.x + "px",
+                          opacity: !contextMenuInfo.opacity ? 0 : undefined
+                      }
                     : {
-                        display: "none"
-                    }
+                          display: "none"
+                      }
             }
         >
             {!!contextMenuInfo && contextMenuInfo.CTXComponent}

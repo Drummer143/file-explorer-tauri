@@ -3,16 +3,13 @@ import { dispatchCustomEvent } from "./dom";
 import { copyFile, pathExists } from "@tauriAPI";
 import { addNotificationFromError } from "./helpers";
 
-export const addFileInClipboard = (
-    info: CopiedFileInfo
-) => {
+export const addFileInClipboard = (info: CopiedFileInfo) => {
     document.documentElement.dataset.copiedFileInfo = JSON.stringify(info);
 
     document.querySelector<HTMLElement>(".cut-file")?.classList.remove("cut-file");
 
     if (info.action === "cut") {
-        document
-            .querySelector<HTMLElement>(`[data-filename="${info.filename}"]`)?.classList.add("cut-file");
+        document.querySelector<HTMLElement>(`[data-filename="${info.filename}"]`)?.classList.add("cut-file");
     }
 };
 
@@ -24,7 +21,7 @@ export const clearClipboard = () => {
 export const checkDataBeforeCopy = async (
     to: {
         dirname: string;
-        filename?: string
+        filename?: string;
     },
     copyOptions: FileCopyOptions
 ) => {
@@ -75,8 +72,7 @@ export const pasteFile = async (
     const { action, dirname, filename, filetype, newPathToFile, pathToSourceFile, exists } = isOk;
 
     if (exists) {
-        if (filetype === "folder")
-        return dispatchCustomEvent("openExistFileModal", { dirname: to.dirname, filename });
+        if (filetype === "folder") return dispatchCustomEvent("openExistFileModal", { dirname: to.dirname, filename });
     }
 
     const id = Math.floor(Math.random() * 1000);

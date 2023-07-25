@@ -60,7 +60,7 @@ const EditFileModal: React.FC = () => {
         }
     };
 
-    const handleAfterOpen = () => document.documentElement.dataset.modalOpened = "true";
+    const handleAfterOpen = () => (document.documentElement.dataset.modalOpened = "true");
 
     const handleAfterClose = () => document.documentElement.removeAttribute("data-modal-opened");
 

@@ -2,7 +2,7 @@ type FileTypes = "disk" | "folder" | "file";
 
 interface ExplorerFile {
     type: "file";
-    subtype?: "image"
+    subtype?: "image";
     name: string;
     size: number;
     isRemovable: boolean;
@@ -53,6 +53,6 @@ interface AppConfig {
 interface CopiedFileInfo {
     dirname: string;
     filename: string;
-    filetype: Exclude<FileTypes, "disk">
-    action: "cut" | "copy"
+    filetype: Exclude<FileTypes, "disk">;
+    action: "cut" | "copy";
 }

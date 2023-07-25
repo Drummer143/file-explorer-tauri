@@ -39,7 +39,8 @@ const FileList: React.FC = () => {
         (e: KeyboardEvent) => {
             const target = e.target as HTMLElement;
 
-            const canSearchFile = !document.documentElement.dataset.ctxOpened && !document.documentElement.dataset.modalOpened;
+            const canSearchFile =
+                !document.documentElement.dataset.ctxOpened && !document.documentElement.dataset.modalOpened;
 
             if (findActiveLayerKeys(e, ["altKey", "metaKey", "shiftKey"]).length > 0 || !canSearchFile) {
                 return;
@@ -52,7 +53,7 @@ const FileList: React.FC = () => {
                         const filename = target.dataset.filename;
                         const filetype = target.dataset.fileType;
 
-                        if (!canMoveTarget || !filename || filetype !== "file" && filetype !== "folder") {
+                        if (!canMoveTarget || !filename || (filetype !== "file" && filetype !== "folder")) {
                             return;
                         }
 
@@ -69,7 +70,7 @@ const FileList: React.FC = () => {
                         const filename = target.dataset.filename;
                         const filetype = target.dataset.fileType;
 
-                        if (!filename || filetype !== "file" && filetype !== "folder") {
+                        if (!filename || (filetype !== "file" && filetype !== "folder")) {
                             return;
                         }
 
@@ -108,8 +109,7 @@ const FileList: React.FC = () => {
 
                     searchPattern.current += e.key;
 
-                    Array
-                        .from(listContainerRef.current.children as unknown as HTMLElement[])
+                    Array.from(listContainerRef.current.children as unknown as HTMLElement[])
                         .find(el => el.dataset.filenameLowercased?.startsWith(searchPattern.current))
                         ?.focus();
 
@@ -120,8 +120,9 @@ const FileList: React.FC = () => {
                 } else if ((document.activeElement as HTMLElement)?.dataset.filename) {
                     e.preventDefault();
 
-                    let focusedElementIndex = Array.from(listContainerRef.current.children as unknown as HTMLElement[])
-                        .findIndex(e => e.dataset.filename === (document.activeElement as HTMLElement)?.dataset.filename);
+                    let focusedElementIndex = Array.from(
+                        listContainerRef.current.children as unknown as HTMLElement[]
+                    ).findIndex(e => e.dataset.filename === (document.activeElement as HTMLElement)?.dataset.filename);
 
                     if (focusedElementIndex === -1) {
                         return;
@@ -165,7 +166,8 @@ const FileList: React.FC = () => {
                     (listContainerRef.current.children.item(focusedElementIndex) as HTMLElement | null)?.focus();
                 }
             }
-        }, [currentPath]
+        },
+        [currentPath]
     );
 
     useEffect(() => {

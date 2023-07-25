@@ -14,13 +14,7 @@ const FileListItemButton: React.FC<FileListItemButtonProps> = ({ onAction, ...ot
         }
     };
 
-    return (
-        <button
-            {...otherProps}
-            onDoubleClick={onAction}
-            onClick={handleClick}
-        />
-    );
+    return <button {...otherProps} onDoubleClick={onAction} onClick={handleClick} />;
 };
 
 export default FileListItemButton;
