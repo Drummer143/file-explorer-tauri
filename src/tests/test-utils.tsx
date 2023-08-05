@@ -8,6 +8,8 @@ import "@testing-library/jest-dom";
 
 i18n.changeLanguage("en");
 
+vi.mock("zustand");
+
 type AllProvidersProps = {
     children: React.ReactNode;
 };
@@ -16,8 +18,7 @@ const AllProviders: React.FC<AllProvidersProps> = ({ children }) => {
     return <I18nextProvider i18n={i18n}>{children}</I18nextProvider>;
 };
 
-const customRender = (ui: React.ReactElement, options?: Omit<RenderOptions, "wrapper">) =>
+export const customRender = (ui: React.ReactElement, options?: Omit<RenderOptions, "wrapper">) =>
     render(ui, { wrapper: AllProviders, ...options });
 
-export { customRender };
 export * from "@testing-library/react";

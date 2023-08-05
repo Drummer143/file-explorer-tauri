@@ -28,7 +28,7 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
             trackerRef.current?.style.setProperty("--action-progress", (e.payload.done / e.payload.total) * 100 + "%");
         });
 
-        const finished = await appWindow.once(`copy-finished//${eventId}`, () => {
+        const finished = await appWindow.listen(`copy-finished//${eventId}`, () => {
             removeCopyProcessFromState(eventId);
 
             onRemove(eventId);
@@ -70,7 +70,7 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
     }, []);
 
     return (
-        <div ref={trackerRef} className={styles.wrapper}>
+        <div ref={trackerRef} className={styles.wrapper} data-testid={eventId}>
             {!askDelete ? (
                 <>
                     <p title={`Copying ${filename} from ${from} to ${to}`} className={styles.text}>
@@ -78,10 +78,10 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
                     </p>
 
                     <div className={styles.buttons}>
-                        <button type="button" onClick={togglePause}>
+                        <button type="button" title="Pause copy" onClick={togglePause}>
                             {paused ? <PlaySVG /> : <PauseSVG />}
                         </button>
-                        <button type="button" onClick={handleTerminateAction}>
+                        <button type="button" title="Cancel copy" onClick={handleTerminateAction}>
                             <CloseSVG strokeWidth={2} width={14} height={14} />
                         </button>
                     </div>
@@ -93,10 +93,10 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
                     </p>
 
                     <div className={styles.buttons}>
-                        <button type="button" onClick={handleRemoveTrackerAndDeleteCopiedFile}>
+                        <button type="button" title="Delete file" onClick={handleRemoveTrackerAndDeleteCopiedFile}>
                             <CheckMarkSVG />
                         </button>
-                        <button type="button" onMouseDown={handleRemoveTracker}>
+                        <button type="button" title="Save copied part" onMouseDown={handleRemoveTracker}>
                             <CloseSVG strokeWidth={2} width={14} height={14} />
                         </button>
                     </div>

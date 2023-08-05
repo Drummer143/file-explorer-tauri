@@ -1,7 +1,7 @@
 import { invoke } from "@tauri-apps/api";
 
-export const openInExplorer = (pathToFile: string) => invoke<void>("open_in_explorer", { pathToFile });
+export const openInExplorer = (pathToFile: string): Promise<void> => invoke<void>("open_in_explorer", { pathToFile });
 
-export const openFile = (pathToFile: string) => invoke<void>("open_file", { pathToFile });
+export const openFile = (pathToFile: string): Promise<void> => invoke<void>("open_file", { pathToFile });
 
-export const removeRaw = (path: string) => invoke<void>("remove", { path });
+export const removeRaw = (path: string): Promise<void> => invoke<void>("remove", { path });

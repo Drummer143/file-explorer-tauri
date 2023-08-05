@@ -39,7 +39,9 @@ export default defineConfig({
             "@tauriAPI": "src/tauriAPIWrapper/index.ts",
             "@hooks": "src/hooks/index.ts",
             "@assets": "src/assets/index.ts",
-            "@zustand": "src/zustand/index.ts"
+            "@zustand": "src/zustand/index.ts",
+            "@test-utils": "src/tests/test-utils.tsx",
+            "@components": "src/components/"
         }
     }
 });
