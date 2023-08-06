@@ -20,6 +20,7 @@ const File: React.FC<FileProps> = ({ name, size, subtype }) => {
 
     return (
         <FileListItemButton
+            title={name}
             onAction={handleAction}
             className={styles.wrapper}
             data-file-type="file"

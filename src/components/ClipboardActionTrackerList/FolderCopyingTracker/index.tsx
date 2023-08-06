@@ -107,7 +107,7 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    return (
+    return (    // TODO: LOCALIZATION
         <div ref={trackerRef} data-waiting-action={status === "waiting-action"} className={styles.wrapper}>
             <div className={styles.info}>
                 {status !== "copy-canceled" ? (

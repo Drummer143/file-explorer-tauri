@@ -35,6 +35,7 @@ const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoin
                     ref?.focus();
                 }
             }}
+            title={mountPoint + name}
             onAction={handleAction}
             className={styles.wrapper}
             data-file-type="disk"

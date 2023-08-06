@@ -24,6 +24,7 @@ const Folder: React.FC<FolderProps> = ({ name, isRemovable, initialFocus }) => {
                     ref?.focus();
                 }
             }}
+            title={name}
             onAction={handleAction}
             className={styles.wrapper}
             data-file-type="folder"

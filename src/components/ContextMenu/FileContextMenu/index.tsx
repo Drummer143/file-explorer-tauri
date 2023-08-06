@@ -4,6 +4,7 @@ import { sep } from "@tauri-apps/api/path";
 import { useExplorerHistory } from "@zustand";
 import { openInExplorer, openFile, remove } from "@tauriAPI";
 import { addFileInClipboard, addNotificationFromError, pasteFile } from "@utils";
+import { useTranslation } from "react-i18next";
 
 type FileContextMenuProps = {
     ctxTarget: HTMLElement;
@@ -11,6 +12,7 @@ type FileContextMenuProps = {
 
 const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
     const { currentPath, pushRoute } = useExplorerHistory();
+    const { t } = useTranslation("translation", { keyPrefix: "ctx" });
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const [filename] = useState(ctxTarget.dataset.filename!);
@@ -64,27 +66,24 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
 
     return (
         <>
-            <button onClick={handleOpenFile}>Open</button>
+            <button onClick={handleOpenFile}>{t("open")}</button>
 
-            <button onClick={handleOpenInExplorer}>{filetype === "file" ? "Show" : "Open"} in explorer</button>
+            <button onClick={handleOpenInExplorer}>{filetype === "file" ? t("showInNativeExplorer") : t("openInNativeExplorer")}</button>
 
             {!readonly && (
                 <>
-                    <button onClick={handleDeleteFile}>Delete</button>
+                    <button onClick={handleDeleteFile}>{t("delete")}</button>
 
-                    <button onClick={handleRenameFile}>Rename</button>
+                    <button onClick={handleRenameFile}>{t("rename")}</button>
 
-                    <button onClick={() => handleAddFileInClipboard("copy")}>Copy</button>
+                    <button onClick={() => handleAddFileInClipboard("copy")}>{t("copy")}</button>
 
-                    <button onClick={() => handleAddFileInClipboard("cut")}>Сut</button>
+                    <button onClick={() => handleAddFileInClipboard("cut")}>{t("cut")}</button>
                 </>
             )}
 
             {filetype === "folder" && document.documentElement.dataset.pathToCopiedFile && !readonly && (
-                <button onClick={handleMovePasteFile}>
-                    {document.documentElement.dataset.clipboardAction === "copy" ? "Copy " : "Move "}
-                    in this folder
-                </button>
+                <button onClick={handleMovePasteFile}>{t("paste")}</button>
             )}
         </>
     );

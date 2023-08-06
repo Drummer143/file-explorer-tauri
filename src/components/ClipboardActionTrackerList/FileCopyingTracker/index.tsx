@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { sep } from "@tauri-apps/api/path";
 import { appWindow } from "@tauri-apps/api/window";
 import { UnlistenFn } from "@tauri-apps/api/event";
+import { useTranslation } from "react-i18next";
 
 import { removeCopyProcessFromState, removeRaw } from "@tauriAPI";
 import { PlaySVG, PauseSVG, CloseSVG, CheckMarkSVG } from "@assets";
@@ -13,6 +14,8 @@ type FileCopyingTrackerProps = StartTrackingClipboardActionDetail & {
 };
 
 const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filename, from, to, onRemove, action }) => {
+    const { t } = useTranslation("translation", { keyPrefix: "clipboardTrackers" });
+
     const [paused, setPaused] = useState(true);
     const [askDelete, setAskDelete] = useState(false);
 
@@ -73,30 +76,37 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
         <div ref={trackerRef} className={styles.wrapper} data-testid={eventId}>
             {!askDelete ? (
                 <>
-                    <p title={`Copying ${filename} from ${from} to ${to}`} className={styles.text}>
-                        {action === "copy" ? "Copying" : "Moving"} {filename} from {from} to {to}
+                    <p
+                        title={t(action === "copy" ? "copyingFileFromTo" : "movingFileFromTo", { filename, from, to })}
+                        className={styles.text}
+                    >
+                        {t(action === "copy" ? "copyingFileFromTo" : "movingFileFromTo", { filename, from, to })}
                     </p>
 
                     <div className={styles.buttons}>
-                        <button type="button" title="Pause copy" onClick={togglePause}>
+                        <button
+                            type="button"
+                            title={paused ? t("continueCopying") : t("pauseCopying")}
+                            onClick={togglePause}
+                        >
                             {paused ? <PlaySVG /> : <PauseSVG />}
                         </button>
-                        <button type="button" title="Cancel copy" onClick={handleTerminateAction}>
+                        <button type="button" title={t("cancelCopying")} onClick={handleTerminateAction}>
                             <CloseSVG strokeWidth={2} width={14} height={14} />
                         </button>
                     </div>
                 </>
             ) : (
                 <>
-                    <p title="Delete copied file?" className={styles.text}>
-                        Delete copied file?
+                    <p title={t("deleteCopiedFile")} className={styles.text}>
+                        {t("deleteCopiedFile")}
                     </p>
 
                     <div className={styles.buttons}>
-                        <button type="button" title="Delete file" onClick={handleRemoveTrackerAndDeleteCopiedFile}>
+                        <button type="button" title={t("deleteFile")} onClick={handleRemoveTrackerAndDeleteCopiedFile}>
                             <CheckMarkSVG />
                         </button>
-                        <button type="button" title="Save copied part" onMouseDown={handleRemoveTracker}>
+                        <button type="button" title={t("saveFile")} onMouseDown={handleRemoveTracker}>
                             <CloseSVG strokeWidth={2} width={14} height={14} />
                         </button>
                     </div>

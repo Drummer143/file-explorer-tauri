@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ReactModal from "react-modal";
+import { useTranslation } from "react-i18next";
 import { sep, extname, basename } from "@tauri-apps/api/path";
 
 import { pathExists } from "@tauriAPI";
@@ -8,6 +9,8 @@ import { dispatchCustomEvent, pasteFile } from "@utils";
 import styles from "./FileExistModal.module.scss";
 
 const FileExistModal: React.FC = () => {
+    const { t } = useTranslation();
+
     const [pathInfo, setPathInfo] = useState<CustomEventMap["openExistFileModal"]["detail"] | undefined>(undefined);
 
     const closeModal = () => setPathInfo(undefined);
@@ -98,18 +101,21 @@ const FileExistModal: React.FC = () => {
             portalClassName={styles.portal}
         >
             <p>
-                {pathInfo?.filename.split(sep).at(-1)} already exists in {pathInfo?.dirname}. Choose an action:
+                {t("modals.fileExistModal.modalText", {
+                    filename: pathInfo?.filename.split(sep).at(-1),
+                    targetFolder: pathInfo?.dirname || "this folder"
+                })}
             </p>
 
             <div className={styles.actionButtons}>
                 <button onClick={() => handleClick("overwrite")} type="button">
-                    Overwrite
+                    {t("modals.fileExistModal.overwrite")}
                 </button>
                 <button onClick={() => handleClick("save-both")} type="button">
-                    Save both
+                    {t("modals.fileExistModal.saveBoth")}
                 </button>
                 <button onClick={() => handleClick("cancel")} type="button">
-                    Cancel
+                    {t("cancel")}
                 </button>
             </div>
         </ReactModal>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Modal from "react-modal";
 import { sep } from "@tauri-apps/api/path";
+import { useTranslation } from "react-i18next";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { rename } from "@tauriAPI";
@@ -16,6 +17,8 @@ type Inputs = {
 
 const EditFileModal: React.FC = () => {
     const { currentPath } = useExplorerHistory();
+
+    const { t } = useTranslation();
 
     const { value: isOpen, setTrue: openModal, setFalse: closeModal } = useDisclosure();
 
@@ -92,11 +95,11 @@ const EditFileModal: React.FC = () => {
             className={styles.modalBody}
             portalClassName={styles.portal}
         >
-            <h2 className={styles.heading}>Editing &quot;{currentFilename}&quot;</h2>
+            <h2 className={styles.heading}>{t("modals.editFileModal.heading", { filename: currentFilename })}</h2>
 
             <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
                 <label className={styles.inputLabel}>
-                    <p>Name: </p>
+                    <p>{t("modals.editFileModal.nameInputLabel")}: </p>
 
                     <input
                         autoComplete="off"
@@ -115,7 +118,7 @@ const EditFileModal: React.FC = () => {
                 </label>
 
                 <button className={styles.submitButton} type="submit">
-                    Save
+                    {t("save")}
                 </button>
             </form>
         </Modal>

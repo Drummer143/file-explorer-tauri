@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { CloseSVG } from "@assets";
 
 import styles from "./Notification.module.scss";
+import { useTranslation } from "react-i18next";
 
 type NotificationComponentProps = AppNotification & {
     index: string;
@@ -10,6 +11,8 @@ type NotificationComponentProps = AppNotification & {
 };
 
 const NotificationComponent: React.FC<NotificationComponentProps> = ({ message, type, index, reason, onRemove }) => {
+    const { t } = useTranslation();
+
     const [isOpened, setIsOpened] = useState(false);
 
     const updateInterval = useRef<NodeJS.Timer | null>(null);
@@ -89,9 +92,9 @@ const NotificationComponent: React.FC<NotificationComponentProps> = ({ message, 
             onMouseLeave={handleMouseLeave}
         >
             <div className={styles.heading}>
-                <p className={styles.headingText}>{type}</p>
+                <p className={styles.headingText}>{t("notifications." + type)}</p>
 
-                <button className={styles.closeButton} onClick={handleCloseNotification}>
+                <button className={styles.closeButton} title={t("close")} onClick={handleCloseNotification}>
                     <CloseSVG />
                 </button>
             </div>

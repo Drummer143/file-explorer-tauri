@@ -1,41 +1,49 @@
+type ContextMenuKeys = "paste" | "copy" | "cut" | "openInNativeExplorer" | "showInNativeExplorer" | "open" | "delete" | "rename";
+
 type LocalizationMap = {
     translation: {
-        enterFileName: string;
-        enterFolderName: string;
-        create: string;
-        newFolder: string;
-        newFile: string;
-        settings: string;
-        language: string;
-        title: string;
-        explorerErrors: {
-            invalidPath: string;
-            onOpenFile: string;
-            onGetInfo: string;
-        };
-        ctx: {
-            buttons: {
-                openFile: string;
-                openFolder: string;
-                delete: string;
-                rename: string;
-                createFolder: string;
-                createFile: string;
-                openInExplorer: string;
-                appearance: string;
-            };
-            sections: {
-                disk: string;
-                directory: string;
-                file: string;
-                explorer: string;
-            };
-        };
+        navbar: {
+            back: string;
+            forward: string;
+            goToParentFolder: string;
+            reload: string;
+        }
         windowControlButtons: {
             minimize: string;
             restoreToWindow: string;
             maximize: string;
             close: string;
         };
+        ctx: {
+            [key in ContextMenuKeys]: string;
+        };
+        clipboardTrackers: {
+            copyingFileFromTo: string;
+            pauseCopying: string;
+            continueCopying: string;
+            cancelCopying: string;
+            deleteCopiedFile: string;
+            deleteFile: string;
+            saveFile: string;
+        };
+        modals: {
+            editFileModal: {
+                heading: string;
+                nameInputLabel: string;
+            };
+            fileExistModal: {
+                modalText: string;
+                overwrite: string;
+                saveBoth: string;
+            }
+        };
+        notifications: {
+            error: string;
+            warning: string;
+            info: string;
+        }
+        save: string;
+        cancel: string;
+        close: string;
     };
 };

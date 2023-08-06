@@ -7,7 +7,7 @@ import { CloseSVG, MaximizeSVG, MinimizeSVG, RestoreToWindowSVG } from "@assets"
 import styles from "./WindowControlButtons.module.scss";
 
 const WindowControlButtons: React.FC = () => {
-    const { t } = useTranslation();
+    const { t } = useTranslation("translation", { keyPrefix: "windowControlButtons" });
 
     const [isMaximized, setIsMaximized] = useState(false);
 
@@ -33,7 +33,7 @@ const WindowControlButtons: React.FC = () => {
                 type="button"
                 className={styles.windowControlButton}
                 onClick={minimize}
-                title={t("windowControlButtons.minimize")}
+                title={t("minimize")}
             >
                 <MinimizeSVG />
             </button>
@@ -42,7 +42,7 @@ const WindowControlButtons: React.FC = () => {
                 type="button"
                 className={styles.windowControlButton}
                 onClick={toggleFullscreen}
-                title={isMaximized ? t("windowControlButtons.restoreToWindow") : t("windowControlButtons.maximize")}
+                title={isMaximized ? t("restoreToWindow") : t("maximize")}
             >
                 {isMaximized ? <RestoreToWindowSVG /> : <MaximizeSVG />}
             </button>
@@ -51,7 +51,7 @@ const WindowControlButtons: React.FC = () => {
                 type="button"
                 className={styles.windowControlButton}
                 onClick={close}
-                title={t("windowControlButtons.close")}
+                title={t("close")}
             >
                 <CloseSVG width={16} height={16} />
             </button>

@@ -9,29 +9,25 @@ import styles from "./NavigationButtons.module.scss";
 const NavigationButtons: React.FC = () => {
     const { canGoBack, canGoForward, goBack, goForward, goToParent, hasParent } = useExplorerHistory();
 
-    const { t } = useTranslation();
+    const { t } = useTranslation("translation", { keyPrefix: "navbar" });
 
     const handleReload = () => location.reload();
 
     return (
         <div className={styles.wrapper}>
-            <button className={styles.button} title={t("navbar.back")} onClick={goBack} disabled={!canGoBack}>
+            <button className={styles.button} title={t("back")} onClick={goBack} disabled={!canGoBack}>
                 <LeftArrowSVG />
             </button>
 
-            <button className={styles.button} title={t("navbar.forward")} onClick={goForward} disabled={!canGoForward}>
+            <button className={styles.button} title={t("forward")} onClick={goForward} disabled={!canGoForward}>
                 <RightArrowSVG />
             </button>
 
-            <button
-                className={styles.button}
-                title='Reload page. You can also reload page by pressing "Right Control + R"'
-                onClick={handleReload}
-            >
+            <button className={styles.button} title={t("reload")} onClick={handleReload}>
                 <ReloadSVG />
             </button>
 
-            <button className={styles.button} title="Move to parent folder" onClick={goToParent} disabled={!hasParent}>
+            <button className={styles.button} title={t("goToParentFolder")} onClick={goToParent} disabled={!hasParent}>
                 <UpArrowSVG />
             </button>
         </div>
