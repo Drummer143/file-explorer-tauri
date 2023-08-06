@@ -25,6 +25,7 @@ TODO:
     -   [x] Window Controls
 -   [x] Explorer history
     -   [ ] Limit length of history - ?
+    -   [ ] Migrate to Navigation API - ?
 -   [ ] Interaction with filesystem
     -   [x] Open file
     -   [x] Delete file
@@ -32,17 +33,23 @@ TODO:
         -   [x] Permanently delete
     -   [x] Rename file
     -   [x] Copy/cut file
-        -   [ ] Frontend
+        -   [x] Frontend
             -   [x] Interface
-            -   [ ] Algorithm
-        -   [ ] Backend
+            -   [x] Algorithm
+        -   [x] Backend
             -   [x] Copy file
             -   [x] Move file
-            -   [ ] Copy directory
-            -   [ ] Move Directory
+    -   [ ] Copy/cut folder
+        -   [ ] Frontend
+            -   [ ] Interface
+            -   [ ] Algorithm
+        -   [ ] Backend
+            -   [ ] Copy folder
+            -   [ ] Move folder
     -   [ ] Create file/directory
     -   [x] Watch changes in current directory
-    -   [ ] symlinks
+        -   [ ] Research unhandled events
+    -   [ ] Symlinks
 -   [ ] App Config
 -   [ ] Settings
 -   [ ] Localization
