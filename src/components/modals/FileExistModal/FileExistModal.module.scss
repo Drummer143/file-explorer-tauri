@@ -15,17 +15,39 @@
     top: 50%;
     left: 50%;
 
-    width: fit-content;
+    max-width: 600px;
     height: fit-content;
+    word-wrap: break-word;
 
     padding: 1rem;
 
+    border-radius: 1rem;
     background-color: #000;
     transform: translate(-50%, -50%);
 }
 
 .actionButtons {
+    max-width: 100%;
+
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(max-content, 1fr));
     gap: 0.5rem;
+
+    margin-top: 2rem;
+
+    button {
+        padding: 0.375rem 0.675rem;
+
+        border-radius: 0.5rem;
+        background-color: rgba($color: #fff, $alpha: 0.13);
+        transition: background-color 150ms;
+
+        &:hover {
+            background-color: rgba($color: #fff, $alpha: 0.2);
+        }
+
+        &:active {
+            background-color: rgba($color: #fff, $alpha: 0.1);
+        }
+    }
 }
