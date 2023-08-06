@@ -8,12 +8,12 @@ import { useExplorerHistory } from "@zustand";
 
 import styles from "./Disk.module.scss";
 
-type DiskProps = ExplorerDisk;
+type DiskProps = ExplorerDisk & { initialFocus?: boolean };
 
 // const FREE_MEMORY_COLOR_CHANGE_THRESHOLD = 0.60;
 // const FREE_MEMORY_COLOR_CHANGE_VALUE_MULTIPLIER = 1 - FREE_MEMORY_COLOR_CHANGE_THRESHOLD;
 
-const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoint }) => {
+const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoint, initialFocus }) => {
     const { pushRoute } = useExplorerHistory();
 
     // const availableSpacePercentage = useMemo(() => {
@@ -30,18 +30,23 @@ const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoin
 
     return (
         <FileListItemButton
+            ref={ref => {
+                if (initialFocus) {
+                    ref?.focus();
+                }
+            }}
             onAction={handleAction}
             className={styles.wrapper}
             data-file-type="disk"
             data-context-menu-type={CTXTypes.file}
             data-filename={mountPoint}
             data-filename-lowercased={name.toLocaleLowerCase()}
-            // style={{
-            //     '--available-space-width': availableSpacePercentage + "%",
-            //     "--free-memory-background-color":
-            //             getDiskBackgroundColor((availableSpacePercentage / 100 - FREE_MEMORY_COLOR_CHANGE_THRESHOLD)
-            //             * FREE_MEMORY_COLOR_CHANGE_VALUE_MULTIPLIER)
-            // } as React.CSSProperties}
+        // style={{
+        //     '--available-space-width': availableSpacePercentage + "%",
+        //     "--free-memory-background-color":
+        //             getDiskBackgroundColor((availableSpacePercentage / 100 - FREE_MEMORY_COLOR_CHANGE_THRESHOLD)
+        //             * FREE_MEMORY_COLOR_CHANGE_VALUE_MULTIPLIER)
+        // } as React.CSSProperties}
         >
             <div className={styles.icon}>
                 <DiskSVG />

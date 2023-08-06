@@ -1,6 +1,6 @@
 import { create } from "zustand";
 // import { persist } from "zustand/middleware";
-import { dirname } from "@tauri-apps/api/path";
+import { dirname, sep } from "@tauri-apps/api/path";
 
 type HistoryUpdateType = "back" | "forward" | "push" | "init";
 
@@ -12,6 +12,8 @@ interface ExplorerHistoryState {
     currentPathIndex: number;
     hasParent: boolean;
     lastHistoryUpdateType: HistoryUpdateType;
+
+    prevTargetFile?: string;
 
     pushRoute: (route: string) => void;
     goBack: () => boolean;
@@ -46,12 +48,13 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
                 currentPathIndex: currentPathIndex + 1,
                 currentPath: route,
                 hasParent: !!route,
-                lastHistoryUpdateType: "push"
+                lastHistoryUpdateType: "push",
+                prevTargetFile: undefined
             });
         },
 
         goBack: () => {
-            const { canGoBack, currentPathIndex, history } = get();
+            const { canGoBack, currentPathIndex, history, currentPath } = get();
 
             if (!canGoBack) {
                 console.error("Can't go back");
@@ -66,7 +69,8 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
                 canGoForward: true,
                 currentPathIndex: newIndex,
                 hasParent: !!history[newIndex],
-                lastHistoryUpdateType: "back"
+                lastHistoryUpdateType: "back",
+                prevTargetFile: currentPath.split(sep).at(-1)
             });
 
             return true;
@@ -88,7 +92,8 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
                 canGoBack: true,
                 currentPathIndex: newIndex,
                 hasParent: !!history[newIndex],
-                lastHistoryUpdateType: "forward"
+                lastHistoryUpdateType: "forward",
+                prevTargetFile: history[newIndex + 1]?.split(sep).at(-1)
             });
 
             return true;

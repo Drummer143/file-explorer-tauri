@@ -8,17 +8,22 @@ import { useExplorerHistory } from "@zustand";
 
 import styles from "./Folder.module.scss";
 
-type FolderProps = ExplorerDirectory;
+type FolderProps = ExplorerDirectory & { initialFocus?: boolean };
 
-const Folder: React.FC<FolderProps> = ({ name, isRemovable }) => {
+const Folder: React.FC<FolderProps> = ({ name, isRemovable, initialFocus }) => {
     const { currentPath, pushRoute } = useExplorerHistory();
 
-    const handleAction: React.MouseEventHandler<HTMLButtonElement> = () => {
+    const handleAction = () => {
         pushRoute(currentPath + sep + name);
     };
 
     return (
         <FileListItemButton
+            ref={ref => {
+                if (initialFocus) {
+                    ref?.focus();
+                }
+            }}
             onAction={handleAction}
             className={styles.wrapper}
             data-file-type="folder"

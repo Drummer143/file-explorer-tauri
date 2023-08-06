@@ -13,19 +13,21 @@ import { CTXTypes, addFileInClipboard, findActiveLayerKeys, pasteFile } from "@u
 import styles from "./FileList.module.scss";
 
 const FileList: React.FC = () => {
-    const { currentPath } = useExplorerHistory();
+    const { currentPath, prevTargetFile } = useExplorerHistory();
 
     const listContainerRef = useRef<HTMLDivElement | null>(null);
     const searchPattern = useRef("");
     const gridWidth = useRef(0);
-    const beforeResetPatternTimeout = useRef<NodeJS.Timeout | null>(null);
+    const beforeResetFileSearchTimeout = useRef<NodeJS.Timeout | null>(null);
+
+    const { files } = useWatchPathChange();
 
     const selectFileComponent = (file: CFile) => {
         switch (file.type) {
             case "disk":
-                return <Disk key={file.mountPoint} {...file} />;
+                return <Disk initialFocus={prevTargetFile === file.mountPoint} key={file.mountPoint} {...file} />;
             case "folder":
-                return <Folder key={file.name} {...file} />;
+                return <Folder initialFocus={prevTargetFile === file.name} key={file.name} {...file} />;
             case "file":
                 return <File key={file.name} {...file} />;
             default:
@@ -33,141 +35,152 @@ const FileList: React.FC = () => {
         }
     };
 
-    const { files } = useWatchPathChange();
+    const handleKeyDownWithCtrlKey = useCallback((e: KeyboardEvent) => {
+        const target = e.target as HTMLElement;
+
+        switch (e.code) {
+            case "KeyX": {
+                const canMoveTarget = target.dataset.contextMenuType !== "disk";
+                const filename = target.dataset.filename;
+                const filetype = target.dataset.fileType;
+
+                if (!canMoveTarget || !filename || (filetype !== "file" && filetype !== "folder")) {
+                    return;
+                }
+
+                addFileInClipboard({
+                    dirname: currentPath,
+                    filename,
+                    filetype,
+                    action: "cut"
+                });
+
+                break;
+            }
+            case "KeyC": {
+                const filename = target.dataset.filename;
+                const filetype = target.dataset.fileType;
+
+                if (!filename || (filetype !== "file" && filetype !== "folder")) {
+                    return;
+                }
+
+                addFileInClipboard({
+                    dirname: currentPath,
+                    filename,
+                    filetype,
+                    action: "copy"
+                });
+
+                break;
+            }
+            case "KeyV": {
+                let to = currentPath;
+                const possibleFocusedFileName = (document.activeElement as HTMLElement | null)?.dataset
+                    .contextMenuAdditionalInfo;
+                const isNotFile =
+                    (document.activeElement as HTMLElement | null)?.dataset.contextMenuType !== "file";
+
+                if (possibleFocusedFileName && isNotFile) {
+                    to = to + sep + possibleFocusedFileName;
+                }
+
+                pasteFile({ dirname: to });
+            }
+        }
+    }, [currentPath]);
+
+    const handleSearchItem = useCallback((e: KeyboardEvent) => {
+        if (beforeResetFileSearchTimeout.current) {
+            clearTimeout(beforeResetFileSearchTimeout.current);
+        }
+
+        searchPattern.current += e.key;
+
+        Array.from(listContainerRef.current?.children as unknown as HTMLElement[])
+            .find(el => el.dataset.filenameLowercased?.startsWith(searchPattern.current))
+            ?.focus();
+
+        beforeResetFileSearchTimeout.current = setTimeout(() => {
+            searchPattern.current = "";
+            beforeResetFileSearchTimeout.current = null;
+        }, 2000);
+    }, []);
+
+    const handleListArrowNavigation = useCallback((e: KeyboardEvent) => {
+        if (!listContainerRef.current) {
+            return;
+        }
+
+        e.preventDefault();
+
+        let focusedElementIndex = Array.from(
+            listContainerRef.current.children as unknown as HTMLElement[]
+        ).findIndex(e => e.dataset.filename === (document.activeElement as HTMLElement)?.dataset.filename);
+
+        if (focusedElementIndex === -1) {
+            return (listContainerRef.current.children.item(0) as HTMLElement | null)?.focus();
+        }
+
+        switch (e.code) {
+            case "ArrowLeft": {
+                focusedElementIndex--;
+                break;
+            }
+            case "ArrowRight": {
+                if (focusedElementIndex === listContainerRef.current.children.length - 1) {
+                    return;
+                }
+
+                focusedElementIndex++;
+
+                if (focusedElementIndex >= listContainerRef.current.children.length) {
+                    focusedElementIndex = listContainerRef.current.children.length - gridWidth.current;
+                }
+
+                break;
+            }
+            case "ArrowUp":
+                focusedElementIndex -= gridWidth.current;
+                break;
+            case "ArrowDown": {
+                const modIndex = listContainerRef.current.children.length % gridWidth.current;
+
+                focusedElementIndex += gridWidth.current;
+
+                if (modIndex && focusedElementIndex >= listContainerRef.current.children.length) {
+                    focusedElementIndex = listContainerRef.current.children.length - 1;
+                }
+                break;
+            }
+        }
+
+        (listContainerRef.current.children.item(focusedElementIndex) as HTMLElement | null)?.focus();
+    }, []);
 
     const handleKeyDown = useCallback(
         (e: KeyboardEvent) => {
-            const target = e.target as HTMLElement;
-
-            const canSearchFile =
+            const isHandlePossible =
                 !document.documentElement.dataset.ctxOpened && !document.documentElement.dataset.modalOpened;
 
-            if (findActiveLayerKeys(e, ["altKey", "metaKey", "shiftKey"]).length > 0 || !canSearchFile) {
+            if (findActiveLayerKeys(e, ["altKey", "metaKey", "shiftKey"]).length > 0 || !isHandlePossible) {
                 return;
             }
 
             if (e.ctrlKey) {
-                switch (e.code) {
-                    case "KeyX": {
-                        const canMoveTarget = target.dataset.contextMenuType !== "disk";
-                        const filename = target.dataset.filename;
-                        const filetype = target.dataset.fileType;
-
-                        if (!canMoveTarget || !filename || (filetype !== "file" && filetype !== "folder")) {
-                            return;
-                        }
-
-                        addFileInClipboard({
-                            dirname: currentPath,
-                            filename,
-                            filetype,
-                            action: "cut"
-                        });
-
-                        break;
-                    }
-                    case "KeyC": {
-                        const filename = target.dataset.filename;
-                        const filetype = target.dataset.fileType;
-
-                        if (!filename || (filetype !== "file" && filetype !== "folder")) {
-                            return;
-                        }
-
-                        addFileInClipboard({
-                            dirname: currentPath,
-                            filename,
-                            filetype,
-                            action: "copy"
-                        });
-
-                        break;
-                    }
-                    case "KeyV": {
-                        let to = currentPath;
-                        const possibleFocusedFileName = (document.activeElement as HTMLElement | null)?.dataset
-                            .contextMenuAdditionalInfo;
-                        const isNotFile =
-                            (document.activeElement as HTMLElement | null)?.dataset.contextMenuType !== "file";
-
-                        if (possibleFocusedFileName && isNotFile) {
-                            to = to + sep + possibleFocusedFileName;
-                        }
-
-                        pasteFile({ dirname: to });
-                    }
-                }
+                handleKeyDownWithCtrlKey(e);
             } else {
-                if (!listContainerRef.current) {
-                    return;
-                }
+                const isBodyFocused = document.activeElement?.isSameNode(document.body);
+                const isFileItemFocused = (document.activeElement as HTMLElement)?.dataset.filename;
 
-                if (e.code.startsWith("Key")) {
-                    if (beforeResetPatternTimeout.current) {
-                        clearTimeout(beforeResetPatternTimeout.current);
-                    }
-
-                    searchPattern.current += e.key;
-
-                    Array.from(listContainerRef.current.children as unknown as HTMLElement[])
-                        .find(el => el.dataset.filenameLowercased?.startsWith(searchPattern.current))
-                        ?.focus();
-
-                    beforeResetPatternTimeout.current = setTimeout(() => {
-                        searchPattern.current = "";
-                        beforeResetPatternTimeout.current = null;
-                    }, 2000);
-                } else if ((document.activeElement as HTMLElement)?.dataset.filename) {
-                    e.preventDefault();
-
-                    let focusedElementIndex = Array.from(
-                        listContainerRef.current.children as unknown as HTMLElement[]
-                    ).findIndex(e => e.dataset.filename === (document.activeElement as HTMLElement)?.dataset.filename);
-
-                    if (focusedElementIndex === -1) {
-                        return;
-                    }
-
-                    switch (e.code) {
-                        case "ArrowLeft": {
-                            const modIndex = focusedElementIndex % gridWidth.current;
-
-                            if (!modIndex) {
-                                return;
-                            } else {
-                                focusedElementIndex--;
-                            }
-
-                            break;
-                        }
-                        case "ArrowRight": {
-                            const modIndex = focusedElementIndex % gridWidth.current;
-
-                            if (modIndex === gridWidth.current - 1) {
-                                return;
-                            } else {
-                                focusedElementIndex++;
-                            }
-
-                            break;
-                        }
-                        case "ArrowUp":
-                            focusedElementIndex -= gridWidth.current;
-                            break;
-                        case "ArrowDown":
-                            focusedElementIndex += gridWidth.current;
-
-                            if (focusedElementIndex >= listContainerRef.current.children.length) {
-                                focusedElementIndex = listContainerRef.current.children.length - 1;
-                            }
-                            break;
-                    }
-
-                    (listContainerRef.current.children.item(focusedElementIndex) as HTMLElement | null)?.focus();
+                if (isBodyFocused && e.code.startsWith("Key")) {
+                    handleSearchItem(e);
+                } else if ((isBodyFocused || isFileItemFocused) && e.code.startsWith("Arrow")) {
+                    handleListArrowNavigation(e);
                 }
             }
         },
-        [currentPath]
+        [handleKeyDownWithCtrlKey, handleListArrowNavigation, handleSearchItem]
     );
 
     useEffect(() => {
