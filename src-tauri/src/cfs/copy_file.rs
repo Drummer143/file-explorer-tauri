@@ -28,6 +28,8 @@ pub fn copy_file_with_progress<R: tauri::Runtime>(
     buffer_size: usize,
     copy_speed: u64,
     control_vars: Arc<(Mutex<CopyActions>, Condvar)>,
+    mut total_bytes_copied: usize,
+    total_size: Option<u64>,
 ) -> CopyResult {
     let file_from = File::open(&from);
 
@@ -50,10 +52,13 @@ pub fn copy_file_with_progress<R: tauri::Runtime>(
 
     let mut file_to = file_to.unwrap();
     let progress_event_name = format!("copy-progress//{}", event_id);
-    let file_size = file_from.metadata().unwrap().len();
-    let mut total_bytes_copied = 0;
     let mut buffer = vec![0; buffer_size];
     let start_time = Instant::now();
+    let file_size = if let Some(total_size) = total_size {
+        total_size
+    } else {
+        file_from.metadata().unwrap().len()
+    };
 
     loop {
         let &(ref lock, ref cvar) = &*control_vars;
@@ -140,6 +145,8 @@ fn spawn_copy_thread<R: Runtime>(
             buffer_size,
             copy_speed,
             control_vars,
+            0,
+            None
         );
 
         if result != CopyResult::Ok || !remove_target_on_finish {
