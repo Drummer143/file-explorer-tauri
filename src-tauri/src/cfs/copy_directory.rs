@@ -28,113 +28,6 @@ pub struct DirectoryCopyOptions {
     pub duplicate_file_action: DuplicateFileAction,
 }
 
-fn copy_directory_recursion<R: Runtime>(
-    window: &tauri::Window<R>,
-    event_id: usize,
-    path_from: &Path,
-    path_to: &Path,
-    buffer_size: usize,
-    copy_speed: u64,
-    control_vars: Arc<(Mutex<CopyActions>, Condvar)>,
-    mut total_bytes_copied: usize,
-    total_size: u64,
-) -> usize {
-    let mkdir_result = fs::create_dir(path_to);
-
-    if let Err(error) = mkdir_result {
-        println!("{}", error.to_string());
-        return total_bytes_copied;
-    }
-
-    let dir_entry = path_from.read_dir();
-
-    if let Err(ref error) = dir_entry {
-        println!("{}", error.to_string());
-    }
-
-    let dir_entry = dir_entry.unwrap();
-    let error_event_name = format!("copy-error//{}", event_id);
-
-    for entry in dir_entry {
-        if let Err(error) = entry {
-            println!("{}", error.to_string());
-            continue;
-        }
-
-        let entry = entry.unwrap();
-        let metadata = entry.metadata();
-
-        if let Err(error) = metadata {
-            println!("{}", error.to_string());
-            continue;
-        }
-
-        let metadata = metadata.unwrap();
-
-        let to = path_to.join(entry.file_name());
-        let entry_path = entry.path();
-
-        if metadata.is_dir() {
-            total_bytes_copied = copy_directory_recursion(
-                window,
-                event_id,
-                &entry_path,
-                &to,
-                buffer_size,
-                copy_speed,
-                control_vars.clone(),
-                total_bytes_copied,
-                total_size,
-            );
-            continue;
-        }
-
-        let from_str = entry_path.to_str().unwrap();
-        let to_str = to.to_str().unwrap();
-
-        if to.exists() {
-            let _ = window.emit(&error_event_name, to_str);
-
-            let &(ref lock, ref cvar) = &*control_vars;
-            let mut state = lock.lock().unwrap();
-
-            *state = CopyActions::Pause;
-
-            while *state == CopyActions::Pause {
-                state = cvar.wait(state).unwrap();
-            }
-
-            if *state == CopyActions::Exit {
-                todo!();
-            }
-        }
-
-        let result = super::copy_file_with_progress(
-            window,
-            from_str,
-            to_str,
-            event_id,
-            buffer_size,
-            copy_speed,
-            control_vars.clone(),
-            total_bytes_copied,
-            Some(total_size),
-        );
-
-        if let CopyResult::Error(error) = result {
-            println!(
-                "error: {}\nmessage: {}",
-                error.error.unwrap_or_default(),
-                error.message.unwrap_or_default()
-            );
-        } else {
-            total_bytes_copied += entry.metadata().unwrap().len() as usize;
-        }
-    }
-
-    total_bytes_copied
-}
-
 fn copy_directory_with_progress<R: tauri::Runtime>(
     window: &tauri::Window<R>,
     from: &str,
@@ -145,13 +38,13 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
     control_vars: Arc<(Mutex<CopyActions>, Condvar)>,
 ) -> CopyResult {
     let path_from = Path::new(from);
-    let dir_size = get_file_size(path_from);
+    let total_size = get_file_size(path_from);
 
-    if let Err(error) = dir_size {
+    if let Err(error) = total_size {
         return CopyResult::Error(error);
     }
 
-    let dir_size = dir_size.unwrap();
+    let total_size = total_size.unwrap();
     let root_dir_entry = path_from.read_dir();
 
     if let Err(error) = root_dir_entry {
@@ -163,17 +56,107 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
 
     let _ = window.emit(&format!("copy-ready//{}", event_id), ());
 
-    copy_directory_recursion(
-        window,
-        event_id,
-        path_from,
-        Path::new(to),
-        buffer_size,
-        copy_speed,
-        control_vars,
-        0,
-        dir_size,
-    );
+    let path_to = Path::new(to);
+    let mut total_bytes_copied = 0;
+
+    if let Err(error) = fs::create_dir(path_to) {
+        println!("{}", error.to_string());
+        return CopyResult::Error(ErrorMessage::new_all(
+            "can't create root folder".into(),
+            error.to_string(),
+        ));
+    }
+
+    let dir_entry = path_from.read_dir();
+
+    if let Err(ref error) = dir_entry {
+        println!("{}", error.to_string());
+    }
+
+    let dir_entry = dir_entry.unwrap();
+    let error_event_name = format!("copy-error//{}", event_id);
+
+    let mut dirs_queue = vec![(dir_entry, String::from(to))];
+
+    while !dirs_queue.is_empty() {
+        let (dir_entry, path_to) = dirs_queue.remove(0);
+        let &(ref lock, ref cvar) = &*control_vars;
+
+        for entry in dir_entry {
+            if let Err(error) = entry {
+                println!("{}", error.to_string());
+                continue;
+            }
+
+            let entry = entry.unwrap();
+            let metadata = entry.metadata();
+
+            if let Err(error) = metadata {
+                println!("{}", error.to_string());
+                continue;
+            }
+
+            let metadata = metadata.unwrap();
+
+            let path_to_new_entry = Path::new(&path_to).join(entry.file_name());
+            let path_to_new_entry_str = path_to_new_entry.to_str().unwrap();
+            let path_to_entry = entry.path();
+
+            {
+                let mut state = lock.lock().unwrap();
+
+                while *state == CopyActions::Pause {
+                    state = cvar.wait(state).unwrap();
+                }
+
+                if *state == CopyActions::Exit {
+                    break;
+                }
+            }
+
+            if metadata.is_dir() {
+                if let Err(error) = fs::create_dir(path_to_new_entry.clone()) {
+                    println!("{}", error.to_string());
+                } else if let Ok(dir) = path_to_entry.read_dir() {
+                    dirs_queue.push((dir, path_to_new_entry_str.into()));
+                }
+
+                continue;
+            }
+
+            if path_to_new_entry.exists() {
+                let mut state = lock.lock().unwrap();
+
+                let _ = window.emit(&error_event_name, path_to_new_entry_str);
+
+                *state = CopyActions::Pause;
+            }
+
+            let result = super::copy_file_with_progress(
+                window,
+                path_to_entry.to_str().unwrap(),
+                path_to_new_entry.to_str().unwrap(),
+                event_id,
+                buffer_size,
+                copy_speed,
+                control_vars.clone(),
+                total_bytes_copied,
+                Some(total_size),
+            );
+
+            if let CopyResult::Error(error) = result {
+                println!(
+                    "error: {}\nmessage: {}",
+                    error.error.unwrap_or_default(),
+                    error.message.unwrap_or_default()
+                );
+            } else {
+                total_bytes_copied += entry.metadata().unwrap().len() as usize;
+            }
+        }
+
+        println!("{:#?}", dirs_queue);
+    }
 
     let _ = window.emit(&format!("copy-finished//{}", event_id), ());
 
@@ -244,7 +227,7 @@ pub fn copy_directory<R: Runtime>(
 
             if let Ok(parsed) = parsed_value {
                 *state = parsed;
-                cvar.notify_one();
+                cvar.notify_all();
             }
         }
     });
