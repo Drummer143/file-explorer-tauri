@@ -2,7 +2,7 @@ use std::{fs::DirEntry, io::Error as IOError, os::windows::prelude::MetadataExt}
 
 use super::{
     get_file_type,
-    types::{ErrorMessage, FileInfo},
+    types::{ErrorMessage, FileInfo}, get_file_subtype,
 };
 
 /// function checks given file and if its ok returns required info about it
@@ -15,12 +15,14 @@ fn handle_file(file: Result<DirEntry, IOError>) -> Option<FileInfo> {
 
         if !is_hidden {
             let file_type = get_file_type(&file.path());
+            let file_subtype = get_file_subtype(&file.path());
 
             return Some(FileInfo::new(
                 file_name,
                 file_type.into(),
                 meta.file_size() as usize,
                 meta.permissions().readonly(),
+                file_subtype
             ));
         }
     }

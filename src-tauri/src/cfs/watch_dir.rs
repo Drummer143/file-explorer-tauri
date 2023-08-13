@@ -16,7 +16,7 @@ use tauri::{Runtime, State, Window};
 use super::{
     get_file_type,
     types::{ErrorMessage, FileChangeEventType, FileChangePayload, FileInfo},
-    CFSState,
+    CFSState, get_file_subtype,
 };
 
 fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>>, id: usize) {
@@ -42,21 +42,22 @@ fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>
                     .unwrap_or(OsStr::new(""))
                     .to_string_lossy();
 
-                let file_type = get_file_type(path_to_file);
-
+                
                 let metadata = path_to_file.metadata();
                 let mut file_info: Option<FileInfo> = None;
-
+                
                 if let Ok(metadata) = metadata {
                     let size = metadata.file_size() as usize;
                     let is_removable = !metadata.permissions().readonly();
+                    let file_subtype = get_file_subtype(path_to_file);
 
-                    file_info = Some(FileInfo {
-                        name: filename.to_string(),
-                        r#type: file_type.into(),
-                        is_removable,
+                    file_info = Some(FileInfo::new(
+                        filename.to_string(),
+                        get_file_type(path_to_file),
                         size,
-                    });
+                        is_removable,
+                        file_subtype,
+                    ));
                 }
 
                 let payload = FileChangePayload {

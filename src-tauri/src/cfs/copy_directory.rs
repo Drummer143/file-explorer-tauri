@@ -6,19 +6,37 @@ use std::{
 };
 use tauri::{Runtime, State, Window};
 
+use crate::cfs::{generate_duplicated_filename, get_file_type};
+
 use super::{
     get_file_size::get_file_size,
-    types::{CopyActions, CopyResult, ErrorMessage},
+    types::{CopyActions, CopyResult, ErrorMessage, FileTypes},
     CFSState,
 };
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Clone)]
 pub enum DuplicateFileAction {
     Overwrite,
     SaveBoth,
     Skip,
     Ask,
 }
+
+impl DuplicateFileAction {
+    pub fn from_window_event_payload(s: &str) -> Result<Self, ()> {
+        let lowercased: &str = &s.to_ascii_lowercase();
+
+        match lowercased {
+            "\"overwrite\"" => Ok(DuplicateFileAction::Overwrite),
+            "\"saveboth\"" => Ok(DuplicateFileAction::SaveBoth),
+            "\"skip\"" => Ok(DuplicateFileAction::Skip),
+            "\"ask\"" => Ok(DuplicateFileAction::Ask),
+            _ => Err(()),
+        }
+    }
+}
+
+type ControlVars = Arc<(Mutex<CopyActions>, Condvar)>;
 
 #[derive(serde::Deserialize)]
 pub struct DirectoryCopyOptions {
@@ -28,6 +46,14 @@ pub struct DirectoryCopyOptions {
     pub duplicate_file_action: DuplicateFileAction,
 }
 
+#[derive(serde::Serialize, Clone)]
+struct ExistingEntryInfo {
+    path: String,
+    filename: String,
+    r#type: FileTypes,
+    path_to_new_dirname: String,
+}
+
 fn copy_directory_with_progress<R: tauri::Runtime>(
     window: &tauri::Window<R>,
     from: &str,
@@ -35,7 +61,8 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
     event_id: usize,
     buffer_size: usize,
     copy_speed: u64,
-    control_vars: Arc<(Mutex<CopyActions>, Condvar)>,
+    control_vars: ControlVars,
+    duplicate_file_action: DuplicateFileAction,
 ) -> CopyResult {
     let path_from = Path::new(from);
     let total_size = get_file_size(path_from);
@@ -61,10 +88,10 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
 
     if let Err(error) = fs::create_dir(path_to) {
         println!("{}", error.to_string());
-        return CopyResult::Error(ErrorMessage::new_all(
-            "can't create root folder".into(),
-            error.to_string(),
-        ));
+        // return CopyResult::Error(ErrorMessage::new_all(
+        //     "can't create root folder".into(),
+        //     error.to_string(),
+        // ));
     }
 
     let dir_entry = path_from.read_dir();
@@ -98,9 +125,79 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
 
             let metadata = metadata.unwrap();
 
-            let path_to_new_entry = Path::new(&path_to).join(entry.file_name());
-            let path_to_new_entry_str = path_to_new_entry.to_str().unwrap();
+            let mut path_to_new_entry = Path::new(&path_to).join(entry.file_name());
+            let path_to_new_entry_str = path_to_new_entry.clone();
+            let mut path_to_new_entry_str = String::from(path_to_new_entry_str.to_str().unwrap());
             let path_to_entry = entry.path();
+
+            if path_to_new_entry.exists() {
+                let _ = window.emit(
+                    &error_event_name,
+                    ExistingEntryInfo {
+                        filename: entry.file_name().to_str().unwrap().into(),
+                        path: path_to_entry.to_str().unwrap().into(),
+                        r#type: get_file_type(&path_to_entry),
+                        path_to_new_dirname: path_to.clone(),
+                    },
+                );
+
+                {
+                    let mut state = lock.lock().unwrap();
+                    *state = CopyActions::Pause;
+                }
+
+                let action_arc = Arc::new(Mutex::new(duplicate_file_action.clone()));
+                let action_arc_clone = action_arc.clone();
+                let ctrl_vars_clone = control_vars.clone();
+
+                window.once(format!("copy-handle-duplicate//{}", event_id), move |e| {
+                    let payload = e.payload().unwrap();
+
+                    if let Ok(action) = DuplicateFileAction::from_window_event_payload(payload) {
+                        let mut action_arc_clone = action_arc_clone.lock().unwrap();
+
+                        *action_arc_clone = action;
+
+                        let &(ref lock, ref cvar) = &*ctrl_vars_clone;
+                        let mut state = lock.lock().unwrap();
+
+                        println!("got event");
+                        *state = CopyActions::Run;
+                        cvar.notify_one();
+                    }
+                });
+
+                println!("waiting");
+
+                let mut state = lock.lock().unwrap();
+                while *state == CopyActions::Pause {
+                    state = cvar.wait(state).unwrap();
+                }
+
+                let current_action = action_arc.lock().unwrap();
+
+                match *current_action {
+                    DuplicateFileAction::Overwrite => {
+                        let _ = fs::remove_file(&path_to_new_entry_str);
+                    }
+                    DuplicateFileAction::SaveBoth => {
+                        let new_filename =
+                            generate_duplicated_filename(path_to_new_entry_str.into());
+
+                        if new_filename.is_err() {
+                            continue;
+                        }
+
+                        let new_filename = new_filename.unwrap();
+                        path_to_new_entry = Path::new(&path_to).join(new_filename);
+
+                        let path_clone = path_to_entry.clone();
+                        path_to_new_entry_str = path_clone.to_str().unwrap().into();
+                    }
+                    DuplicateFileAction::Skip => continue,
+                    _ => {}
+                };
+            }
 
             {
                 let mut state = lock.lock().unwrap();
@@ -118,18 +215,10 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
                 if let Err(error) = fs::create_dir(path_to_new_entry.clone()) {
                     println!("{}", error.to_string());
                 } else if let Ok(dir) = path_to_entry.read_dir() {
-                    dirs_queue.push((dir, path_to_new_entry_str.into()));
+                    dirs_queue.push((dir, path_to_new_entry_str));
                 }
 
                 continue;
-            }
-
-            if path_to_new_entry.exists() {
-                let mut state = lock.lock().unwrap();
-
-                let _ = window.emit(&error_event_name, path_to_new_entry_str);
-
-                *state = CopyActions::Pause;
             }
 
             let result = super::copy_file_with_progress(
@@ -170,8 +259,9 @@ fn spawn_copy_thread<R: Runtime>(
     from: String,
     to: String,
     event_id: usize,
-    control_vars: Arc<(Mutex<CopyActions>, Condvar)>,
+    control_vars: ControlVars,
     remove_target_on_finish: bool,
+    duplicate_file_action: DuplicateFileAction,
 ) -> Result<(), ErrorMessage> {
     thread::spawn(move || {
         let result = copy_directory_with_progress(
@@ -182,6 +272,7 @@ fn spawn_copy_thread<R: Runtime>(
             buffer_size,
             copy_speed,
             control_vars,
+            duplicate_file_action,
         );
 
         match result {
@@ -218,6 +309,8 @@ pub fn copy_directory<R: Runtime>(
 
     let listener_id = window.listen(format!("copy-change-state//{}", event_id), move |e| {
         let payload = e.payload();
+
+        println!("changing state");
 
         let &(ref lock, ref cvar) = &*control_vars;
         let mut state = lock.lock().unwrap();
@@ -270,5 +363,6 @@ pub fn copy_directory<R: Runtime>(
         event_id,
         control_vars_clone,
         copy_options.remove_target_on_finish,
+        copy_options.duplicate_file_action,
     )
 }

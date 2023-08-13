@@ -11,11 +11,16 @@ pub enum FileChangeEventType {
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
+pub enum FileSubtypes {
+    Image,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
 pub enum FileTypes {
     Disk,
     File,
     Folder,
-    Image,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, Debug)]
@@ -82,15 +87,17 @@ pub struct FileInfo {
     pub r#type: FileTypes,
     pub size: usize,
     pub is_removable: bool,
+    pub subtype: Option<FileSubtypes>,
 }
 
 impl FileInfo {
-    pub fn new(name: String, r#type: FileTypes, size: usize, is_removable: bool) -> FileInfo {
+    pub fn new(name: String, r#type: FileTypes, size: usize, is_removable: bool, subtype: Option<FileSubtypes>) -> FileInfo {
         FileInfo {
             name,
             r#type,
             size,
             is_removable,
+            subtype
         }
     }
 }

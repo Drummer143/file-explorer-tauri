@@ -62,10 +62,26 @@ fn get_file_type(path_to_file: &Path) -> FileTypes {
         .unwrap_or("");
 
     if DISPLAYABLE_IMAGE_EXTENSIONS.contains(&extension) {
-        return FileTypes::Image;
+        return FileTypes::File;
     }
 
     FileTypes::File
+}
+
+fn get_file_subtype(path_to_file: &Path) -> Option<FileSubtypes> {
+    if path_to_file.is_dir() {
+        return None;
+    }
+
+    let extension = path_to_file.extension().and_then(OsStr::to_str);
+
+    if let Some(extension) = extension {
+        if DISPLAYABLE_IMAGE_EXTENSIONS.contains(&extension) {
+            return Some(FileSubtypes::Image);
+        }
+    }
+
+    None
 }
 
 #[tauri::command(async)]
@@ -127,6 +143,31 @@ pub fn remove_copy_process_from_state<R: Runtime>(
     }
 }
 
+#[tauri::command(async)]
+fn generate_duplicated_filename(path_to_file: String) -> Result<String, ErrorMessage> {
+    let path = Path::new(&path_to_file);
+    let mut index = 0;
+    let filename = path.file_name().unwrap_or_default();
+    let filename = filename.to_str();
+
+    if filename.is_none() {
+        return Err(ErrorMessage::new_message("Incorrect path".into()));
+    }
+
+    let filename = filename.unwrap();
+
+    loop {
+        index += 1;
+
+        let indexed_path = format!("{} ({})", path_to_file, index);
+        let indexed_path = Path::new(&indexed_path);
+
+        if !indexed_path.exists() {
+            break Ok(format!("{} ({})", filename, index));
+        }
+    }
+}
+
 pub fn init<R: Runtime>(config: &Config) -> TauriPlugin<R> {
     let (js_init_script, app_config) = app_config::init(config, APP_CONFIG_NAME);
 
@@ -134,19 +175,20 @@ pub fn init<R: Runtime>(config: &Config) -> TauriPlugin<R> {
 
     Builder::new("cfs")
         .invoke_handler(tauri::generate_handler![
+            copy_directory,
+            copy_file,
+            exists,
+            generate_duplicated_filename,
+            get_disks,
+            print_state,
             remove,
-            remove_file,
+            read_dir,
+            remove_copy_process_from_state,
             remove_directory,
+            remove_file,
+            rename,
             unwatch,
             watch_dir,
-            get_disks,
-            remove_copy_process_from_state,
-            read_dir,
-            rename,
-            exists,
-            copy_file,
-            copy_directory,
-            print_state,
         ])
         .setup(|app| {
             app.manage(CFSState::new_app_config(app_config));
