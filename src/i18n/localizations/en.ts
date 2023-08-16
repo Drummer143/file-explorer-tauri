@@ -39,7 +39,8 @@ export default {
             fileExistModal: {
                 modalText: "{{filename}} already exists in {{targetFolder}}. Choose an action:",
                 overwrite: "Overwrite",
-                saveBoth: "Save both"
+                saveBoth: "Save both",
+                merge: "Merge"
             }
         },
         notifications: {

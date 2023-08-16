@@ -72,9 +72,7 @@ export const pasteFile = async (
     const { action, dirname, filename, filetype, newPathToFile, pathToSourceFile, exists } = isOk;
 
     if (exists) {
-        if (filetype === "file") {
-            return dispatchCustomEvent("openExistFileModal", { dirname: to.dirname, filename });
-        }
+        return dispatchCustomEvent("openExistFileModal", { dirname: to.dirname, filename, filetype });
     }
 
     const id = Math.floor(Math.random() * 1000);

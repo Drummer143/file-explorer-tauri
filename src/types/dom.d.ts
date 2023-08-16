@@ -8,6 +8,7 @@ declare global {
     interface OpenExistFileModalDetail {
         dirname: string;
         filename: string;
+        filetype: "file" | "folder";
     }
 
     interface StartTrackingClipboardActionDetail {

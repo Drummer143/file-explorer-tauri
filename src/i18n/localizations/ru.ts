@@ -40,7 +40,8 @@ export default {
             fileExistModal: {
                 modalText: "{{filename}} уже существует в папке {{targetFolder}}. Выберите действие:",
                 overwrite: "Перезаписать",
-                saveBoth: "Сохранить оба файла"
+                saveBoth: "Сохранить оба файла",
+                merge: "Объединить"
             }
         },
         notifications: {

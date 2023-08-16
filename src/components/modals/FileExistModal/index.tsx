@@ -1,22 +1,22 @@
 import React, { useEffect, useState } from "react";
 import ReactModal from "react-modal";
 import { useTranslation } from "react-i18next";
-import { sep, extname, basename } from "@tauri-apps/api/path";
+import { sep } from "@tauri-apps/api/path";
 
-import { addIndexToFilename, pathExists } from "@tauriAPI";
-import { dispatchCustomEvent, pasteFile } from "@utils";
+import { addIndexToFilename } from "@tauriAPI";
+import { pasteFile } from "@utils";
 
 import styles from "./FileExistModal.module.scss";
 
 const FileExistModal: React.FC = () => {
     const { t } = useTranslation();
 
-    const [pathInfo, setPathInfo] = useState<CustomEventMap["openExistFileModal"]["detail"] | undefined>(undefined);
+    const [fileInfo, setFileInfo] = useState<CustomEventMap["openExistFileModal"]["detail"] | undefined>(undefined);
 
-    const closeModal = () => setPathInfo(undefined);
+    const closeModal = () => setFileInfo(undefined);
 
-    const handleClick = async (action: "overwrite" | "save-both" | "cancel") => {
-        if (action === "cancel" || !pathInfo) {
+    const handleClick = async (action: "overwrite" | "save-both" | "cancel" | "merge") => {
+        if (action === "cancel" || !fileInfo) {
             return closeModal();
         }
 
@@ -25,26 +25,31 @@ const FileExistModal: React.FC = () => {
             overwrite: false
         };
 
-        let filename = pathInfo.filename;
+        let filename = fileInfo.filename;
 
-        if (action === "save-both") {
-            filename = await addIndexToFilename(pathInfo.dirname + sep + pathInfo.filename);
-        } else {
-            options.overwrite = true;
+        switch (action) {
+            case "overwrite":
+                options.overwrite = true;
+                break;
+            case "save-both":
+                filename = await addIndexToFilename(fileInfo.dirname + sep + fileInfo.filename);
+                break;
+            case "merge":
+                options.skipExist = true;
         }
 
-        pasteFile({ dirname: pathInfo.dirname, filename }, options);
+        pasteFile({ dirname: fileInfo.dirname, filename }, options);
 
         closeModal();
     };
 
-    const handleAfterOpen = () => (document.documentElement.dataset.modalOpened = "true");
+    const handleAfterOpen = () => document.documentElement.dataset.modalOpened = "true";
 
     const handleAfterClose = () => document.documentElement.removeAttribute("data-modal-opened");
 
     useEffect(() => {
         const handleOpenModal = (e: CustomEventMap["openExistFileModal"]) => {
-            setPathInfo(e.detail);
+            setFileInfo(e.detail);
         };
 
         document.addEventListener("openExistFileModal", handleOpenModal);
@@ -56,7 +61,7 @@ const FileExistModal: React.FC = () => {
 
     return (
         <ReactModal
-            isOpen={!!pathInfo}
+            isOpen={!!fileInfo}
             onRequestClose={closeModal}
             onAfterOpen={handleAfterOpen}
             onAfterClose={handleAfterClose}
@@ -69,12 +74,22 @@ const FileExistModal: React.FC = () => {
         >
             <p>
                 {t("modals.fileExistModal.modalText", {
-                    filename: pathInfo?.filename.split(sep).at(-1),
-                    targetFolder: pathInfo?.dirname || "this folder"
+                    filename: fileInfo?.filename.split(sep).at(-1),
+                    targetFolder: fileInfo?.dirname || "this folder"
                 })}
             </p>
 
-            <div className={styles.actionButtons}>
+            <div
+                className={styles.actionButtons}
+                style={{
+                    "--count-of-columns": fileInfo?.filetype === "file" ? "3" : "4",
+                } as React.CSSProperties}
+            >
+                {fileInfo?.filetype === "folder" && (
+                    <button onClick={() => handleClick("merge")} type="button">
+                        {t("modals.fileExistModal.merge")}
+                    </button>
+                )}
                 <button onClick={() => handleClick("overwrite")} type="button">
                     {t("modals.fileExistModal.overwrite")}
                 </button>

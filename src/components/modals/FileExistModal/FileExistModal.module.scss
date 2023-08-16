@@ -30,17 +30,20 @@
     max-width: 100%;
 
     display: grid;
-    grid-template-columns: repeat(3, minmax(max-content, 1fr));
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    grid-template-columns: repeat(var(--count-of-columns), minmax(max-content, 1fr));
+    gap: 0.375rem;
 
     margin-top: 2rem;
 
     button {
-        padding: 0.375rem 0.675rem;
+        padding: 0.25rem 0.5rem;
 
+        white-space: nowrap;
         border-radius: 0.5rem;
         background-color: rgba($color: #fff, $alpha: 0.13);
         transition: background-color 150ms;
+        font-size: 0.85em;
 
         &:hover {
             background-color: rgba($color: #fff, $alpha: 0.2);
