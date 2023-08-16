@@ -45,7 +45,7 @@ TODO:
             -   [x] Algorithm
         -   [x] Backend
             -   [x] Copy folder
-            -   [ ] Move folder
+            -   [x] Move folder
     -   [ ] Create file/directory
     -   [x] Watch changes in current directory
         -   [ ] Research unhandled events
