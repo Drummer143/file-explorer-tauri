@@ -3,7 +3,7 @@ import ReactModal from "react-modal";
 import { useTranslation } from "react-i18next";
 import { sep, extname, basename } from "@tauri-apps/api/path";
 
-import { pathExists } from "@tauriAPI";
+import { addIndexToFilename, pathExists } from "@tauriAPI";
 import { dispatchCustomEvent, pasteFile } from "@utils";
 
 import styles from "./FileExistModal.module.scss";
@@ -14,33 +14,6 @@ const FileExistModal: React.FC = () => {
     const [pathInfo, setPathInfo] = useState<CustomEventMap["openExistFileModal"]["detail"] | undefined>(undefined);
 
     const closeModal = () => setPathInfo(undefined);
-
-    const addIndexToFilename = async (pathInfo: CustomEventMap["openExistFileModal"]["detail"]) => {
-        let currentNumber = 1;
-        let ext: string;
-
-        try {
-            ext = "." + (await extname(pathInfo.filename));
-        } catch (error) {
-            ext = "";
-        }
-
-        const filenameNoExt = await basename(pathInfo.filename, ext);
-
-        const concatIndex = () => filenameNoExt + ` (${currentNumber})` + ext;
-        const concatPath = () => pathInfo.dirname + sep + filename;
-
-        let filename = concatIndex();
-        let numberedPath = concatPath();
-
-        while (await pathExists(numberedPath)) {
-            currentNumber++;
-            filename = concatIndex();
-            numberedPath = concatPath();
-        }
-
-        return filename;
-    };
 
     const handleClick = async (action: "overwrite" | "save-both" | "cancel") => {
         if (action === "cancel" || !pathInfo) {
@@ -55,18 +28,12 @@ const FileExistModal: React.FC = () => {
         let filename = pathInfo.filename;
 
         if (action === "save-both") {
-            filename = await addIndexToFilename(pathInfo);
+            filename = await addIndexToFilename(pathInfo.dirname + sep + pathInfo.filename);
         } else {
             options.overwrite = true;
         }
 
-        const isFile = document.documentElement.dataset.copiedFileInfo?.includes("\"filetype\":\"file\"");
-
-        if (isFile) {
-            pasteFile({ dirname: pathInfo.dirname, filename }, options);
-        } else {
-            dispatchCustomEvent("addNotification", { message: "Can copy only files", type: "error" });
-        }
+        pasteFile({ dirname: pathInfo.dirname, filename }, options);
 
         closeModal();
     };
