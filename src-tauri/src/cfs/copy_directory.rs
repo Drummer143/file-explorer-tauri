@@ -6,7 +6,7 @@ use std::{
 };
 use tauri::{Runtime, State, Window};
 
-use crate::cfs::{generate_duplicated_filename, get_file_type};
+use crate::cfs::{add_index_to_filename, get_file_type};
 
 use super::{
     get_file_size::get_file_size,
@@ -14,7 +14,7 @@ use super::{
     CFSState,
 };
 
-#[derive(serde::Deserialize, Clone)]
+#[derive(serde::Deserialize, Clone, Debug)]
 pub enum DuplicateFileAction {
     Overwrite,
     SaveBoth,
@@ -28,7 +28,7 @@ impl DuplicateFileAction {
 
         match lowercased {
             "\"overwrite\"" => Ok(DuplicateFileAction::Overwrite),
-            "\"saveboth\"" => Ok(DuplicateFileAction::SaveBoth),
+            "\"save-both\"" => Ok(DuplicateFileAction::SaveBoth),
             "\"skip\"" => Ok(DuplicateFileAction::Skip),
             "\"ask\"" => Ok(DuplicateFileAction::Ask),
             _ => Err(()),
@@ -67,6 +67,15 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
     let path_from = Path::new(from);
     let total_size = get_file_size(path_from);
 
+    {
+        let &(ref lock, ref cvar) = &*control_vars.clone();
+        let mut state = lock.lock().unwrap();
+
+        while *state == CopyActions::Pause {
+            state = cvar.wait(state).unwrap();
+        }
+    }
+
     if let Err(error) = total_size {
         return CopyResult::Error(error);
     }
@@ -86,12 +95,14 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
     let path_to = Path::new(to);
     let mut total_bytes_copied = 0;
 
-    if let Err(error) = fs::create_dir(path_to) {
-        println!("{}", error.to_string());
-        // return CopyResult::Error(ErrorMessage::new_all(
-        //     "can't create root folder".into(),
-        //     error.to_string(),
-        // ));
+    if !path_to.exists() {
+        if let Err(error) = fs::create_dir(path_to) {
+            println!("can't create root folder: {}", error.to_string());
+            return CopyResult::Error(ErrorMessage::new_all(
+                "can't create root folder".into(),
+                error.to_string(),
+            ));
+        }
     }
 
     let dir_entry = path_from.read_dir();
@@ -119,7 +130,7 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
             let metadata = entry.metadata();
 
             if let Err(error) = metadata {
-                println!("{}", error.to_string());
+                println!("error on metadata: {}", error.to_string());
                 continue;
             }
 
@@ -130,7 +141,7 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
             let mut path_to_new_entry_str = String::from(path_to_new_entry_str.to_str().unwrap());
             let path_to_entry = entry.path();
 
-            if path_to_new_entry.exists() {
+            if path_to_new_entry.exists() && !metadata.is_dir() {
                 let _ = window.emit(
                     &error_event_name,
                     ExistingEntryInfo {
@@ -164,25 +175,35 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
                         println!("got event");
                         *state = CopyActions::Run;
                         cvar.notify_one();
+                    } else {
+                        println!("can't parse payload: {:#?}", payload);
                     }
                 });
 
                 println!("waiting");
 
-                let mut state = lock.lock().unwrap();
-                while *state == CopyActions::Pause {
-                    state = cvar.wait(state).unwrap();
+                {
+                    let mut state = lock.lock().unwrap();
+
+                    while *state == CopyActions::Pause {
+                        state = cvar.wait(state).unwrap();
+                    }
+
+                    if *state == CopyActions::Exit {
+                        break;
+                    }
                 }
 
                 let current_action = action_arc.lock().unwrap();
+
+                println!("current_action: {:#?}", *current_action);
 
                 match *current_action {
                     DuplicateFileAction::Overwrite => {
                         let _ = fs::remove_file(&path_to_new_entry_str);
                     }
                     DuplicateFileAction::SaveBoth => {
-                        let new_filename =
-                            generate_duplicated_filename(path_to_new_entry_str.into());
+                        let new_filename = add_index_to_filename(path_to_new_entry_str.into());
 
                         if new_filename.is_err() {
                             continue;
