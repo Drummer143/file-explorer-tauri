@@ -25,11 +25,11 @@ const FileList: React.FC = () => {
     const selectFileComponent = (file: CFile) => {
         switch (file.type) {
             case "disk":
-                return <Disk initialFocus={prevTargetFile === file.mountPoint} key={file.mountPoint} {...file} />;
+                return <Disk initialFocus={prevTargetFile === file.mountPoint} key={currentPath + file.mountPoint} {...file} />;
             case "folder":
-                return <Folder initialFocus={prevTargetFile === file.name} key={file.name} {...file} />;
+                return <Folder initialFocus={prevTargetFile === file.name} key={currentPath + file.name} {...file} />;
             case "file":
-                return <File key={file.name} {...file} />;
+                return <File key={currentPath + file.name} {...file} />;
             default:
                 console.error("unhandled file", file);
         }
