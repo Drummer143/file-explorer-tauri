@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import FileContextMenu from "./FileContextMenu";
 import ExplorerContextMenu from "./ExplorerContextMenu";
@@ -7,13 +7,13 @@ import styles from "./ContextMenu.module.scss";
 
 type ContextMenuInfo =
     | {
-          CTXComponent: React.ReactNode;
-          opacity: 0 | 1;
-          coordinates: {
-              x: number;
-              y: number;
-          };
-      }
+        CTXComponent: React.ReactNode;
+        opacity: 0 | 1;
+        coordinates: {
+            x: number;
+            y: number;
+        };
+    }
     | undefined;
 
 const ContextMenu: React.FC = () => {
@@ -21,7 +21,7 @@ const ContextMenu: React.FC = () => {
 
     const ctxContainerRef = useRef<HTMLDivElement>(null);
 
-    const selectContextMenu = (ctxTarget: HTMLElement) => {
+    const selectContextMenu = useCallback((ctxTarget: HTMLElement) => {
         const contextMenuType = ctxTarget.dataset.contextMenuType;
         const filename = ctxTarget.dataset.filename;
 
@@ -38,7 +38,7 @@ const ContextMenu: React.FC = () => {
             case "explorer":
                 return <ExplorerContextMenu />;
         }
-    };
+    }, []);
 
     const closeCTX = () => {
         setContextMenuInfo(undefined);
@@ -61,6 +61,7 @@ const ContextMenu: React.FC = () => {
     useEffect(() => {
         const handleContextMenu = (e: MouseEvent) => {
             e.preventDefault();
+            setContextMenuInfo(undefined);
 
             const composedPath = e.composedPath() as HTMLElement[];
             const contextMenuTarget = composedPath.find(el => (el as HTMLElement)?.dataset?.contextMenuType);
@@ -76,13 +77,15 @@ const ContextMenu: React.FC = () => {
 
             document.documentElement.dataset.ctxOpened = "true";
 
-            setContextMenuInfo({
-                CTXComponent,
-                opacity: 0,
-                coordinates: {
-                    x: e.clientX,
-                    y: e.clientY
-                }
+            setTimeout(() => {
+                setContextMenuInfo({
+                    CTXComponent,
+                    opacity: 0,
+                    coordinates: {
+                        x: e.clientX,
+                        y: e.clientY
+                    }
+                });
             });
 
             document.addEventListener("click", closeCTXOnOuterClick);
@@ -93,6 +96,7 @@ const ContextMenu: React.FC = () => {
 
         return () => {
             document.removeEventListener("contextmenu", handleContextMenu);
+            window.removeEventListener("resize", closeCTX);
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -137,16 +141,16 @@ const ContextMenu: React.FC = () => {
             style={
                 contextMenuInfo
                     ? {
-                          top: contextMenuInfo.coordinates.y + "px",
-                          left: contextMenuInfo.coordinates.x + "px",
-                          opacity: !contextMenuInfo.opacity ? 0 : undefined
-                      }
+                        top: contextMenuInfo.coordinates.y + "px",
+                        left: contextMenuInfo.coordinates.x + "px",
+                        opacity: !contextMenuInfo.opacity ? 0 : undefined
+                    }
                     : {
-                          display: "none"
-                      }
+                        display: "none"
+                    }
             }
         >
-            {!!contextMenuInfo && contextMenuInfo.CTXComponent}
+            {contextMenuInfo?.CTXComponent}
         </div>
     );
 };
