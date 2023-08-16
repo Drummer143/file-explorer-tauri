@@ -10,6 +10,7 @@ pub mod rename;
 pub mod types;
 pub mod watch_dir;
 
+use fs_extra::file;
 use notify::RecommendedWatcher;
 use std::{collections::HashMap, ffi::OsStr, path::Path, sync::Mutex};
 use tauri::{
@@ -144,26 +145,38 @@ pub fn remove_copy_process_from_state<R: Runtime>(
 }
 
 #[tauri::command(async)]
-fn generate_duplicated_filename(path_to_file: String) -> Result<String, ErrorMessage> {
+fn add_index_to_filename(path_to_file: String) -> Result<String, ErrorMessage> {
     let path = Path::new(&path_to_file);
     let mut index = 0;
-    let filename = path.file_name().unwrap_or_default();
-    let filename = filename.to_str();
+    let filename = path.file_stem().unwrap().to_str();
 
     if filename.is_none() {
         return Err(ErrorMessage::new_message("Incorrect path".into()));
     }
 
+    let dirname = path.parent();
+
+    if dirname.is_none() {
+        return Err(ErrorMessage::new_message("Incorrect path".into()));
+    }
+
+    let dirname = dirname.unwrap();
     let filename = filename.unwrap();
+    let file_ext = path.extension().unwrap_or_default().to_str().unwrap_or_default();
 
     loop {
         index += 1;
 
-        let indexed_path = format!("{} ({})", path_to_file, index);
-        let indexed_path = Path::new(&indexed_path);
+        let mut indexed_filename = format!("{} ({})", filename, index);
+
+        if !file_ext.is_empty() {
+            indexed_filename = format!("{}.{}", indexed_filename, file_ext);
+        }
+
+        let indexed_path = dirname.join(&indexed_filename);
 
         if !indexed_path.exists() {
-            break Ok(format!("{} ({})", filename, index));
+            break Ok(indexed_filename);
         }
     }
 }
@@ -175,10 +188,10 @@ pub fn init<R: Runtime>(config: &Config) -> TauriPlugin<R> {
 
     Builder::new("cfs")
         .invoke_handler(tauri::generate_handler![
+            add_index_to_filename,
             copy_directory,
             copy_file,
             exists,
-            generate_duplicated_filename,
             get_disks,
             print_state,
             remove,
