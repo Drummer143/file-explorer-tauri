@@ -1,6 +1,6 @@
 import { sep } from "@tauri-apps/api/path";
 import { dispatchCustomEvent } from "./dom";
-import { copyFile, pathExists } from "@tauriAPI";
+import { copyFile, copyFolder, pathExists } from "@tauriAPI";
 import { addNotificationFromError } from "./helpers";
 
 export const addFileInClipboard = (info: CopiedFileInfo) => {
@@ -94,9 +94,16 @@ export const pasteFile = async (
         if (filetype === "file") {
             copyFile(pathToSourceFile, newPathToFile, id, copyOptions);
         } else {
-            clearClipboard();
+            copyFolder(pathToSourceFile, newPathToFile, id, {
+                ...copyOptions,
+                duplicateFileAction: "Ask"
+            });
 
-            return console.error("unimplemented");
+            // return console.error("unimplemented");
+        }
+
+        if (action === "cut") {
+            clearClipboard();
         }
     } catch (error) {
         addNotificationFromError(error);

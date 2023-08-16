@@ -58,12 +58,14 @@ type Events = {
 interface FileCopyOptions {
     skipExist: boolean;
     overwrite: boolean;
+
     removeTargetOnFinish?: boolean;
 }
 
 interface DirectoryCopyOptions {
-    skipExist: boolean;
-    ifExists: "cancel" | "overwrite" | "merge";
-    ifNestedFileExist: "overwrite" | "saveBoth" | "ask" | "skip";
-    removeTargetOnFinish?: boolean;
+    duplicateFileAction: "Overwrite" | "SaveBoth" | "Ask" | "Skip";
+    overwrite: boolean
+    skipExist: boolean
+
+    removeTargetOnFinish?: boolean
 }
