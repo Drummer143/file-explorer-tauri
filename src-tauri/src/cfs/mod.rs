@@ -10,7 +10,6 @@ pub mod rename;
 pub mod types;
 pub mod watch_dir;
 
-use fs_extra::file;
 use notify::RecommendedWatcher;
 use std::{collections::HashMap, ffi::OsStr, path::Path, sync::Mutex};
 use tauri::{
@@ -110,17 +109,6 @@ fn remove<R: Runtime>(
         Err(ErrorMessage::new_message(message))
     }
 }
-
-// #[tauri::command(async)]
-// fn copy<R: Runtime>(window: Window<R>, from: String, to: String) -> Result<(), ErrorMessage> {
-//     let path = Path::new(&from);
-
-//     if path.is_file() {
-//         copy_file(window, from, to)
-//     } else {
-//         Err(ErrorMessage::new_message("Can copy only files".into()))
-//     }
-// }
 
 #[tauri::command(async)]
 fn print_state(state: State<'_, CFSState>) {

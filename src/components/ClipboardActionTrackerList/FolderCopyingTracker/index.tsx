@@ -27,6 +27,7 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
     const [errorFilename, setErrorFilename] = useState<string | undefined>(undefined);
 
     const trackerRef = useRef<HTMLDivElement | null>(null);
+    const doActionForAllDuplicates = useRef(false);
     const untrack = useRef<{
         progress: UnlistenFn;
         preparing: UnlistenFn;
@@ -80,12 +81,26 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
         onRemove(eventId);
     };
 
-    const handleToggleErrorMessage = () => setIsErrorMessageVisible(prev => !prev);
-
-    const handleErrorButtonClick = (action: "overwrite" | "save-both" | "skip") => {
-        appWindow.emit(`copy-handle-duplicate//${eventId}`, action);
-        setErrorFilename(undefined);
+    const handleToggleErrorMessage = () => {
+        setIsErrorMessageVisible(prev => !prev);
     };
+
+    const handleErrorButtonClick = (action: "Overwrite" | "SaveBoth" | "Skip") => {
+        appWindow.emit(`copy-handle-duplicate//${eventId}`, {
+            action,
+            // eslint-disable-next-line camelcase
+            do_for_all: doActionForAllDuplicates.current
+        });
+
+        setIsErrorMessageVisible(false);
+        setErrorFilename(undefined);
+        setStatus("copying");
+        setPaused(false);
+    };
+
+    const handleCheckboxChange: React.ChangeEventHandler<HTMLInputElement> = e => {
+        doActionForAllDuplicates.current = e.target.checked;
+    }
 
     useEffect(() => {
         mountListeners().then(togglePause);
@@ -120,7 +135,7 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
                         onClick={handleToggleErrorMessage}
                         className={styles.text}
                     >
-                        {[paused || status === "waiting-action" && "[PAUSED]"]} {action === "copy" ? "Copying" : "Moving"} {filename} from {from} to {to}
+                        {(paused || status === "waiting-action") && "[PAUSED]"} {action === "copy" ? "Copying" : "Moving"} {filename} from {from} to {to}
                     </p>
                 ) : (
                     <p className={styles.text} onClick={handleToggleErrorMessage} title="Action required">
@@ -142,9 +157,14 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
                 <div className={styles.errorBody}>
                     <p>{errorFilename} is already exists. choose action:</p>
 
-                    <button type="button" onClick={() => handleErrorButtonClick("overwrite")}>overwrite</button>
-                    <button type="button" onClick={() => handleErrorButtonClick("save-both")}>save both</button>
-                    <button type="button" onClick={() => handleErrorButtonClick("skip")}>skip file</button>
+                    <button type="button" onClick={() => handleErrorButtonClick("Overwrite")}>overwrite</button>
+                    <button type="button" onClick={() => handleErrorButtonClick("SaveBoth")}>save both</button>
+                    <button type="button" onClick={() => handleErrorButtonClick("Skip")}>skip file</button>
+
+                    <label className={styles.doForAllLabel}>
+                        <input type="checkbox" onChange={handleCheckboxChange} />
+                        <p>Do this for all files</p>
+                    </label>
                 </div>
             )}
         </div>

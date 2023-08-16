@@ -15,6 +15,7 @@ use super::{
 };
 
 #[derive(serde::Deserialize, Clone, Debug)]
+// #[serde(rename_all = "camelCase")]
 pub enum DuplicateFileAction {
     Overwrite,
     SaveBoth,
@@ -22,18 +23,10 @@ pub enum DuplicateFileAction {
     Ask,
 }
 
-impl DuplicateFileAction {
-    pub fn from_window_event_payload(s: &str) -> Result<Self, ()> {
-        let lowercased: &str = &s.to_ascii_lowercase();
-
-        match lowercased {
-            "\"overwrite\"" => Ok(DuplicateFileAction::Overwrite),
-            "\"save-both\"" => Ok(DuplicateFileAction::SaveBoth),
-            "\"skip\"" => Ok(DuplicateFileAction::Skip),
-            "\"ask\"" => Ok(DuplicateFileAction::Ask),
-            _ => Err(()),
-        }
-    }
+#[derive(serde::Deserialize)]
+pub struct DuplicateFileHandleEventPayload {
+    action: DuplicateFileAction,
+    do_for_all: bool,
 }
 
 type ControlVars = Arc<(Mutex<CopyActions>, Condvar)>;
@@ -114,6 +107,8 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
     let dir_entry = dir_entry.unwrap();
     let error_event_name = format!("copy-error//{}", event_id);
 
+    let repeat_action_for_all_files = Arc::new(Mutex::new(false));
+    let action_arc = Arc::new(Mutex::new(duplicate_file_action.clone()));
     let mut dirs_queue = vec![(dir_entry, String::from(to))];
 
     while !dirs_queue.is_empty() {
@@ -142,55 +137,67 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
             let path_to_entry = entry.path();
 
             if path_to_new_entry.exists() && !metadata.is_dir() {
-                let _ = window.emit(
-                    &error_event_name,
-                    ExistingEntryInfo {
-                        filename: entry.file_name().to_str().unwrap().into(),
-                        path: path_to_entry.to_str().unwrap().into(),
-                        r#type: get_file_type(&path_to_entry),
-                        path_to_new_dirname: path_to.clone(),
-                    },
-                );
+                if !*repeat_action_for_all_files.lock().unwrap() {
+                    let _ = window.emit(
+                        &error_event_name,
+                        ExistingEntryInfo {
+                            filename: entry.file_name().to_str().unwrap().into(),
+                            path: path_to_entry.to_str().unwrap().into(),
+                            r#type: get_file_type(&path_to_entry),
+                            path_to_new_dirname: path_to.clone(),
+                        },
+                    );
 
-                {
-                    let mut state = lock.lock().unwrap();
-                    *state = CopyActions::Pause;
-                }
+                    {
+                        let mut state = lock.lock().unwrap();
+                        *state = CopyActions::Pause;
+                    }
 
-                let action_arc = Arc::new(Mutex::new(duplicate_file_action.clone()));
-                let action_arc_clone = action_arc.clone();
-                let ctrl_vars_clone = control_vars.clone();
+                    let action_arc_clone = action_arc.clone();
+                    let repeat_action_for_all_files_clone = repeat_action_for_all_files.clone();
+                    let ctrl_vars_clone = control_vars.clone();
 
-                window.once(format!("copy-handle-duplicate//{}", event_id), move |e| {
-                    let payload = e.payload().unwrap();
+                    window.once(format!("copy-handle-duplicate//{}", event_id), move |e| {
+                        let payload_str = e.payload().unwrap();
 
-                    if let Ok(action) = DuplicateFileAction::from_window_event_payload(payload) {
-                        let mut action_arc_clone = action_arc_clone.lock().unwrap();
+                        let payload =
+                            serde_json::from_str::<DuplicateFileHandleEventPayload>(payload_str);
 
-                        *action_arc_clone = action;
+                        if let Ok(payload) = payload {
+                            let mut action_arc_clone = action_arc_clone.lock().unwrap();
 
-                        let &(ref lock, ref cvar) = &*ctrl_vars_clone;
+                            *action_arc_clone = payload.action;
+
+                            if payload.do_for_all {
+                                let mut repeat_action_for_all_files_clone =
+                                    repeat_action_for_all_files_clone.lock().unwrap();
+
+                                *repeat_action_for_all_files_clone = payload.do_for_all;
+                            }
+
+                            let &(ref lock, ref cvar) = &*ctrl_vars_clone;
+                            let mut state = lock.lock().unwrap();
+
+                            println!("got event");
+                            *state = CopyActions::Run;
+                            cvar.notify_one();
+                        } else {
+                            println!("can't parse payload: {:#?}", payload_str);
+                        }
+                    });
+
+                    println!("waiting");
+
+                    {
                         let mut state = lock.lock().unwrap();
 
-                        println!("got event");
-                        *state = CopyActions::Run;
-                        cvar.notify_one();
-                    } else {
-                        println!("can't parse payload: {:#?}", payload);
-                    }
-                });
+                        while *state == CopyActions::Pause {
+                            state = cvar.wait(state).unwrap();
+                        }
 
-                println!("waiting");
-
-                {
-                    let mut state = lock.lock().unwrap();
-
-                    while *state == CopyActions::Pause {
-                        state = cvar.wait(state).unwrap();
-                    }
-
-                    if *state == CopyActions::Exit {
-                        break;
+                        if *state == CopyActions::Exit {
+                            break;
+                        }
                     }
                 }
 

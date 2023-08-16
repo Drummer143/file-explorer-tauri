@@ -1,4 +1,6 @@
 .wrapper {
+    --info-height: 25px;
+
     position: relative;
 
     width: 250px;
@@ -8,10 +10,6 @@
     overflow: hidden;
     font-size: 0.9em;
 
-    // &[data-waiting-action="true"] {
-    //     height: 50px;
-    // }
-
     &::after {
         content: "";
 
@@ -20,29 +18,30 @@
         bottom: 0;
         left: 0;
         z-index: 0;
-
+        
+        height: var(--info-height);
         width: var(--action-progress);
-
+        
         transition: width 50ms;
         pointer-events: none;
         background: linear-gradient(90deg,
-                rgba(255, 255, 255, 0) 0%,
-                rgba(255, 255, 255, 0.2) 70%,
-                rgba(255, 255, 255, 0.3) 90%);
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.2) 70%,
+        rgba(255, 255, 255, 0.3) 90%);
     }
 }
 
 .error::after {
     background: linear-gradient(90deg,
-            rgba(255, 0, 0, 0) 0%,
-            rgba(255, 0, 0, 0.3) 70%,
-            rgba(255, 0, 0, 0.5) 90%);
+    rgba(255, 0, 0, 0) 0%,
+    rgba(255, 0, 0, 0.3) 70%,
+    rgba(255, 0, 0, 0.5) 90%);
 }
 
 .info {
-    height: 25px;
+    height: var(--info-height);
     width: 100%;
-
+    
     padding: 0 0.25rem;
 
     display: flex;
@@ -147,10 +146,6 @@
         border-radius: 0.5rem;
         transition: background-color 150ms;
 
-        &:last-of-type {
-            margin-bottom: 0.25rem;
-        }
-
         &:hover {
             background-color: rgb(45, 45, 45);
         }
@@ -162,5 +157,29 @@
 
     .error & {
         animation: errorAlert 2s linear 0s 1 forwards;
+    }
+}
+
+.doForAllLabel {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.375rem;
+
+    input {
+        appearance: none;
+
+        width: 14px;
+        aspect-ratio: 1 / 1;
+
+        border: 2px solid rgb(170, 170, 170);
+        border-radius: 0.25rem;
+        transition: background-color 150ms, border-color 150ms;
+
+        &:checked {
+            background-color: rgb(200, 200, 200);
+
+            border: 2px solid #000;
+        }
     }
 }
