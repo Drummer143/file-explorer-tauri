@@ -18,7 +18,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
     const [filename] = useState(ctxTarget.dataset.filename!);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const [filetype] = useState(ctxTarget.dataset.fileType!);
-    const [readonly] = useState(ctxTarget.dataset.readonly);
+    const [readonly] = useState(ctxTarget.dataset.readonly === "true");
 
     const handleOpenFile = () => {
         const path = currentPath ? currentPath + sep + filename : filename;

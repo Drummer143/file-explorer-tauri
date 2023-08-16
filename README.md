@@ -40,11 +40,11 @@ TODO:
             -   [x] Copy file
             -   [x] Move file
     -   [ ] Copy/cut folder
-        -   [ ] Frontend
-            -   [ ] Interface
-            -   [ ] Algorithm
-        -   [ ] Backend
-            -   [ ] Copy folder
+        -   [x] Frontend
+            -   [x] Interface
+            -   [x] Algorithm
+        -   [x] Backend
+            -   [x] Copy folder
             -   [ ] Move folder
     -   [ ] Create file/directory
     -   [x] Watch changes in current directory

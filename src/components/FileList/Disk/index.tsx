@@ -38,6 +38,7 @@ const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoin
             title={mountPoint + name}
             onAction={handleAction}
             className={styles.wrapper}
+            data-readonly="true"
             data-file-type="disk"
             data-context-menu-type={CTXTypes.file}
             data-filename={mountPoint}
