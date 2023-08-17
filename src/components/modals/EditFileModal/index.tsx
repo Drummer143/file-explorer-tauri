@@ -54,7 +54,7 @@ const EditFileModal: React.FC = () => {
     };
 
     const handleCustomValidate = (value: string) => {
-        const selector = `[data-context-menu-additional-info-lowercased="${value.toLowerCase()}"]`;
+        const selector = `[data-filename-lowercased="${value.toLowerCase()}"]`;
         const elementWithGivenFilename = document.querySelector(selector);
         const isEqualsSelf = currentFilename === value;
 
@@ -99,10 +99,10 @@ const EditFileModal: React.FC = () => {
 
             <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
                 <label className={styles.inputLabel}>
-                    <p>{t("modals.editFileModal.nameInputLabel")}: </p>
+                    <p className={styles.inputDescription}>{t("modals.editFileModal.nameInputLabel")}: </p>
 
                     <input
-                        autoComplete="off"
+                        autoComplete="new-password"
                         className={styles.input}
                         {...register("filename", {
                             required: true,

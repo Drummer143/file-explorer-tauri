@@ -6,8 +6,8 @@ import Disk from "./Disk";
 import File from "./File";
 import Folder from "./Folder";
 import { useExplorerHistory } from "@zustand";
-import { EditFileModal, FileExistModal } from "../modals";
 import { useResizeObserver, useWatchPathChange } from "@hooks";
+import { CreateFileModal, EditFileModal, FileExistModal } from "../modals";
 import { CTXTypes, addFileInClipboard, findActiveLayerKeys, pasteFile } from "@utils";
 
 import styles from "./FileList.module.scss";
@@ -229,7 +229,7 @@ const FileList: React.FC = () => {
                 <div
                     ref={listContainerRef}
                     className={styles.wrapper}
-                    data-context-menu-type={CTXTypes.explorer}
+                    data-context-menu-type={currentPath ? CTXTypes.explorer : undefined}
                     data-readonly={currentPath ? "" : true}
                 >
                     {files.map(selectFileComponent)}
@@ -238,6 +238,7 @@ const FileList: React.FC = () => {
 
             <EditFileModal />
             <FileExistModal />
+            <CreateFileModal />
         </>
     );
 };

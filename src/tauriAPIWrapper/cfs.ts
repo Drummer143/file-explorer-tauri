@@ -68,3 +68,6 @@ export const printCFSState = (): Promise<void> => invoke("plugin:cfs|print_state
 
 export const addIndexToFilename = (pathToFile: string) =>
     invoke<string>("plugin:cfs|add_index_to_filename", { pathToFile });
+
+export const createFile = (path: string, filetype: Exclude<FileTypes, "disk">) =>
+    invoke<void>("plugin:cfs|create_file", { path, filetype });

@@ -169,6 +169,37 @@ fn add_index_to_filename(path_to_file: String) -> Result<String, ErrorMessage> {
     }
 }
 
+#[tauri::command(async)]
+pub fn create_file(path: String, filetype: FileTypes) -> Result<(), ErrorMessage> {
+    use std::fs::{create_dir_all, File};
+
+    if Path::new(&path).exists() {
+        return Err(ErrorMessage::new_message("File is already exists".into()));
+    }
+
+    match filetype {
+        FileTypes::File => {
+            if let Err(error) = File::create(path) {
+                Err(ErrorMessage::new_all("Can't create file".into(), error.to_string()))
+            } else {
+                Ok(())
+            }
+        },
+        FileTypes::Folder => {
+            if let Err(error) = create_dir_all(path) {
+                Err(ErrorMessage::new_all("Can't create folder".into(), error.to_string()))
+            } else {
+                Ok(())
+            }
+        }
+        _ => {
+            println!("{:#?}", filetype);
+
+            todo!()
+        }
+    }
+}
+
 pub fn init<R: Runtime>(config: &Config) -> TauriPlugin<R> {
     let (js_init_script, app_config) = app_config::init(config, APP_CONFIG_NAME);
 
@@ -179,6 +210,7 @@ pub fn init<R: Runtime>(config: &Config) -> TauriPlugin<R> {
             add_index_to_filename,
             copy_directory,
             copy_file,
+            create_file,
             exists,
             get_disks,
             print_state,
