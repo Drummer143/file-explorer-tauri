@@ -1,4 +1,12 @@
-type ContextMenuKeys = "paste" | "copy" | "cut" | "openInNativeExplorer" | "showInNativeExplorer" | "open" | "delete" | "rename";
+type ContextMenuKeys =
+    | "paste"
+    | "copy"
+    | "cut"
+    | "openInNativeExplorer"
+    | "showInNativeExplorer"
+    | "open"
+    | "delete"
+    | "rename";
 
 type LocalizationMap = {
     translation: {
@@ -7,7 +15,7 @@ type LocalizationMap = {
             forward: string;
             goToParentFolder: string;
             reload: string;
-        }
+        };
         windowControlButtons: {
             minimize: string;
             restoreToWindow: string;
@@ -35,13 +43,13 @@ type LocalizationMap = {
                 modalText: string;
                 overwrite: string;
                 saveBoth: string;
-            }
+            };
         };
         notifications: {
             error: string;
             warning: string;
             info: string;
-        }
+        };
         save: string;
         cancel: string;
         close: string;

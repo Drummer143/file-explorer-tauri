@@ -1,7 +1,7 @@
 import { sep } from "@tauri-apps/api/path";
 import { dispatchCustomEvent } from "./dom";
-import { copyFile, copyFolder, pathExists } from "@tauriAPI";
 import { addNotificationFromError } from "./helpers";
+import { copyFile, copyFolder, pathExists } from "@tauriAPI";
 
 export const addFileInClipboard = (info: CopiedFileInfo) => {
     document.documentElement.dataset.copiedFileInfo = JSON.stringify(info);

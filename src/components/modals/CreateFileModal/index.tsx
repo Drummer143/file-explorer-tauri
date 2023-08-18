@@ -13,7 +13,7 @@ import styles from "./CreateFileModal.module.scss";
 type FormValues = {
     filename: string;
     extension: string;
-}
+};
 
 const CreateFileModal: React.FC = () => {
     const { currentPath } = useExplorerHistory();
@@ -22,7 +22,14 @@ const CreateFileModal: React.FC = () => {
     const [filetype, setFiletype] = useState<"file" | "folder">("file");
     const [isExtensionInputHidden, setIsExtensionInputHidden] = useState(true);
 
-    const { register, setValue, getValues, formState: { errors }, reset, handleSubmit } = useForm<FormValues>({
+    const {
+        register,
+        setValue,
+        getValues,
+        formState: { errors },
+        reset,
+        handleSubmit
+    } = useForm<FormValues>({
         defaultValues: {
             filename: "",
             extension: ""
@@ -61,7 +68,7 @@ const CreateFileModal: React.FC = () => {
             return "Name or extension must be filled";
         }
 
-        const selector = `[data-filename-lowercased="${filename}${extension ? ("." + extension) : ""}"]`;
+        const selector = `[data-filename-lowercased="${filename}${extension ? "." + extension : ""}"]`;
         const exists = document.querySelector(selector);
 
         if (exists) {
@@ -102,7 +109,8 @@ const CreateFileModal: React.FC = () => {
         };
     }, [openModal]);
 
-    return (    // TODO: LOCALIZATION
+    return (
+        // TODO: LOCALIZATION
         <Modal
             isOpen={isOpen}
             onRequestClose={closeModal}
@@ -120,9 +128,9 @@ const CreateFileModal: React.FC = () => {
 
             <form className={styles.form} onSubmit={handleSubmit(onSubmit)}>
                 <div
-                    className={styles.filenameInputsLabel
-                        .concat(!isExtensionInputHidden && filetype === "file" ? "" : ` ${styles.extensionInputHidden}`)
-                    }
+                    className={styles.filenameInputsLabel.concat(
+                        !isExtensionInputHidden && filetype === "file" ? "" : ` ${styles.extensionInputHidden}`
+                    )}
                 >
                     <div className={styles.inputContainer}>
                         <input

@@ -24,20 +24,12 @@ const ExplorerContextMenu: React.FC = () => {
             <button onClick={handleOpenInExplorer}>{t("openInNativeExplorer")}</button>
 
             {document.documentElement.dataset.pathToCopiedFile && (
-                <>
-                    <button onClick={handleMovePasteFile}>
-                        {t("paste")}
-                    </button>
-                </>
+                <button onClick={handleMovePasteFile}>{t("paste")}</button>
             )}
 
-            <button onClick={() => handleCreateNewEntity("file")}>
-                {t("createNewFile")}
-            </button>
+            <button onClick={() => handleCreateNewEntity("file")}>{t("createNewFile")}</button>
 
-            <button onClick={() => handleCreateNewEntity("folder")}>
-                {t("createNewFolder")}
-            </button>
+            <button onClick={() => handleCreateNewEntity("folder")}>{t("createNewFolder")}</button>
         </>
     );
 };

@@ -25,7 +25,13 @@ const FileList: React.FC = () => {
     const selectFileComponent = (file: CFile) => {
         switch (file.type) {
             case "disk":
-                return <Disk initialFocus={prevTargetFile === file.mountPoint} key={currentPath + file.mountPoint} {...file} />;
+                return (
+                    <Disk
+                        initialFocus={prevTargetFile === file.mountPoint}
+                        key={currentPath + file.mountPoint}
+                        {...file}
+                    />
+                );
             case "folder":
                 return <Folder initialFocus={prevTargetFile === file.name} key={currentPath + file.name} {...file} />;
             case "file":
@@ -35,60 +41,63 @@ const FileList: React.FC = () => {
         }
     };
 
-    const handleKeyDownWithCtrlKey = useCallback((e: KeyboardEvent) => {
-        const target = e.target as HTMLElement;
+    const handleKeyDownWithCtrlKey = useCallback(
+        (e: KeyboardEvent) => {
+            const target = e.target as HTMLElement;
 
-        switch (e.code) {
-            case "KeyX": {
-                const canMoveTarget = target.dataset.contextMenuType !== "disk";
-                const filename = target.dataset.filename;
-                const filetype = target.dataset.fileType;
+            switch (e.code) {
+                case "KeyX": {
+                    const canMoveTarget = target.dataset.contextMenuType !== "disk";
+                    const filename = target.dataset.filename;
+                    const filetype = target.dataset.fileType;
 
-                if (!canMoveTarget || !filename || (filetype !== "file" && filetype !== "folder")) {
-                    return;
+                    if (!canMoveTarget || !filename || (filetype !== "file" && filetype !== "folder")) {
+                        return;
+                    }
+
+                    addFileInClipboard({
+                        dirname: currentPath,
+                        filename,
+                        filetype,
+                        action: "cut"
+                    });
+
+                    break;
                 }
+                case "KeyC": {
+                    const filename = target.dataset.filename;
+                    const filetype = target.dataset.fileType;
 
-                addFileInClipboard({
-                    dirname: currentPath,
-                    filename,
-                    filetype,
-                    action: "cut"
-                });
+                    if (!filename || (filetype !== "file" && filetype !== "folder")) {
+                        return;
+                    }
 
-                break;
-            }
-            case "KeyC": {
-                const filename = target.dataset.filename;
-                const filetype = target.dataset.fileType;
+                    addFileInClipboard({
+                        dirname: currentPath,
+                        filename,
+                        filetype,
+                        action: "copy"
+                    });
 
-                if (!filename || (filetype !== "file" && filetype !== "folder")) {
-                    return;
+                    break;
                 }
+                case "KeyV": {
+                    let to = currentPath;
+                    const possibleFocusedFileName = (document.activeElement as HTMLElement | null)?.dataset
+                        .contextMenuAdditionalInfo;
+                    const isNotFile =
+                        (document.activeElement as HTMLElement | null)?.dataset.contextMenuType !== "file";
 
-                addFileInClipboard({
-                    dirname: currentPath,
-                    filename,
-                    filetype,
-                    action: "copy"
-                });
+                    if (possibleFocusedFileName && isNotFile) {
+                        to = to + sep + possibleFocusedFileName;
+                    }
 
-                break;
-            }
-            case "KeyV": {
-                let to = currentPath;
-                const possibleFocusedFileName = (document.activeElement as HTMLElement | null)?.dataset
-                    .contextMenuAdditionalInfo;
-                const isNotFile =
-                    (document.activeElement as HTMLElement | null)?.dataset.contextMenuType !== "file";
-
-                if (possibleFocusedFileName && isNotFile) {
-                    to = to + sep + possibleFocusedFileName;
+                    pasteFile({ dirname: to });
                 }
-
-                pasteFile({ dirname: to });
             }
-        }
-    }, [currentPath]);
+        },
+        [currentPath]
+    );
 
     const handleSearchItem = useCallback((e: KeyboardEvent) => {
         if (beforeResetFileSearchTimeout.current) {
@@ -114,9 +123,9 @@ const FileList: React.FC = () => {
 
         e.preventDefault();
 
-        let focusedElementIndex = Array.from(
-            listContainerRef.current.children as unknown as HTMLElement[]
-        ).findIndex(e => e.dataset.filename === (document.activeElement as HTMLElement)?.dataset.filename);
+        let focusedElementIndex = Array.from(listContainerRef.current.children as unknown as HTMLElement[]).findIndex(
+            e => e.dataset.filename === (document.activeElement as HTMLElement)?.dataset.filename
+        );
 
         if (focusedElementIndex === -1) {
             return (listContainerRef.current.children.item(0) as HTMLElement | null)?.focus();

@@ -100,7 +100,7 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
 
     const handleCheckboxChange: React.ChangeEventHandler<HTMLInputElement> = e => {
         doActionForAllDuplicates.current = e.target.checked;
-    }
+    };
 
     useEffect(() => {
         mountListeners().then(togglePause);
@@ -120,7 +120,8 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
         }
     }, [status]);
 
-    return (    // TODO: LOCALIZATION
+    return (
+        // TODO: LOCALIZATION
         <div
             ref={trackerRef}
             data-waiting-action={status === "waiting-action"}
@@ -135,7 +136,8 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
                         onClick={handleToggleErrorMessage}
                         className={styles.text}
                     >
-                        {(paused || status === "waiting-action") && "[PAUSED]"} {action === "copy" ? "Copying" : "Moving"} {filename} from {from} to {to}
+                        {(paused || status === "waiting-action") && "[PAUSED]"}{" "}
+                        {action === "copy" ? "Copying" : "Moving"} {filename} from {from} to {to}
                     </p>
                 ) : (
                     <p className={styles.text} onClick={handleToggleErrorMessage} title="Action required">
@@ -157,9 +159,15 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
                 <div className={styles.errorBody}>
                     <p>{errorFilename} is already exists. choose action:</p>
 
-                    <button type="button" onClick={() => handleErrorButtonClick("Overwrite")}>overwrite</button>
-                    <button type="button" onClick={() => handleErrorButtonClick("SaveBoth")}>save both</button>
-                    <button type="button" onClick={() => handleErrorButtonClick("Skip")}>skip file</button>
+                    <button type="button" onClick={() => handleErrorButtonClick("Overwrite")}>
+                        overwrite
+                    </button>
+                    <button type="button" onClick={() => handleErrorButtonClick("SaveBoth")}>
+                        save both
+                    </button>
+                    <button type="button" onClick={() => handleErrorButtonClick("Skip")}>
+                        skip file
+                    </button>
 
                     <label className={styles.doForAllLabel}>
                         <input type="checkbox" onChange={handleCheckboxChange} />

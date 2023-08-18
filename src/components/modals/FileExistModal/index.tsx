@@ -43,7 +43,7 @@ const FileExistModal: React.FC = () => {
         closeModal();
     };
 
-    const handleAfterOpen = () => document.documentElement.dataset.modalOpened = "true";
+    const handleAfterOpen = () => (document.documentElement.dataset.modalOpened = "true");
 
     const handleAfterClose = () => document.documentElement.removeAttribute("data-modal-opened");
 
@@ -81,9 +81,11 @@ const FileExistModal: React.FC = () => {
 
             <div
                 className={styles.actionButtons}
-                style={{
-                    "--count-of-columns": fileInfo?.filetype === "file" ? "3" : "4",
-                } as React.CSSProperties}
+                style={
+                    {
+                        "--count-of-columns": fileInfo?.filetype === "file" ? "3" : "4"
+                    } as React.CSSProperties
+                }
             >
                 {fileInfo?.filetype === "folder" && (
                     <button onClick={() => handleClick("merge")} type="button">

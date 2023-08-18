@@ -13,11 +13,7 @@ describe("FileListItemButton test", () => {
     };
 
     test("component renders correctly", () => {
-        const component = customRender((
-            <FileListItemButton {...props}>
-                Test button
-            </FileListItemButton>
-        ));
+        const component = customRender(<FileListItemButton {...props}>Test button</FileListItemButton>);
 
         const button = component.getByTestId(id, { exact: true });
 

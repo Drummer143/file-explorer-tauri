@@ -45,7 +45,12 @@ export const copyFile = (from: string, to: string, eventId: number, copyOptions:
         }
     });
 
-export const copyFolder = (from: string, to: string, eventId: number, copyOptions: DirectoryCopyOptions): Promise<void> =>
+export const copyFolder = (
+    from: string,
+    to: string,
+    eventId: number,
+    copyOptions: DirectoryCopyOptions
+): Promise<void> =>
     invoke("plugin:cfs|copy_directory", {
         from,
         to,

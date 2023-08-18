@@ -29,12 +29,7 @@ const WindowControlButtons: React.FC = () => {
 
     return (
         <div className={styles.wrapper}>
-            <button
-                type="button"
-                className={styles.windowControlButton}
-                onClick={minimize}
-                title={t("minimize")}
-            >
+            <button type="button" className={styles.windowControlButton} onClick={minimize} title={t("minimize")}>
                 <MinimizeSVG />
             </button>
 
@@ -47,12 +42,7 @@ const WindowControlButtons: React.FC = () => {
                 {isMaximized ? <RestoreToWindowSVG /> : <MaximizeSVG />}
             </button>
 
-            <button
-                type="button"
-                className={styles.windowControlButton}
-                onClick={close}
-                title={t("close")}
-            >
+            <button type="button" className={styles.windowControlButton} onClick={close} title={t("close")}>
                 <CloseSVG width={16} height={16} />
             </button>
         </div>

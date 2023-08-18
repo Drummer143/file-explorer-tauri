@@ -25,7 +25,7 @@ declare global {
         openExistFileModal: CustomEvent<OpenExistFileModalDetail>;
         startTrackingClipboardAction: CustomEvent<StartTrackingClipboardActionDetail>;
         addNotification: CustomEvent<AppNotification>;
-        openCreateFIleModal: CustomEvent<"file" | "folder">
+        openCreateFIleModal: CustomEvent<"file" | "folder">;
     }
 
     interface Document {

@@ -68,7 +68,9 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
         <>
             <button onClick={handleOpenFile}>{t("open")}</button>
 
-            <button onClick={handleOpenInExplorer}>{filetype === "file" ? t("showInNativeExplorer") : t("openInNativeExplorer")}</button>
+            <button onClick={handleOpenInExplorer}>
+                {filetype === "file" ? t("showInNativeExplorer") : t("openInNativeExplorer")}
+            </button>
 
             {!readonly && (
                 <>

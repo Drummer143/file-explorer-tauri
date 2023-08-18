@@ -17,7 +17,7 @@ describe("FileCopyingTracker test", () => {
                 filename="filename"
                 from={__dirname}
                 to={__dirname}
-                onRemove={id => console.log(id)}
+                onRemove={vi.fn()}
                 type="file"
             />
         );
@@ -27,7 +27,7 @@ describe("FileCopyingTracker test", () => {
         expect(tracker).toBeInTheDocument();
     });
 
-    test("spy onRemove has to be called on copy cancel", async () => {
+    test("spyOnRemove has to be called on copy cancel", async () => {
         const eventId = Math.floor(Math.random() * 10);
 
         const spyOnRemove = vi.fn();
@@ -50,15 +50,17 @@ describe("FileCopyingTracker test", () => {
 
         fireEvent.click(cancelCopyButton);
 
-        waitFor(() => {
-            const removeTrackerButton = screen.getByTitle("Save copied part");
+        waitFor(
+            () => {
+                const removeTrackerButton = screen.getByTitle("Save copied part");
 
-            removeTrackerButton.click();
-    
-            expect(spyOnRemove).toBeCalled();
+                removeTrackerButton.click();
 
-        }, {
-            timeout: 1000
-        });
+                expect(spyOnRemove).toBeCalled();
+            },
+            {
+                timeout: 1000
+            }
+        );
     });
 });

@@ -64,8 +64,8 @@ interface FileCopyOptions {
 
 interface DirectoryCopyOptions {
     duplicateFileAction: "Overwrite" | "SaveBoth" | "Ask" | "Skip";
-    overwrite: boolean
-    skipExist: boolean
+    overwrite: boolean;
+    skipExist: boolean;
 
-    removeTargetOnFinish?: boolean
+    removeTargetOnFinish?: boolean;
 }

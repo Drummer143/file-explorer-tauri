@@ -3,9 +3,7 @@ import { act } from "@testing-library/react";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
-const { create: actualCreate } = await vi.importActual<typeof zustand>(
-    "zustand"
-);
+const { create: actualCreate } = await vi.importActual<typeof zustand>("zustand");
 
 // a variable to hold reset functions for all stores declared in the app
 export const storeResetFns = new Set<() => void>();
@@ -26,7 +24,7 @@ export const create = (<T>() => {
 // reset all stores after each test run
 afterEach(() => {
     act(() => {
-        storeResetFns.forEach((resetFn) => {
+        storeResetFns.forEach(resetFn => {
             resetFn();
         });
     });
