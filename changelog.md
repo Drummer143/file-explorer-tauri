@@ -1,8 +1,10 @@
 # Changelog
 
-## 0.0.0
-    - Navigation through filesystem
-    - Deleting permanently/in trash files
-    - Renaming files
-    - Copying/moving files with progress tracking and process management capability
-    - Entering a path
+## 0.1.0
+    - Actions with filesystem(navigation, creating, deleting, copying, moving)
+    - Basic interface and interactivity(Path input, navigation history)
+    - Navigation through files with arrow keys
+    - Searching for a file in current folder by entering its name
+    - Partially error notification
+    - Tracking copying/moving progress
+    - Localization for all existing interface(ru, en)

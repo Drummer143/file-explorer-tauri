@@ -9,7 +9,7 @@ TODO:
     -   [ ] Different file list appearance
     -   [ ] Files Sorting
     -   [ ] Files grouping
-    -   [ ] Navigation through list using arrow keys
+    -   [x] Navigation through list using arrow keys
     -   [x] Focus on the element that starts with the entered letters
     -   [ ] Extended icons for files - ?
         -   [ ] Icons with file extensions - ?
@@ -39,30 +39,30 @@ TODO:
         -   [x] Backend
             -   [x] Copy file
             -   [x] Move file
-    -   [ ] Copy/cut folder
+    -   [x] Copy/cut folder
         -   [x] Frontend
             -   [x] Interface
             -   [x] Algorithm
         -   [x] Backend
             -   [x] Copy folder
             -   [x] Move folder
-    -   [ ] Create file/directory
+    -   [x] Create file/directory
     -   [x] Watch changes in current directory
         -   [ ] Research unhandled events
     -   [ ] Symlinks
 -   [ ] App Config
 -   [ ] Settings
 -   [ ] Localization
+    -   [ ] Refactor the naming of fields in localization objects to names associated with the HTML structure
 -   [x] Context Menu
 -   [ ] Side Menu
 -   [ ] Drag and drop
--   [ ] Custom scrollbar
+-   [x] Custom scrollbar
 -   [ ] Hotkeys
 -   [ ] Customization
 -   [ ] Error Notifications
-    - [ ] Call notifications on every error
+    -   [ ] Call notifications on every error
 -   [ ] Search files in file system
--   [ ] 
 -   [ ] Tests
 -   [ ] Interactivity
     -   [ ] Show loader while dir is scanning
@@ -73,7 +73,7 @@ TODO:
 -   [ ] Handle empty path
 -   [ ] Track all long-term actions
     -   [x] File copying/moving
-    -   [ ] Folder copying/moving/deleting(if not empty)
+    -   [x] Folder copying/moving/deleting(if not empty)
 
 BUGS:
 
