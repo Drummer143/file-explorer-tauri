@@ -23,6 +23,7 @@ export const useWatchPathChange = () => {
 
     const updateFilesOnDirChange = useCallback(
         ({ payload }: TauriEvent<ChangesInDirectoryPayload>, handleFiles: Dispatch<SetStateAction<CFile[]>>) => {
+            console.log(payload);
             switch (payload.type) {
                 case "remove": {
                     handleFiles(prev => prev.filter(f => f.name !== payload.name));

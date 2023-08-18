@@ -13,7 +13,8 @@ const ExplorerContextMenu: React.FC = () => {
 
     const handleMovePasteFile = async () => pasteFile({ dirname: currentPath });
 
-    const handleCreateNewEntity = (type: "file" | "folder") => dispatchCustomEvent("openCreateFIleModal", type);
+    const handleCreateNewEntity = (type: "file" | "folder") =>
+        dispatchCustomEvent("openEditFileModal", { filetype: type, dirname: currentPath });
 
     if (!currentPath) {
         return <></>;

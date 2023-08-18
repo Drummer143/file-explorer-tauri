@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { sep } from "@tauri-apps/api/path";
 import { appWindow } from "@tauri-apps/api/window";
 import { UnlistenFn } from "@tauri-apps/api/event";
@@ -25,13 +25,16 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
         finished: UnlistenFn;
     } | null>(null);
 
-    const mountListeners = async () => {
-        // const u1 = await appWindow.listen(`copy-started//${eventId}`, e => console.log(e));
+    const mountListeners = useCallback(async () => {
+        if (untrack.current) {
+            return console.error("already mounted");
+        }
+
         const progress = await appWindow.listen<{ done: number; total: number }>(`copy-progress//${eventId}`, e => {
             trackerRef.current?.style.setProperty("--action-progress", (e.payload.done / e.payload.total) * 100 + "%");
         });
 
-        const finished = await appWindow.listen(`copy-finished//${eventId}`, () => {
+        const finished = await appWindow.once(`copy-finished//${eventId}`, () => {
             removeCopyProcessFromState(eventId);
 
             onRemove(eventId);
@@ -40,15 +43,15 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
         });
 
         untrack.current = { progress, finished };
-    };
+    }, [eventId, onRemove]);
 
-    const togglePause = () => {
+    const togglePause = useCallback(() => {
         setPaused(prev => {
             appWindow.emit(`copy-change-state//${eventId}`, prev ? "run" : "pause");
 
             return !prev;
         });
-    };
+    }, [eventId]);
 
     const handleTerminateAction = () => {
         untrack.current?.progress();
@@ -69,8 +72,7 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
 
     useEffect(() => {
         mountListeners().then(togglePause);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [mountListeners, togglePause]);
 
     return (
         <div ref={trackerRef} className={styles.wrapper} data-testid={eventId}>
@@ -80,18 +82,15 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
                         title={t(action === "copy" ? "copyingFileFromTo" : "movingFileFromTo", { filename, from, to })}
                         className={styles.text}
                     >
+                        {paused && "[PAUSED]"}{" "}
                         {t(action === "copy" ? "copyingFileFromTo" : "movingFileFromTo", { filename, from, to })}
                     </p>
 
                     <div className={styles.buttons}>
-                        <button
-                            type="button"
-                            title={paused ? t("continueCopying") : t("pauseCopying")}
-                            onClick={togglePause}
-                        >
+                        <button type="button" title={paused ? t("continue") : t("pause")} onClick={togglePause}>
                             {paused ? <PlaySVG /> : <PauseSVG />}
                         </button>
-                        <button type="button" title={t("cancelCopying")} onClick={handleTerminateAction}>
+                        <button type="button" title={t("cancel")} onClick={handleTerminateAction}>
                             <CloseSVG strokeWidth={2} width={14} height={14} />
                         </button>
                     </div>

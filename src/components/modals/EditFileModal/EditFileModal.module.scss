@@ -15,7 +15,7 @@
     top: 50%;
     left: 50%;
 
-    min-width: 300px;
+    width: 400px;
 
     background-color: #000;
     transform: translate(-50%, -50%);
@@ -28,6 +28,7 @@
     background-color: #222;
 
     border-bottom: 1px solid #666;
+    word-wrap: break-word;
 }
 
 .form {
@@ -37,17 +38,62 @@
     gap: 1rem;
 }
 
-.inputLabel {
+.filenameInputsLabel {
     display: grid;
-    grid-template-columns: min-content 1fr;
+    grid-template-columns: 7fr 3fr;
+    grid-template-rows: repeat(2, min-content);
     gap: 0.5rem;
+    transition: grid-template 150ms;
+
+    & > label {
+        display: block;
+    }
+}
+
+.filenameInputsError {
+    height: 1.25rem;
+
+    color: rgb(200, 50, 50);
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.extensionInputHidden {
+    grid-template-columns: 1fr 0px;
+
+    .extensionInputLabel {
+        transition: opacity 1ms 100ms;
+        opacity: 0;
+
+        p {
+            opacity: 0;
+        }
+    }
+}
+
+.inputContainer {
+    position: relative;
+
+    .input:focus ~ .inputDescription {
+        opacity: 0.9;
+    }
 }
 
 .inputDescription {
-    white-space: nowrap;
+    position: absolute;
+    top: 0;
+    left: 5px;
+
+    font-size: 0.675em;
+    transform: translateY(-60%);
+    letter-spacing: 0.03em;
+    transition: opacity 150ms;
+    pointer-events: none;
 }
 
 .input {
+    width: 100%;
+
     padding: 0.125rem 0.25rem;
 
     background-color: rgba($color: #fff, $alpha: 0.2);
@@ -71,14 +117,13 @@
     border-radius: 0.25rem;
     justify-self: flex-end;
     transition: background-color 150ms, border-color 150ms;
-    border: 1px solid transparent;
+    border: 2px solid transparent;
 
     &:hover {
         background-color: rgba($color: #0f0, $alpha: 0.36);
     }
 
-    &:active,
-    &:focus {
+    &:active {
         background-color: rgba($color: #0f0, $alpha: 0.2);
     }
 

@@ -95,7 +95,7 @@ const NotificationComponent: React.FC<NotificationComponentProps> = ({ message, 
                 <p className={styles.headingText}>{t("notifications." + type)}</p>
 
                 <button className={styles.closeButton} title={t("close")} onClick={handleCloseNotification}>
-                    <CloseSVG />
+                    <CloseSVG strokeWidth={2} width={14} height={14} />
                 </button>
             </div>
 

@@ -11,9 +11,7 @@ import { useExplorerHistory } from "@zustand";
 
 import styles from "./File.module.scss";
 
-type FileProps = ExplorerFile;
-
-const File: React.FC<FileProps> = ({ name, size, subtype }) => {
+const File: React.FC<ExplorerFile> = ({ name, size, readonly, subtype }) => {
     const { currentPath } = useExplorerHistory();
 
     const handleAction = () => openFile(currentPath + sep + name).catch(error => console.error(error));
@@ -24,6 +22,7 @@ const File: React.FC<FileProps> = ({ name, size, subtype }) => {
             onAction={handleAction}
             className={styles.wrapper}
             data-file-type="file"
+            data-readonly={readonly}
             data-file-subtype={subtype}
             data-context-menu-type={CTXTypes.file}
             data-filename={name}

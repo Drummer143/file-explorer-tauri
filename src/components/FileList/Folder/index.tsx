@@ -10,7 +10,7 @@ import styles from "./Folder.module.scss";
 
 type FolderProps = ExplorerDirectory & { initialFocus?: boolean };
 
-const Folder: React.FC<FolderProps> = ({ name, isRemovable, initialFocus }) => {
+const Folder: React.FC<FolderProps> = ({ name, readonly, initialFocus }) => {
     const { currentPath, pushRoute } = useExplorerHistory();
 
     const handleAction = () => {
@@ -28,7 +28,7 @@ const Folder: React.FC<FolderProps> = ({ name, isRemovable, initialFocus }) => {
             onAction={handleAction}
             className={styles.wrapper}
             data-file-type="folder"
-            data-readonly={isRemovable ? true : ""}
+            data-readonly={readonly}
             data-context-menu-type={CTXTypes.file}
             data-filename={name}
             data-filename-lowercased={name.toLocaleLowerCase()}

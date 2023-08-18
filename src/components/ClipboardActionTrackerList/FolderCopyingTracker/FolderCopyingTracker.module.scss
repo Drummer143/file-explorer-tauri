@@ -1,9 +1,7 @@
 .wrapper {
-    --info-height: 25px;
-
     position: relative;
 
-    width: 250px;
+    width: var(--popup-width);
 
     background-color: black;
     border-radius: 2px;
@@ -19,7 +17,7 @@
         left: 0;
         z-index: 0;
 
-        height: var(--info-height);
+        height: var(--popup-min-height);
         width: var(--action-progress);
 
         transition: width 50ms;
@@ -38,7 +36,7 @@
 }
 
 .info {
-    height: var(--info-height);
+    height: var(--popup-min-height);
     width: 100%;
 
     padding: 0 0.25rem;

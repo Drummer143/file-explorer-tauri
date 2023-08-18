@@ -6,8 +6,8 @@ import Disk from "./Disk";
 import File from "./File";
 import Folder from "./Folder";
 import { useExplorerHistory } from "@zustand";
+import { EditFileModal, FileExistModal } from "../modals";
 import { useResizeObserver, useWatchPathChange } from "@hooks";
-import { CreateFileModal, EditFileModal, FileExistModal } from "../modals";
 import { CTXTypes, addFileInClipboard, findActiveLayerKeys, pasteFile } from "@utils";
 
 import styles from "./FileList.module.scss";
@@ -245,9 +245,8 @@ const FileList: React.FC = () => {
                 </div>
             </OverlayScrollbarsComponent>
 
-            <EditFileModal />
             <FileExistModal />
-            <CreateFileModal />
+            <EditFileModal />
         </>
     );
 };

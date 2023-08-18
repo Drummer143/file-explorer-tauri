@@ -20,21 +20,39 @@ export default {
             showInNativeExplorer: "Show in explorer",
             open: "Open",
             delete: "Delete",
-            rename: "Rename"
+            rename: "Rename",
+            createNewFile: "Create new file",
+            createNewFolder: "Create new folder"
         },
         clipboardTrackers: {
             copyingFileFromTo: "Copying {{filename}} from {{from}} to {{to}}",
-            cancelCopying: "Cancel copying",
-            continueCopying: "Continue copying",
-            pauseCopying: "Pause copying",
+            movingFileFromTo: "Moving {{filename}} from {{from}} to {{to}}",
+            alreadyExists: "{{filename}} already exists. Choose an action:",
+            cancel: "cancel",
+            continue: "Continue copying",
+            pause: "Pause copying",
             deleteCopiedFile: "Delete copied file?",
             deleteFile: "Delete file",
-            saveFile: "Save file"
+            saveFile: "Save file",
+            overwrite: "Overwrite",
+            saveBoth: "Save both",
+            merge: "Merge",
+            doThisForAllFiles: "Do this for all files",
+            preparingToCopyFolder: "Preparing to copy folder",
+            actionRequired: "Action required"
         },
         modals: {
             editFileModal: {
-                heading: "Editing {{filename}}",
-                nameInputLabel: "Name"
+                editingHeading: "Editing {{filename}}",
+                nameInputLabel: "Name",
+                extensionInputLabel: "Extension",
+                fileCreatingHeading: "Creating new file",
+                folderCreatingHeading: "Creating new folder",
+                submitButton: "Save",
+                errors: {
+                    alreadyTaken: "This name is already taken",
+                    emptyName: "Filename can't be empty"
+                }
             },
             fileExistModal: {
                 modalText: "{{filename}} already exists in {{targetFolder}}. Choose an action:",
@@ -51,36 +69,5 @@ export default {
         save: "Save",
         cancel: "Cancel",
         close: "Close"
-        // enterFileName: "Enter file name",
-        // enterFolderName: "Enter folder name",
-        // create: "Create",
-        // newFolder: "New folder",
-        // newFile: "New file",
-        // settings: "Settings",
-        // language: "Language",
-        // title: "File Explorer",
-        // explorerErrors: {
-        //     invalidPath: "Can't find !<path!<. Check correctness of the path",
-        //     onOpenFile: "Can't open file",
-        //     onGetInfo: "Can't get information about file"
-        // },
-        // ctx: {
-        //     buttons: {
-        //         openFile: "Open file",
-        //         openFolder: "Open folder",
-        //         delete: "Delete",
-        //         rename: "Rename",
-        //         createFolder: "Create folder",
-        //         createFile: "Create file",
-        //         openInExplorer: "Open in Windows explorer",
-        //         appearance: "Appearance"
-        //     },
-        //     sections: {
-        //         disk: "disk",
-        //         directory: "directory",
-        //         file: "file",
-        //         explorer: "explorer"
-        //     }
-        // },
     }
-} as LocalizationMap;
+};

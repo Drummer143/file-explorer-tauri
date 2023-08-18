@@ -1,8 +1,8 @@
 .wrapper {
     position: relative;
 
-    height: 25px;
-    width: 250px;
+    height: var(--popup-min-height);
+    width: var(--popup-width);
 
     padding: 0 0.25rem;
 

@@ -1,13 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { appWindow } from "@tauri-apps/api/window";
 import { UnlistenFn } from "@tauri-apps/api/event";
+import { useTranslation } from "react-i18next";
 
 import { removeCopyProcessFromState } from "@tauriAPI";
 import { PlaySVG, PauseSVG, CloseSVG } from "@assets";
 
 import styles from "./FolderCopyingTracker.module.scss";
 
-type CopyStatus = "preparing" | "waiting-action" | "copying";
+type CopyStatus = "preparing" | "waiting-action" | "copying" | "paused";
 
 type FolderCopyingTrackerProps = StartTrackingClipboardActionDetail & {
     onRemove: (eventId: number) => void;
@@ -21,7 +22,8 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
     onRemove,
     to
 }) => {
-    const [paused, setPaused] = useState(true);
+    const { t } = useTranslation("translation", { keyPrefix: "" });
+
     const [status, setStatus] = useState<CopyStatus>("preparing");
     const [isErrorMessageVisible, setIsErrorMessageVisible] = useState(false);
     const [errorFilename, setErrorFilename] = useState<string | undefined>(undefined);
@@ -35,7 +37,7 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
         finished: UnlistenFn;
     } | null>(null);
 
-    const mountListeners = async () => {
+    const mountListeners = useCallback(async () => {
         const preparing = await appWindow.once(`copy-ready//${eventId}`, () => {
             setStatus("copying");
         });
@@ -60,15 +62,15 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
         });
 
         untrack.current = { progress, finished, preparing, error };
-    };
+    }, [eventId, onRemove]);
 
-    const togglePause = () => {
-        setPaused(prev => {
-            appWindow.emit(`copy-change-state//${eventId}`, prev ? "run" : "pause");
+    const togglePause = useCallback(() => {
+        setStatus(prev => {
+            appWindow.emit(`copy-change-state//${eventId}`, prev === "paused" ? "run" : "pause");
 
-            return !prev;
+            return prev === "paused" ? "copying" : "paused";
         });
-    };
+    }, [eventId]);
 
     const handleTerminateAction = () => {
         untrack.current?.progress();
@@ -95,7 +97,6 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
         setIsErrorMessageVisible(false);
         setErrorFilename(undefined);
         setStatus("copying");
-        setPaused(false);
     };
 
     const handleCheckboxChange: React.ChangeEventHandler<HTMLInputElement> = e => {
@@ -111,8 +112,7 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
             untrack.current?.preparing();
             untrack.current?.progress();
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [mountListeners, togglePause]);
 
     useEffect(() => {
         if (status !== "waiting-action") {
@@ -121,35 +121,38 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
     }, [status]);
 
     return (
-        // TODO: LOCALIZATION
-        <div
-            ref={trackerRef}
-            data-waiting-action={status === "waiting-action"}
-            className={styles.wrapper + (errorFilename ? ` ${styles.error}` : "")}
-        >
+        <div ref={trackerRef} className={styles.wrapper.concat(errorFilename ? ` ${styles.error}` : "")}>
             <div className={styles.info}>
                 {status === "preparing" ? (
-                    <p className={styles.text}>Preparing to copy folder</p>
-                ) : status === "copying" || !isErrorMessageVisible ? (
+                    <p title={t("preparingToCopyFolder")} className={styles.text}>
+                        {t("preparingToCopyFolder")}
+                    </p>
+                ) : status === "copying" || isErrorMessageVisible ? (
                     <p
-                        title={`Copying ${filename} from ${from} to ${to}`}
+                        title={t(action === "copy" ? "copyingFileFromTo" : "movingFileFromTo", { filename, from, to })}
                         onClick={handleToggleErrorMessage}
                         className={styles.text}
                     >
-                        {(paused || status === "waiting-action") && "[PAUSED]"}{" "}
-                        {action === "copy" ? "Copying" : "Moving"} {filename} from {from} to {to}
+                        {["paused", "waiting-action"].includes(status) && "[PAUSED]"}{" "}
+                        {t(action === "copy" ? "copyingFileFromTo" : "movingFileFromTo", { filename, from, to })}
                     </p>
                 ) : (
-                    <p className={styles.text} onClick={handleToggleErrorMessage} title="Action required">
-                        Action required
+                    <p className={styles.text} onClick={handleToggleErrorMessage} title={t("actionRequired")}>
+                        {t("actionRequired")}
                     </p>
                 )}
 
                 <div className={styles.buttons}>
-                    <button type="button" onClick={togglePause} disabled={status === "waiting-action"}>
-                        {paused ? <PlaySVG /> : <PauseSVG />}
+                    <button
+                        type="button"
+                        title={status === "paused" ? t("pause") : t("continue")}
+                        onClick={togglePause}
+                        disabled={["preparing", "waiting-action"].includes(status)}
+                    >
+                        {status === "copying" ? <PlaySVG /> : <PauseSVG />}
                     </button>
-                    <button type="button" onClick={handleTerminateAction}>
+
+                    <button type="button" title={t("cancel")} onClick={handleTerminateAction}>
                         <CloseSVG strokeWidth={2} width={14} height={14} />
                     </button>
                 </div>
@@ -157,21 +160,21 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
 
             {isErrorMessageVisible && errorFilename && (
                 <div className={styles.errorBody}>
-                    <p>{errorFilename} is already exists. choose action:</p>
+                    <p>{t("alreadyExists", { filename: errorFilename })}</p>
 
-                    <button type="button" onClick={() => handleErrorButtonClick("Overwrite")}>
-                        overwrite
+                    <button type="button" title={t("overwrite")} onClick={() => handleErrorButtonClick("Overwrite")}>
+                        {t("overwrite")}
                     </button>
-                    <button type="button" onClick={() => handleErrorButtonClick("SaveBoth")}>
-                        save both
+                    <button type="button" title={t("saveBoth")} onClick={() => handleErrorButtonClick("SaveBoth")}>
+                        {t("saveBoth")}
                     </button>
-                    <button type="button" onClick={() => handleErrorButtonClick("Skip")}>
-                        skip file
+                    <button type="button" title={t("skipFile")} onClick={() => handleErrorButtonClick("Skip")}>
+                        {t("skipFile")}
                     </button>
 
                     <label className={styles.doForAllLabel}>
                         <input type="checkbox" onChange={handleCheckboxChange} />
-                        <p>Do this for all files</p>
+                        <p>{t("doThisForAllFiles")}</p>
                     </label>
                 </div>
             )}

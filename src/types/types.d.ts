@@ -5,13 +5,13 @@ interface ExplorerFile {
     subtype?: "image";
     name: string;
     size: number;
-    isRemovable: boolean;
+    readonly: boolean;
 }
 
 interface ExplorerDirectory {
     type: "folder";
     name: string;
-    isRemovable: boolean;
+    readonly: boolean;
 }
 
 interface ExplorerDisk {
@@ -20,7 +20,7 @@ interface ExplorerDisk {
     mountPoint: string;
     availableSpace: number;
     totalSpace: number;
-    isRemovable: boolean;
+    readonly: boolean;
 }
 
 type CFile = ExplorerDirectory | ExplorerDisk | ExplorerFile;

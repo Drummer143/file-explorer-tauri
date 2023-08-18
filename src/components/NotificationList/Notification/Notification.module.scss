@@ -1,22 +1,26 @@
 .wrapper {
     position: relative;
 
-    width: 250px;
-    // height: 3rem;
+    width: var(--popup-width);
 
-    background-color: #1a1a1a;
-    border-radius: 0.25rem;
-    border: 1px solid rgba($color: #fff, $alpha: 0.5);
+    background-color: black;
+    border-radius: 2px;
+    overflow: hidden;
+    font-size: 0.9em;
 }
 
 .heading {
     position: relative;
 
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    height: var(--popup-min-height);
+    width: 100%;
 
-    padding: 0.125rem 0.25rem;
+    padding: 0 0.25rem 1px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
 
     &::before,
     &::after {
@@ -62,11 +66,18 @@
 }
 
 .closeButton {
-    transition: background-color 150ms;
+    height: 20px;
+    width: 20px;
 
-    padding: 0.0675rem;
+    padding: 3px;
 
+    opacity: 0;
+    transition: background-color 150ms, opacity 150ms;
     border-radius: 0.125rem;
+
+    .wrapper:hover & {
+        opacity: 1;
+    }
 
     &:hover {
         background-color: rgba($color: #fff, $alpha: 0.25);

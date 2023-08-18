@@ -86,17 +86,17 @@ pub struct FileInfo {
     pub name: String,
     pub r#type: FileTypes,
     pub size: usize,
-    pub is_removable: bool,
+    pub readonly: bool,
     pub subtype: Option<FileSubtypes>,
 }
 
 impl FileInfo {
-    pub fn new(name: String, r#type: FileTypes, size: usize, is_removable: bool, subtype: Option<FileSubtypes>) -> FileInfo {
+    pub fn new(name: String, r#type: FileTypes, size: usize, readonly: bool, subtype: Option<FileSubtypes>) -> FileInfo {
         FileInfo {
             name,
             r#type,
             size,
-            is_removable,
+            readonly,
             subtype
         }
     }

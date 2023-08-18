@@ -52,7 +52,11 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
     };
 
     const handleRenameFile = () =>
-        document.dispatchEvent(new CustomEvent("openEditFileModal", { detail: { filename } }));
+        document.dispatchEvent(
+            new CustomEvent("openEditFileModal", {
+                detail: { filename, filetype: filetype as "file" | "folder", dirname: currentPath }
+            })
+        );
 
     const handleAddFileInClipboard = (action: "copy" | "cut") => {
         if (filetype !== "file" && filetype !== "folder") {

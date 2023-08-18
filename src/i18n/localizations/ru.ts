@@ -20,22 +20,38 @@ export default {
             showInNativeExplorer: "Показать в проводнике",
             open: "Открыть",
             delete: "Удалить",
-            rename: "Переименовать"
+            rename: "Переименовать",
+            createNewFile: "Создать новый файл",
+            createNewFolder: "Создать новую папку"
         },
         clipboardTrackers: {
             copyingFileFromTo: "Копирование {{filename}} из {{from}} в {{to}}",
             movingFileFromTo: "Перемещение {{filename}} из {{from}} в {{to}}",
-            cancelCopying: "Отменить копирование",
-            continueCopying: "Продолжить копирование",
-            pauseCopying: "Приостановить копирование",
+            cancel: "Отменить копирование",
+            continue: "Продолжить копирование",
+            pause: "Приостановить копирование",
             deleteCopiedFile: "Удалить копированный файл?",
             deleteFile: "Удалить файл",
-            saveFile: "Оставить файл"
+            saveFile: "Оставить файл",
+            overwrite: "Перезаписать",
+            saveBoth: "Сохранить оба файла",
+            merge: "Объединить",
+            doThisForAllFiles: "Выполнить действие для всех файлов",
+            preparingToCopyFolder: "Подготовка",
+            actionRequired: "Требуется действие"
         },
         modals: {
             editFileModal: {
-                heading: "Редактирование {{filename}}",
-                nameInputLabel: "Название файла"
+                editingHeading: "Редактирование {{filename}}",
+                nameInputLabel: "Имя",
+                extensionInputLabel: "Расширение",
+                fileCreatingHeading: "Создание нового файла",
+                folderCreatingHeading: "Создание новой папки",
+                submitButton: "Сохранить",
+                errors: {
+                    alreadyTaken: "Это имя уже занято",
+                    emptyName: "Имя файла не может быть пустым"
+                }
             },
             fileExistModal: {
                 modalText: "{{filename}} уже существует в папке {{targetFolder}}. Выберите действие:",
@@ -53,4 +69,4 @@ export default {
         cancel: "Отменить",
         close: "Закрыть"
     }
-} as LocalizationMap;
+};

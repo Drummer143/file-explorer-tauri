@@ -2,7 +2,10 @@ declare global {
     const appConfig: AppConfig;
 
     interface OpenEditFileModalDetail {
-        filename: string;
+        filetype: "file" | "folder";
+        dirname: string;
+
+        filename?: string;
     }
 
     interface OpenExistFileModalDetail {
@@ -25,7 +28,6 @@ declare global {
         openExistFileModal: CustomEvent<OpenExistFileModalDetail>;
         startTrackingClipboardAction: CustomEvent<StartTrackingClipboardActionDetail>;
         addNotification: CustomEvent<AppNotification>;
-        openCreateFIleModal: CustomEvent<"file" | "folder">;
     }
 
     interface Document {
