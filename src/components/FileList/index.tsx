@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { sep } from "@tauri-apps/api/path";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 
@@ -7,17 +7,16 @@ import Disk from "./Disk";
 import File from "./File";
 import Folder from "./Folder";
 import SelectionArea from "../SelectionArea";
-import { useExplorerHistory } from "@zustand";
 import { EditFileModal, FileExistModal } from "../modals";
 import { useResizeObserver, useWatchPathChange } from "@hooks";
+import { useExplorerHistory, useFilesSelectionStore } from "@zustand";
 import { CTXTypes, addFileInClipboard, findActiveLayerKeys, pasteFile } from "@utils";
 
 import styles from "./FileList.module.scss";
 
 const FileList: React.FC = () => {
     const { currentPath, prevTargetFile } = useExplorerHistory();
-
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const { selectedItems, clearSelectedItems, setSelectedItems, firstSelected, setFirstSelected } = useFilesSelectionStore();
 
     const listContainerRef = useRef<HTMLDivElement | null>(null);
     const searchPattern = useRef("");
@@ -31,15 +30,15 @@ const FileList: React.FC = () => {
             case "disk":
                 return (
                     <Disk
-                        selected={selectedIds.includes(file.mountPoint)}
+                        selected={selectedItems.includes(file.mountPoint)}
                         key={currentPath + file.mountPoint}
                         {...file}
                     />
                 );
             case "folder":
-                return <Folder selected={selectedIds.includes(file.name)} key={currentPath + file.name} {...file} />;
+                return <Folder selected={selectedItems.includes(file.name)} key={currentPath + file.name} {...file} />;
             case "file":
-                return <File selected={selectedIds.includes(file.name)} key={currentPath + file.name} {...file} />;
+                return <File selected={selectedItems.includes(file.name)} key={currentPath + file.name} {...file} />;
             default:
                 console.error("unhandled file", file);
         }
@@ -196,15 +195,79 @@ const FileList: React.FC = () => {
         [handleKeyDownWithCtrlKey, handleListArrowNavigation, handleSearchItem]
     );
 
+    const handleListWrapperClick: React.MouseEventHandler<HTMLDivElement> = e => {
+        const target = e.target as HTMLElement;
+
+        if (e.currentTarget.isSameNode(target)) {
+            clearSelectedItems();
+            return console.log("e.currentTarget.isSameNode(target)");
+        }
+
+        const targetFilename = target.dataset.filename!;
+
+        if (e.shiftKey) {
+            const activeElement = document.activeElement as HTMLElement;
+
+            if (!activeElement.dataset.filename) {
+                return console.log("!activeElement.dataset.filename");
+            }
+
+            if (!firstSelected) {
+                console.log("!firstSelected");
+                return setSelectedItems([activeElement.dataset.filename]);
+            }
+
+            if (firstSelected === targetFilename) {
+                return console.log("firstSelected === targetFilename");
+            }
+
+            const files = Array.from(listContainerRef.current?.children as unknown as HTMLElement[]);
+            const firstSelectedIndex = files.findIndex(f => f.dataset.filename === firstSelected);
+            const targetIndex = files.findIndex(f => f.dataset.filename === targetFilename);
+            let startIndex = Math.min(firstSelectedIndex, targetIndex);
+            const endIndex = Math.max(firstSelectedIndex, targetIndex);
+            const newSelected: string[] = [];
+
+            console.log(firstSelectedIndex);
+
+            for (; startIndex <= endIndex; startIndex++) {
+                const filename = files[startIndex].dataset.filename;
+
+                if (!filename) {
+                    return;
+                }
+
+                newSelected.push(filename);
+            }
+
+            console.log(newSelected);
+
+            return setSelectedItems(newSelected);
+        }
+
+        if (e.ctrlKey) {
+            if (targetFilename === firstSelected) {
+                setSelectedItems(prev => prev.filter(f => f !== targetFilename));
+            } else {
+                setSelectedItems(prev => prev.concat(targetFilename));
+            }
+
+            return;
+        }
+
+        setFirstSelected(targetFilename);
+    };
+
     useEffect(() => {
         listContainerRef.current?.scrollTo({ top: 0 });
-    }, [currentPath]);
+        clearSelectedItems();
+    }, [clearSelectedItems, currentPath]);
 
     useEffect(() => {
         if (prevTargetFile) {
             listContainerRef.current?.querySelector<HTMLButtonElement>(`[data-filename="${prevTargetFile}"]`)?.focus();
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [files]);
 
     useEffect(() => {
@@ -251,6 +314,7 @@ const FileList: React.FC = () => {
                     className={styles.wrapper}
                     data-context-menu-type={currentPath ? CTXTypes.explorer : undefined}
                     data-readonly={currentPath ? "" : true}
+                    onClick={handleListWrapperClick}
                 >
                     {files.map(selectFileComponent)}
                 </div>
@@ -263,7 +327,6 @@ const FileList: React.FC = () => {
                 targetSelector={`[data-context-menu-type="${CTXTypes.file}"]`}
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 getItemId={element => (element as HTMLElement).dataset.filename!}
-                setSelectedIds={setSelectedIds}
             />
         </>
     );

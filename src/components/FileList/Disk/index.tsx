@@ -1,7 +1,6 @@
 import React, { useRef } from "react";
 import xbytes from "xbytes";
 
-import FileListItemButton from "../../customs/FileListItemButton";
 import { DiskSVG } from "@assets";
 import { CTXTypes } from "@utils";
 import { useExplorerHistory } from "@zustand";
@@ -10,16 +9,8 @@ import "./Disk.scss";
 
 type DiskProps = ExplorerDisk & { selected?: boolean };
 
-// const FREE_MEMORY_COLOR_CHANGE_THRESHOLD = 0.60;
-// const FREE_MEMORY_COLOR_CHANGE_VALUE_MULTIPLIER = 1 - FREE_MEMORY_COLOR_CHANGE_THRESHOLD;
-
 const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoint, selected }) => {
     const { pushRoute } = useExplorerHistory();
-
-    // const availableSpacePercentage = useMemo(() => {
-    //     const onePercent = totalSpace / 100;
-    //     return availableSpace / onePercent;
-    // }, [availableSpace, totalSpace]);
 
     const xbytesConfig = useRef<xbytes.MainOpts>({
         fixed: 2,
@@ -28,18 +19,17 @@ const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoin
 
     const handleAction = () => pushRoute(mountPoint);
 
-    const handleFocus: React.FocusEventHandler<HTMLButtonElement> = e =>
-        (e.currentTarget as HTMLElement).ariaSelected = "true";
-
-    const handleBlur: React.FocusEventHandler<HTMLButtonElement> = e =>
-        (e.currentTarget as HTMLElement).ariaSelected = "false";
+    const handleKeyDown: React.KeyboardEventHandler<HTMLButtonElement> = (e) => {
+        if (["Space", "Enter"].includes(e.code)) {
+            handleAction();
+        }
+    };
 
     return (
-        <FileListItemButton
-            onBlur={handleBlur}
-            onFocus={handleFocus}
+        <button
+            onDoubleClick={handleAction}
+            onKeyDown={handleKeyDown}
             title={mountPoint + name}
-            onAction={handleAction}
             className="diskItemWrapper"
             data-readonly="true"
             data-file-type="disk"
@@ -47,12 +37,6 @@ const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoin
             data-filename={mountPoint}
             data-filename-lowercased={name.toLocaleLowerCase()}
             aria-selected={selected}
-        // style={{
-        //     '--available-space-width': availableSpacePercentage + "%",
-        //     "--free-memory-background-color":
-        //             getDiskBackgroundColor((availableSpacePercentage / 100 - FREE_MEMORY_COLOR_CHANGE_THRESHOLD)
-        //             * FREE_MEMORY_COLOR_CHANGE_VALUE_MULTIPLIER)
-        // } as React.CSSProperties}
         >
             <div className="diskItemIcon">
                 <DiskSVG />
@@ -67,7 +51,7 @@ const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoin
                     {xbytes(availableSpace, xbytesConfig.current)} / {xbytes(totalSpace, xbytesConfig.current)}
                 </p>
             </div>
-        </FileListItemButton>
+        </button>
     );
 };
 

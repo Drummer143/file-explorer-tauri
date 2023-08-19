@@ -3,7 +3,6 @@ import xbytes from "xbytes";
 import { sep } from "@tauri-apps/api/path";
 import { convertFileSrc } from "@tauri-apps/api/tauri";
 
-import FileListItemButton from "../../customs/FileListItemButton";
 import { FileSVG } from "@assets";
 import { CTXTypes } from "@utils";
 import { openFile } from "@tauriAPI";
@@ -18,18 +17,17 @@ const File: React.FC<FileProps> = ({ name, size, readonly, subtype, selected }) 
 
     const handleAction = () => openFile(currentPath + sep + name).catch(error => console.error(error));
 
-    const handleFocus: React.FocusEventHandler<HTMLButtonElement> = e =>
-        (e.currentTarget as HTMLElement).ariaSelected = "true";
-
-    const handleBlur: React.FocusEventHandler<HTMLButtonElement> = e =>
-        (e.currentTarget as HTMLElement).ariaSelected = "false";
+    const handleKeyDown: React.KeyboardEventHandler<HTMLButtonElement> = (e) => {
+        if (["Space", "Enter"].includes(e.code)) {
+            handleAction();
+        }
+    };
 
     return (
-        <FileListItemButton
-            onBlur={handleBlur}
-            onFocus={handleFocus}
+        <button
+            onDoubleClick={handleAction}
+            onKeyDown={handleKeyDown}
             title={name}
-            onAction={handleAction}
             className="fileItemWrapper"
             data-file-type="file"
             data-readonly={readonly}
@@ -47,7 +45,7 @@ const File: React.FC<FileProps> = ({ name, size, readonly, subtype, selected }) 
                 <p className="fileItemName">{name}</p>
                 <p className="fileItemSize">{xbytes(size, { fixed: size ? 2 : 0 })}</p>
             </div>
-        </FileListItemButton>
+        </button>
     );
 };
 

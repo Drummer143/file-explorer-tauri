@@ -1,11 +1,3 @@
-@mixin itemFocused {
-    outline-color: rgba($color: #fff, $alpha: 0.45);
-
-    &:not(:hover) {
-        background-color: rgba($color: #fff, $alpha: 0.05);
-    }
-}
-
 @mixin defaultItemStyle {
     --padding: 0.25rem;
 
@@ -25,12 +17,21 @@
     transition: background-color, outline-color, box-shadow;
     transition-duration: 100ms;
 
-    &:hover {
-        background-color: rgba($color: #fff, $alpha: 0.15);
+    .appFocused &[aria-selected="true"]:not(:hover) {
+        background-color: rgba($color: #fff, $alpha: 0.08);
+    }
+    
+    .appBlurred &[aria-selected="true"]:not(:hover) {
+        background-color: rgba($color: #fff, $alpha: 0.04);
     }
 
-    &:focus, .appFocused &[aria-selected="true"] {
-        @include itemFocused();
+    &:focus {
+        outline-color: rgba($color: #fff, $alpha: 0.55);
+
+    }
+
+    &:hover {
+        background-color: rgba($color: #fff, $alpha: 0.15);
     }
 
     &:active {

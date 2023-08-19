@@ -1,7 +1,6 @@
 import React from "react";
 import { sep } from "@tauri-apps/api/path";
 
-import FileListItemButton from "../../customs/FileListItemButton";
 import { CTXTypes } from "@utils";
 import { FolderSVG } from "@assets";
 import { useExplorerHistory } from "@zustand";
@@ -17,18 +16,17 @@ const Folder: React.FC<FolderProps> = ({ name, readonly, selected }) => {
         pushRoute(currentPath + sep + name);
     };
 
-    const handleFocus: React.FocusEventHandler<HTMLButtonElement> = e =>
-        (e.currentTarget as HTMLElement).ariaSelected = "true";
-
-    const handleBlur: React.FocusEventHandler<HTMLButtonElement> = e =>
-        (e.currentTarget as HTMLElement).ariaSelected = "false";
+    const handleKeyDown: React.KeyboardEventHandler<HTMLButtonElement> = (e) => {
+        if (["Space", "Enter"].includes(e.code)) {
+            handleAction();
+        }
+    };
 
     return (
-        <FileListItemButton
-            onBlur={handleBlur}
-            onFocus={handleFocus}
+        <button
+            onDoubleClick={handleAction}
+            onKeyDown={handleKeyDown}
             title={name}
-            onAction={handleAction}
             className="folderItemWrapper"
             data-file-type="folder"
             data-readonly={readonly}
@@ -42,7 +40,7 @@ const Folder: React.FC<FolderProps> = ({ name, readonly, selected }) => {
             </div>
 
             <p className="folderItemDescription">{name}</p>
-        </FileListItemButton>
+        </button>
     );
 };
 

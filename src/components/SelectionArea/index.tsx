@@ -1,22 +1,33 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
+import { useFilesSelectionStore } from "@zustand";
+
 import styles from "./SelectionArea.module.scss";
 
 type SelectionAreaProps = {
     rootElementRef: React.RefObject<HTMLElement>;
     targetSelector: string;
     getItemId: (item: Element) => string
-    setSelectedIds: (ids: string[]) => void
 }
 
-const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElementRef, targetSelector, getItemId, setSelectedIds }) => {
+const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElementRef, targetSelector, getItemId }) => {
+    const { setSelectedItems } = useFilesSelectionStore(state => state);
+
     const [hidden, setHidden] = useState(false);
 
     const startPos = useRef({ x: 0, y: 0 });
     const currentPos = useRef({ x: 0, y: 0 });
+    const isMoving = useRef(false);
 
     const handleMoveArea = useCallback((e: MouseEvent) => {
         currentPos.current = { x: e.clientX, y: e.clientY };
+
+        if (!isMoving.current) {
+            rootElementRef.current?.style.setProperty("pointer-events", "none");
+            setHidden(false);
+
+            isMoving.current = true;
+        }
 
         const targets = rootElementRef.current?.querySelectorAll(targetSelector);
 
@@ -44,41 +55,30 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElementRef, targetSel
             }
         });
 
-        setSelectedIds(selectedIds);
-    }, [getItemId, rootElementRef, setSelectedIds, startPos, targetSelector]);
+        setSelectedItems(selectedIds);
+    }, [getItemId, rootElementRef, setSelectedItems, targetSelector]);
 
     const handleEndSelecting = useCallback(() => {
         document.removeEventListener("mousemove", handleMoveArea);
 
+        isMoving.current = false;
+
         rootElementRef.current?.style.removeProperty("pointer-events");
 
-        const resetSelectedItems = (e: MouseEvent) => {
-            if((e.target as HTMLElement).dataset.tauriDragRegion !== "true") {
-                document.removeEventListener("mousedown", resetSelectedItems);
-
-                setSelectedIds([]);
-            }
-        }
-
-        document.addEventListener("mousedown", resetSelectedItems);
-
         setHidden(true);
-    }, [handleMoveArea, rootElementRef, setSelectedIds]);
+    }, [handleMoveArea, rootElementRef]);
 
     const handleStartSelecting = useCallback((e: MouseEvent) => {
         if (!e.target || !e.currentTarget || !(e.currentTarget as HTMLElement).isSameNode(e.target as HTMLElement)) {
             return;
         }
 
-        rootElementRef.current?.style.setProperty("pointer-events", "none");
-
         document.addEventListener("mousemove", handleMoveArea);
         document.addEventListener("mouseup", handleEndSelecting, { once: true });
 
         startPos.current = { y: e.clientY, x: e.clientX };
         currentPos.current = { y: e.clientY, x: e.clientX };
-        setHidden(false);
-    }, [handleEndSelecting, handleMoveArea, rootElementRef]);
+    }, [handleEndSelecting, handleMoveArea]);
 
     useEffect(() => {
         const root = rootElementRef.current;
