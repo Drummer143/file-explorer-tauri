@@ -6,38 +6,42 @@ import { CTXTypes } from "@utils";
 import { FolderSVG } from "@assets";
 import { useExplorerHistory } from "@zustand";
 
-import styles from "./Folder.module.scss";
+import "./Folder.scss";
 
-type FolderProps = ExplorerDirectory & { initialFocus?: boolean };
+type FolderProps = ExplorerDirectory & { selected?: boolean };
 
-const Folder: React.FC<FolderProps> = ({ name, readonly, initialFocus }) => {
+const Folder: React.FC<FolderProps> = ({ name, readonly, selected }) => {
     const { currentPath, pushRoute } = useExplorerHistory();
 
     const handleAction = () => {
         pushRoute(currentPath + sep + name);
     };
 
+    const handleFocus: React.FocusEventHandler<HTMLButtonElement> = e =>
+        (e.currentTarget as HTMLElement).ariaSelected = "true";
+
+    const handleBlur: React.FocusEventHandler<HTMLButtonElement> = e =>
+        (e.currentTarget as HTMLElement).ariaSelected = "false";
+
     return (
         <FileListItemButton
-            ref={ref => {
-                if (initialFocus) {
-                    ref?.focus();
-                }
-            }}
+            onBlur={handleBlur}
+            onFocus={handleFocus}
             title={name}
             onAction={handleAction}
-            className={styles.wrapper}
+            className="folderItemWrapper"
             data-file-type="folder"
             data-readonly={readonly}
             data-context-menu-type={CTXTypes.file}
             data-filename={name}
             data-filename-lowercased={name.toLocaleLowerCase()}
+            aria-selected={selected}
         >
-            <div className={styles.icon}>
+            <div className="folderItemIcon">
                 <FolderSVG />
             </div>
 
-            <p className={styles.description}>{name}</p>
+            <p className="folderItemDescription">{name}</p>
         </FileListItemButton>
     );
 };

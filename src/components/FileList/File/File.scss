@@ -1,23 +1,23 @@
 @use "../defaultItemStyle" as d;
 
-.wrapper {
+.fileItemWrapper {
     @include d.defaultItemStyle;
 }
 
-.icon {
+.fileItemIcon {
     @include d.iconStyle;
 }
 
-.description {
+.fileItemDescription {
     @include d.textContainerStyle;
 }
 
-.name {
+.fileItemName {
     @include d.mainInfo;
 
     margin-bottom: 0.15rem;
 }
 
-.size {
+.fileItemSize {
     @include d.subInfo;
 }

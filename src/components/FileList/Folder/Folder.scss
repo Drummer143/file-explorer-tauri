@@ -1,14 +1,14 @@
 @use "../defaultItemStyle" as d;
 
-.wrapper {
+.folderItemWrapper {
     @include d.defaultItemStyle;
 }
 
-.icon {
+.folderItemIcon {
     @include d.iconStyle;
 }
 
-.description {
+.folderItemDescription {
     @include d.textContainerStyle;
     @include d.mainInfo;
 }

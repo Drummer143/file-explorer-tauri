@@ -45,7 +45,7 @@ const ContextMenu: React.FC = () => {
 
         document.documentElement.removeAttribute("data-ctx-opened");
 
-        document.removeEventListener("click", closeCTXOnOuterClick);
+        document.removeEventListener("mousedown", closeCTXOnOuterClick);
         window.removeEventListener("resize", closeCTX);
     };
 
@@ -88,7 +88,7 @@ const ContextMenu: React.FC = () => {
                 });
             });
 
-            document.addEventListener("click", closeCTXOnOuterClick);
+            document.addEventListener("mousedown", closeCTXOnOuterClick);
             window.addEventListener("resize", closeCTX);
         };
 

@@ -1,6 +1,6 @@
 @use "../defaultItemStyle" as d;
 
-.wrapper {
+.diskItemWrapper {
     @include d.defaultItemStyle;
 
     // &::before {
@@ -19,20 +19,20 @@
     // }
 }
 
-.icon {
+.diskItemIcon {
     @include d.iconStyle;
 }
 
-.description {
+.diskItemDescription {
     @include d.textContainerStyle;
 }
 
-.name {
+.diskItemName {
     @include d.mainInfo;
 
     margin-bottom: 0.15rem;
 }
 
-.info {
+.diskItemInfo {
     @include d.subInfo;
 }

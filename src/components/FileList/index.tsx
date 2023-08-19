@@ -1,10 +1,12 @@
-import React, { useCallback, useEffect, useRef } from "react";
+/* eslint-disable max-lines */
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { sep } from "@tauri-apps/api/path";
 import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 
 import Disk from "./Disk";
 import File from "./File";
 import Folder from "./Folder";
+import SelectionArea from "../SelectionArea";
 import { useExplorerHistory } from "@zustand";
 import { EditFileModal, FileExistModal } from "../modals";
 import { useResizeObserver, useWatchPathChange } from "@hooks";
@@ -14,6 +16,8 @@ import styles from "./FileList.module.scss";
 
 const FileList: React.FC = () => {
     const { currentPath, prevTargetFile } = useExplorerHistory();
+
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
     const listContainerRef = useRef<HTMLDivElement | null>(null);
     const searchPattern = useRef("");
@@ -27,15 +31,15 @@ const FileList: React.FC = () => {
             case "disk":
                 return (
                     <Disk
-                        initialFocus={prevTargetFile === file.mountPoint}
+                        selected={selectedIds.includes(file.mountPoint)}
                         key={currentPath + file.mountPoint}
                         {...file}
                     />
                 );
             case "folder":
-                return <Folder initialFocus={prevTargetFile === file.name} key={currentPath + file.name} {...file} />;
+                return <Folder selected={selectedIds.includes(file.name)} key={currentPath + file.name} {...file} />;
             case "file":
-                return <File key={currentPath + file.name} {...file} />;
+                return <File selected={selectedIds.includes(file.name)} key={currentPath + file.name} {...file} />;
             default:
                 console.error("unhandled file", file);
         }
@@ -197,6 +201,13 @@ const FileList: React.FC = () => {
     }, [currentPath]);
 
     useEffect(() => {
+        if (prevTargetFile) {
+            listContainerRef.current?.querySelector<HTMLButtonElement>(`[data-filename="${prevTargetFile}"]`)?.focus();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [files]);
+
+    useEffect(() => {
         document.addEventListener("keydown", handleKeyDown);
 
         return () => {
@@ -247,6 +258,13 @@ const FileList: React.FC = () => {
 
             <FileExistModal />
             <EditFileModal />
+            <SelectionArea
+                rootElementRef={listContainerRef}
+                targetSelector={`[data-context-menu-type="${CTXTypes.file}"]`}
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                getItemId={element => (element as HTMLElement).dataset.filename!}
+                setSelectedIds={setSelectedIds}
+            />
         </>
     );
 };
