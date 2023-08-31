@@ -5,12 +5,12 @@ import { useFilesSelectionStore } from "@zustand";
 import styles from "./SelectionArea.module.scss";
 
 type SelectionAreaProps = {
-    rootElementRef: React.RefObject<HTMLElement>;
     targetSelector: string;
-    getItemId: (item: Element) => string
+
+    rootElement?: HTMLElement | null;
 }
 
-const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElementRef, targetSelector, getItemId }) => {
+const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelector }) => {
     const { setSelectedItems } = useFilesSelectionStore(state => state);
 
     const [hidden, setHidden] = useState(false);
@@ -20,16 +20,16 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElementRef, targetSel
     const isMoving = useRef(false);
 
     const handleMoveArea = useCallback((e: MouseEvent) => {
-        currentPos.current = { x: e.clientX, y: e.clientY };
-
         if (!isMoving.current) {
-            rootElementRef.current?.style.setProperty("pointer-events", "none");
+            rootElement?.style.setProperty("pointer-events", "none");
             setHidden(false);
 
             isMoving.current = true;
         }
 
-        const targets = rootElementRef.current?.querySelectorAll(targetSelector);
+        currentPos.current = { y: e.clientY, x: e.clientX };
+
+        const targets = rootElement?.querySelectorAll(targetSelector);
 
         if (!targets?.length) {
             return;
@@ -50,23 +50,29 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElementRef, targetSel
                 rect.bottom < minY ||
                 rect.top > maxY);
 
-            if (isSelected) {
-                selectedIds.push(getItemId(target));
+            const filename = (target as HTMLElement)?.dataset.filename;
+
+            if (isSelected && filename) {
+                selectedIds.push(filename);
             }
         });
 
         setSelectedItems(selectedIds);
-    }, [getItemId, rootElementRef, setSelectedItems, targetSelector]);
+    }, [rootElement, setSelectedItems, targetSelector]);
+
+    useEffect(() => {
+        console.log("rerender");
+    }, [setSelectedItems]);
 
     const handleEndSelecting = useCallback(() => {
         document.removeEventListener("mousemove", handleMoveArea);
 
         isMoving.current = false;
 
-        rootElementRef.current?.style.removeProperty("pointer-events");
+        rootElement?.style.removeProperty("pointer-events");
 
         setHidden(true);
-    }, [handleMoveArea, rootElementRef]);
+    }, [handleMoveArea, rootElement]);
 
     const handleStartSelecting = useCallback((e: MouseEvent) => {
         if (!e.target || !e.currentTarget || !(e.currentTarget as HTMLElement).isSameNode(e.target as HTMLElement)) {
@@ -77,22 +83,20 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElementRef, targetSel
         document.addEventListener("mouseup", handleEndSelecting, { once: true });
 
         startPos.current = { y: e.clientY, x: e.clientX };
-        currentPos.current = { y: e.clientY, x: e.clientX };
+        currentPos.current = startPos.current;
     }, [handleEndSelecting, handleMoveArea]);
 
     useEffect(() => {
-        const root = rootElementRef.current;
-
-        if (!root) {
+        if (!rootElement) {
             return;
         }
 
-        root.addEventListener("mousedown", handleStartSelecting);
+        rootElement.addEventListener("mousedown", handleStartSelecting);
 
         return () => {
-            root.removeEventListener("mousedown", handleStartSelecting);
+            rootElement.removeEventListener("mousedown", handleStartSelecting);
         };
-    }, [handleStartSelecting, rootElementRef]);
+    }, [handleStartSelecting, rootElement]);
 
     return (
         <div

@@ -1,44 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ReactModal from "react-modal";
+import { appWindow } from "@tauri-apps/api/window";
 import { useTranslation } from "react-i18next";
-import { sep } from "@tauri-apps/api/path";
+import { basename, dirname, sep } from "@tauri-apps/api/path";
+import { UnlistenFn, Event as TauriEvent } from "@tauri-apps/api/event";
 
-import { addIndexToFilename } from "@tauriAPI";
-import { pasteFile } from "@utils";
+import { getFileType } from "@tauriAPI";
 
 import styles from "./FileExistModal.module.scss";
 
 const FileExistModal: React.FC = () => {
     const { t } = useTranslation();
 
-    const [fileInfo, setFileInfo] = useState<CustomEventMap["openExistFileModal"]["detail"] | undefined>(undefined);
+    const [fileInfo, setFileInfo] = useState<RootFileExistsEventPayload | undefined>(undefined);
+
+    const unlistenExistFile = useRef<UnlistenFn | null>(null);
 
     const closeModal = () => setFileInfo(undefined);
 
-    const handleClick = async (action: "overwrite" | "save-both" | "cancel" | "merge") => {
-        if (action === "cancel" || !fileInfo) {
-            return closeModal();
-        }
-
-        const options: FileCopyOptions = {
-            skipExist: false,
-            overwrite: false
-        };
-
-        let filename = fileInfo.filename;
-
-        switch (action) {
-            case "overwrite":
-                options.overwrite = true;
-                break;
-            case "save-both":
-                filename = await addIndexToFilename(fileInfo.dirname + sep + fileInfo.filename);
-                break;
-            case "merge":
-                options.skipExist = true;
-        }
-
-        pasteFile({ dirname: fileInfo.dirname, filename }, options);
+    const handleClick = async (action: "overwrite" | "saveBoth" | "skip" | "merge") => {
+        appWindow.emit("file-exists-answer", action);
 
         closeModal();
     };
@@ -48,14 +29,28 @@ const FileExistModal: React.FC = () => {
     const handleAfterClose = () => document.documentElement.removeAttribute("data-modal-opened");
 
     useEffect(() => {
-        const handleOpenModal = (e: CustomEventMap["openExistFileModal"]) => {
-            setFileInfo(e.detail);
+        const handleOpenModal = async (e: TauriEvent<PathsFromTo>) => {
+            const dirnameTo = await dirname(e.payload.to);
+            const filename = await basename(e.payload.from);
+            const filetype = await getFileType(e.payload.from);
+
+            setFileInfo({
+                dirname: dirnameTo,
+                filename,
+                filetype
+            });
         };
 
-        document.addEventListener("openExistFileModal", handleOpenModal);
+        const mountListener = async () => {
+            unlistenExistFile.current = await appWindow.listen("file-exists", handleOpenModal);
+        };
+
+        mountListener();
 
         return () => {
-            document.removeEventListener("openExistFileModal", handleOpenModal);
+            if(unlistenExistFile.current) {
+                unlistenExistFile.current();
+            }
         };
     }, []);
 
@@ -95,10 +90,10 @@ const FileExistModal: React.FC = () => {
                 <button onClick={() => handleClick("overwrite")} type="button">
                     {t("modals.fileExistModal.overwrite")}
                 </button>
-                <button onClick={() => handleClick("save-both")} type="button">
+                <button onClick={() => handleClick("saveBoth")} type="button">
                     {t("modals.fileExistModal.saveBoth")}
                 </button>
-                <button onClick={() => handleClick("cancel")} type="button">
+                <button onClick={() => handleClick("skip")} type="button">
                     {t("cancel")}
                 </button>
             </div>

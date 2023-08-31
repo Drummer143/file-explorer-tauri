@@ -62,10 +62,8 @@ interface FileCopyOptions {
     removeTargetOnFinish?: boolean;
 }
 
-interface DirectoryCopyOptions {
-    duplicateFileAction: "Overwrite" | "SaveBoth" | "Ask" | "Skip";
-    overwrite: boolean;
-    skipExist: boolean;
-
-    removeTargetOnFinish?: boolean;
+interface RootFileExistsEventPayload {
+    dirname: string;
+    filename: string;
+    filetype: "file" | "folder";
 }

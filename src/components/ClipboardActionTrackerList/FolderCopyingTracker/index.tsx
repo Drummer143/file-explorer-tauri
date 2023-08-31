@@ -3,7 +3,6 @@ import { appWindow } from "@tauri-apps/api/window";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 
-import { removeCopyProcessFromState } from "@tauriAPI";
 import { PlaySVG, PauseSVG, CloseSVG } from "@assets";
 
 import styles from "./FolderCopyingTracker.module.scss";
@@ -22,7 +21,7 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
     onRemove,
     to
 }) => {
-    const { t } = useTranslation("translation", { keyPrefix: "" });
+    const { t } = useTranslation("translation", { keyPrefix: "clipboardTrackers" });
 
     const [status, setStatus] = useState<CopyStatus>("preparing");
     const [isErrorMessageVisible, setIsErrorMessageVisible] = useState(false);
@@ -36,6 +35,14 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
         error: UnlistenFn;
         finished: UnlistenFn;
     } | null>(null);
+
+    const togglePause = useCallback(() => {
+        setStatus(prev => {
+            appWindow.emit(`copy-change-state//${eventId}`, prev === "copying" ? "pause" : "run");
+
+            return prev === "paused" ? "copying" : "paused";
+        });
+    }, [eventId]);
 
     const mountListeners = useCallback(async () => {
         const preparing = await appWindow.once(`copy-ready//${eventId}`, () => {
@@ -52,8 +59,6 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
         });
 
         const finished = await appWindow.once(`copy-finished//${eventId}`, () => {
-            removeCopyProcessFromState(eventId);
-
             onRemove(eventId);
 
             untrack.current?.progress();
@@ -63,14 +68,6 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
 
         untrack.current = { progress, finished, preparing, error };
     }, [eventId, onRemove]);
-
-    const togglePause = useCallback(() => {
-        setStatus(prev => {
-            appWindow.emit(`copy-change-state//${eventId}`, prev === "paused" ? "run" : "pause");
-
-            return prev === "paused" ? "copying" : "paused";
-        });
-    }, [eventId]);
 
     const handleTerminateAction = () => {
         untrack.current?.progress();
@@ -83,15 +80,12 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
         onRemove(eventId);
     };
 
-    const handleToggleErrorMessage = () => {
-        setIsErrorMessageVisible(prev => !prev);
-    };
+    const handleToggleErrorMessage = () => setIsErrorMessageVisible(prev => !prev);
 
-    const handleErrorButtonClick = (action: "Overwrite" | "SaveBoth" | "Skip") => {
+    const handleErrorButtonClick = (action: "overwrite" | "saveBoth" | "skip") => {
         appWindow.emit(`copy-handle-duplicate//${eventId}`, {
             action,
-            // eslint-disable-next-line camelcase
-            do_for_all: doActionForAllDuplicates.current
+            doForAll: doActionForAllDuplicates.current
         });
 
         setIsErrorMessageVisible(false);
@@ -149,7 +143,7 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
                         onClick={togglePause}
                         disabled={["preparing", "waiting-action"].includes(status)}
                     >
-                        {status === "copying" ? <PlaySVG /> : <PauseSVG />}
+                        {status === "paused" ? <PlaySVG /> : <PauseSVG />}
                     </button>
 
                     <button type="button" title={t("cancel")} onClick={handleTerminateAction}>
@@ -162,13 +156,13 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
                 <div className={styles.errorBody}>
                     <p>{t("alreadyExists", { filename: errorFilename })}</p>
 
-                    <button type="button" title={t("overwrite")} onClick={() => handleErrorButtonClick("Overwrite")}>
+                    <button type="button" title={t("overwrite")} onClick={() => handleErrorButtonClick("overwrite")}>
                         {t("overwrite")}
                     </button>
-                    <button type="button" title={t("saveBoth")} onClick={() => handleErrorButtonClick("SaveBoth")}>
+                    <button type="button" title={t("saveBoth")} onClick={() => handleErrorButtonClick("saveBoth")}>
                         {t("saveBoth")}
                     </button>
-                    <button type="button" title={t("skipFile")} onClick={() => handleErrorButtonClick("Skip")}>
+                    <button type="button" title={t("skipFile")} onClick={() => handleErrorButtonClick("skip")}>
                         {t("skipFile")}
                     </button>
 

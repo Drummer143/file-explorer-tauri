@@ -1,14 +1,13 @@
-pub mod app_config;
-pub mod copy_directory;
-pub mod copy_file;
-pub mod get_disks;
-pub mod get_file_size;
-pub mod read_dir;
-pub mod remove_directory;
-pub mod remove_file;
-pub mod rename;
-pub mod types;
-pub mod watch_dir;
+pub(super) mod app_config;
+pub(super) mod copy;
+pub(super) mod get_disks;
+pub(super) mod get_file_size;
+pub(super) mod read_dir;
+pub(super) mod remove_directory;
+pub(super) mod remove_file;
+pub(super) mod rename;
+pub(super) mod types;
+pub(super) mod watch_dir;
 
 use notify::RecommendedWatcher;
 use std::{collections::HashMap, ffi::OsStr, path::Path, sync::Mutex};
@@ -18,8 +17,11 @@ use tauri::{
 };
 use tauri::{Config, Window};
 
-use copy_directory::*;
-use copy_file::*;
+use copy::{
+    copy_directory::{__cmd__copy_directory, copy_directory},
+    copy_file::{__cmd__copy_file, copy_file},
+    copy_multiple_files::{__cmd__copy_multiple_files, copy_multiple_files},
+};
 use get_disks::*;
 use read_dir::*;
 use remove_directory::*;
@@ -31,7 +33,6 @@ use watch_dir::*;
 #[derive(Default, Debug)]
 pub struct CFSState {
     watcher: Mutex<HashMap<usize, (RecommendedWatcher, String)>>,
-    copy_processes: Mutex<HashMap<usize, tauri::EventHandler>>,
     app_config: AppConfig,
 }
 
@@ -39,33 +40,25 @@ impl CFSState {
     pub fn new_app_config(app_config: AppConfig) -> Self {
         Self {
             watcher: Mutex::default(),
-            copy_processes: Mutex::default(),
             app_config,
         }
     }
 }
 
-///  10 Megabytes
 const DISPLAYABLE_IMAGE_EXTENSIONS: [&str; 13] = [
     "jpg", "jpeg", "jpe", "jif", "jfif", "jfi", "webp", "png", "gif", "svg", "svgz", "bmp", "dib",
 ];
 const APP_CONFIG_NAME: &str = "app_config.json";
 
-fn get_file_type(path_to_file: &Path) -> FileTypes {
+#[tauri::command(async)]
+pub fn get_file_type(path_to_file: String) -> FileTypes {
+    let path_to_file = Path::new(&path_to_file);
+
     if path_to_file.is_dir() {
-        return FileTypes::Folder;
+        FileTypes::Folder
+    } else {
+        FileTypes::File
     }
-
-    let extension = path_to_file
-        .extension()
-        .and_then(OsStr::to_str)
-        .unwrap_or("");
-
-    if DISPLAYABLE_IMAGE_EXTENSIONS.contains(&extension) {
-        return FileTypes::File;
-    }
-
-    FileTypes::File
 }
 
 fn get_file_subtype(path_to_file: &Path) -> Option<FileSubtypes> {
@@ -115,23 +108,9 @@ fn print_state(state: State<'_, CFSState>) {
     println!("{:#?}", state);
 }
 
-#[tauri::command(async)]
-pub fn remove_copy_process_from_state<R: Runtime>(
-    state: State<'_, CFSState>,
-    window: Window<R>,
-    id: usize,
-) {
-    let state = state.copy_processes.lock();
-
-    if let Ok(mut state) = state {
-        let id = state.remove(&id);
-
-        if let Some(id) = id {
-            window.unlisten(id);
-        }
-    }
-}
-
+/// Adds index to the filename until it's unique.
+///
+/// Returns path to file.
 #[tauri::command(async)]
 fn add_index_to_filename(path_to_file: String) -> Result<String, ErrorMessage> {
     let path = Path::new(&path_to_file);
@@ -150,7 +129,11 @@ fn add_index_to_filename(path_to_file: String) -> Result<String, ErrorMessage> {
 
     let dirname = dirname.unwrap();
     let filename = filename.unwrap();
-    let file_ext = path.extension().unwrap_or_default().to_str().unwrap_or_default();
+    let file_ext = path
+        .extension()
+        .unwrap_or_default()
+        .to_str()
+        .unwrap_or_default();
 
     loop {
         index += 1;
@@ -164,7 +147,7 @@ fn add_index_to_filename(path_to_file: String) -> Result<String, ErrorMessage> {
         let indexed_path = dirname.join(&indexed_filename);
 
         if !indexed_path.exists() {
-            break Ok(indexed_filename);
+            break Ok(indexed_path.to_str().unwrap().to_string());
         }
     }
 }
@@ -180,14 +163,20 @@ pub fn create_file(path: String, filetype: FileTypes) -> Result<(), ErrorMessage
     match filetype {
         FileTypes::File => {
             if let Err(error) = File::create(path) {
-                Err(ErrorMessage::new_all("Can't create file".into(), error.to_string()))
+                Err(ErrorMessage::new_all(
+                    "Can't create file".into(),
+                    error.to_string(),
+                ))
             } else {
                 Ok(())
             }
-        },
+        }
         FileTypes::Folder => {
             if let Err(error) = create_dir_all(path) {
-                Err(ErrorMessage::new_all("Can't create folder".into(), error.to_string()))
+                Err(ErrorMessage::new_all(
+                    "Can't create folder".into(),
+                    error.to_string(),
+                ))
             } else {
                 Ok(())
             }
@@ -210,13 +199,14 @@ pub fn init<R: Runtime>(config: &Config) -> TauriPlugin<R> {
             add_index_to_filename,
             copy_directory,
             copy_file,
+            copy_multiple_files,
             create_file,
             exists,
             get_disks,
+            get_file_type,
             print_state,
             remove,
             read_dir,
-            remove_copy_process_from_state,
             remove_directory,
             remove_file,
             rename,

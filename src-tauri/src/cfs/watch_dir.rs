@@ -14,9 +14,9 @@ use std::{
 use tauri::{Runtime, State, Window};
 
 use super::{
-    get_file_type,
+    get_file_subtype, get_file_type,
     types::{ErrorMessage, FileChangeEventType, FileChangePayload, FileInfo},
-    CFSState, get_file_subtype,
+    CFSState,
 };
 
 fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>>, id: usize) {
@@ -42,14 +42,13 @@ fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>
                     .unwrap_or(OsStr::new(""))
                     .to_string_lossy();
 
-                
                 let metadata = path_to_file.metadata();
                 let mut file_info: Option<FileInfo> = None;
-                
+
                 if let Ok(metadata) = metadata {
                     file_info = Some(FileInfo::new(
                         filename.to_string(),
-                        get_file_type(path_to_file),
+                        get_file_type(path_to_file.to_str().unwrap().to_string()),
                         metadata.file_size() as usize,
                         metadata.permissions().readonly(),
                         get_file_subtype(path_to_file),

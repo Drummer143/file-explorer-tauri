@@ -63,10 +63,10 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
             return;
         }
 
-        addFileInClipboard({ dirname: currentPath + sep + filename, filename, filetype, action });
+        addFileInClipboard({ files: { filename, dirname: currentPath }, action });
     };
 
-    const handleMovePasteFile = () => pasteFile({ dirname: currentPath + sep + filename });
+    const handleMovePasteFile = () => pasteFile(currentPath);
 
     return (
         <>

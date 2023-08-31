@@ -51,8 +51,16 @@ interface AppConfig {
 }
 
 interface CopiedFileInfo {
-    dirname: string;
-    filename: string;
-    filetype: Exclude<FileTypes, "disk">;
+    files: PathsParts | PathsParts[];
     action: "cut" | "copy";
+}
+
+interface PathsParts {
+    dirname: string
+    filename: string;
+}
+
+interface PathsFromTo {
+    from: string;
+    to: string;
 }

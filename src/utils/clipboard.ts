@@ -1,7 +1,8 @@
 import { sep } from "@tauri-apps/api/path";
+
 import { dispatchCustomEvent } from "./dom";
 import { addNotificationFromError } from "./helpers";
-import { copyFile, copyFolder, pathExists } from "@tauriAPI";
+import { copyFile, copyFolder, getFileType } from "@tauriAPI";
 
 export const addFileInClipboard = (info: CopiedFileInfo) => {
     document.documentElement.dataset.copiedFileInfo = JSON.stringify(info);
@@ -9,7 +10,13 @@ export const addFileInClipboard = (info: CopiedFileInfo) => {
     document.querySelector<HTMLElement>(".cut-file")?.classList.remove("cut-file");
 
     if (info.action === "cut") {
-        document.querySelector<HTMLElement>(`[data-filename="${info.filename}"]`)?.classList.add("cut-file");
+        if (Array.isArray(info.files)) {
+            info.files.forEach(f => {
+                document.querySelector<HTMLElement>(`[data-filename="${f}"]`)?.classList.add("cut-file");
+            });
+        } else {
+            document.querySelector<HTMLElement>(`[data-filename="${info.files}"]`)?.classList.add("cut-file");
+        }
     }
 };
 
@@ -18,13 +25,7 @@ export const clearClipboard = () => {
     document.querySelector<HTMLElement>(".cut-file")?.classList.remove("cut-file");
 };
 
-export const checkDataBeforeCopy = async (
-    to: {
-        dirname: string;
-        filename?: string;
-    },
-    copyOptions: FileCopyOptions
-) => {
+export const prepareDataBeforeCopy = (to: string): false | CopiedFileInfo & { paths: PathsFromTo | PathsFromTo[] } => {
     const info = document.documentElement.dataset.copiedFileInfo;
 
     if (!info) {
@@ -33,71 +34,81 @@ export const checkDataBeforeCopy = async (
 
     try {
         const copiedFileInfo: CopiedFileInfo = JSON.parse(info);
-        const pathToSourceFile = copiedFileInfo.dirname + sep + copiedFileInfo.filename;
+        const mergePathParts = (dirname: string, filename: string) => dirname + sep + filename;
+        const isNestedPath = (parentPath: string, nestedPath: string) => parentPath.includes(nestedPath);
 
-        if (to.filename) {
-            copiedFileInfo.filename = to.filename;
+        let paths: PathsFromTo | PathsFromTo[];
+
+        if (Array.isArray(copiedFileInfo.files)) {
+            const p: PathsFromTo[] = [];
+
+            copiedFileInfo.files.forEach(from => {
+                const pathFrom = mergePathParts(from.dirname, from.filename);
+                const pathTo = mergePathParts(to, from.filename);
+
+                if (isNestedPath(pathTo, pathFrom)) {
+                    p.push({ from: pathFrom, to: pathTo });
+                }
+            });
+
+            if (p.length) {
+                paths = p;
+            } else {
+                return false;
+            }
+        } else {
+            // if user is pasting file in the same folder where he copied file
+            const pathFrom = mergePathParts(copiedFileInfo.files.dirname, copiedFileInfo.files.filename);
+            const pathTo = mergePathParts(to, copiedFileInfo.files.filename);
+
+            if (isNestedPath(pathTo, pathFrom)) {
+                console.error("copying in nested folder");
+                return false;
+            }
+
+            paths = { from: pathFrom, to: pathTo };
         }
-
-        // if user is pasting file in the same folder where he copied file
-        if (copiedFileInfo.dirname === to.dirname) {
-            return false;
-        }
-
-        const newPathToFile = to.dirname + sep + copiedFileInfo.filename;
-        const skipExist = copyOptions.skipExist || copyOptions.overwrite;
-        const exists = skipExist ? false : await pathExists(newPathToFile);
 
         return {
             ...copiedFileInfo,
-            newPathToFile,
-            exists,
-            pathToSourceFile
+            paths
         };
     } catch (_) {
         return false;
     }
 };
 
-export const pasteFile = async (
-    to: { dirname: string; filename?: string },
-    copyOptions: FileCopyOptions = { overwrite: false, skipExist: false }
-) => {
-    const isOk = await checkDataBeforeCopy(to, copyOptions);
+export const pasteFile = async (to: string) => {
+    const isOk = prepareDataBeforeCopy(to);
 
     if (!isOk) {
         return;
     }
 
-    const { action, dirname, filename, filetype, newPathToFile, pathToSourceFile, exists } = isOk;
+    const { action, paths, files } = isOk;
+    // const filetype = await getFileType(pathToSourceFile);
 
-    if (exists) {
-        return dispatchCustomEvent("openExistFileModal", { dirname: to.dirname, filename, filetype });
+    if (Array.isArray(paths) || Array.isArray(files)) {
+        return console.error("unemplimented");
     }
 
     const id = Math.floor(Math.random() * 1000);
+    const filetype = await getFileType(paths.from);
 
     dispatchCustomEvent("startTrackingClipboardAction", {
         eventId: id,
-        from: dirname,
-        to: to.dirname,
-        filename,
+        from: paths.from,
+        to: paths.to,
+        filename: files.filename,
         action,
         type: filetype
     });
 
-    copyOptions.removeTargetOnFinish = action === "cut";
-
     try {
         if (filetype === "file") {
-            copyFile(pathToSourceFile, newPathToFile, id, copyOptions);
+            copyFile(paths.from, paths.to, id, action === "cut");
         } else {
-            copyFolder(pathToSourceFile, newPathToFile, id, {
-                ...copyOptions,
-                duplicateFileAction: "Ask"
-            });
-
-            // return console.error("unimplemented");
+            copyFolder(paths.from, paths.to, id, action === "cut");
         }
 
         if (action === "cut") {

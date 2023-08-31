@@ -4,7 +4,7 @@ import { appWindow } from "@tauri-apps/api/window";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 
-import { removeCopyProcessFromState, removeRaw } from "@tauriAPI";
+import { removeRaw } from "@tauriAPI";
 import { PlaySVG, PauseSVG, CloseSVG, CheckMarkSVG } from "@assets";
 
 import styles from "./FileCopyingTracker.module.scss";
@@ -35,8 +35,6 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
         });
 
         const finished = await appWindow.once(`copy-finished//${eventId}`, () => {
-            removeCopyProcessFromState(eventId);
-
             onRemove(eventId);
 
             untrack.current?.progress();
@@ -72,6 +70,11 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
 
     useEffect(() => {
         mountListeners().then(togglePause);
+
+        return () => {
+            untrack.current?.finished();
+            untrack.current?.progress();
+        };
     }, [mountListeners, togglePause]);
 
     return (

@@ -8,17 +8,12 @@ use std::{
 };
 use tauri::{Runtime, State, Window};
 
-use super::{
+use crate::cfs::{
     types::{CopyActions, CopyCutProgress, CopyResult, ErrorMessage},
     CFSState,
 };
 
-#[derive(serde::Deserialize)]
-pub struct FileCopyOptions {
-    pub overwrite: bool,
-    pub skip_exist: bool,
-    pub remove_target_on_finish: bool,
-}
+use super::utils::HandleDuplicateFileAnswer;
 
 pub fn copy_file_with_progress<R: tauri::Runtime>(
     window: &tauri::Window<R>,
@@ -124,76 +119,16 @@ pub fn copy_file_with_progress<R: tauri::Runtime>(
     }
 }
 
-fn spawn_copy_thread<R: Runtime>(
-    window: Window<R>,
-    copy_speed: u64,
-    buffer_size: usize,
-    from: String,
-    to: String,
-    event_id: usize,
-    control_vars: Arc<(Mutex<CopyActions>, Condvar)>,
-    remove_target_on_finish: bool,
-) -> Result<(), ErrorMessage> {
-    let finish_event_name = format!("copy-finished//{}", event_id);
-
-    thread::spawn(move || {
-        let result = copy_file_with_progress(
-            &window,
-            &from,
-            &to,
-            event_id,
-            buffer_size,
-            copy_speed,
-            control_vars,
-            0,
-            None
-        );
-
-        if result != CopyResult::Ok || !remove_target_on_finish {
-            let payload = if let CopyResult::Error(error) = result {
-                Some(error)
-            } else {
-                None
-            };
-
-            window
-                .emit(&finish_event_name, payload)
-                .expect("Can't send message to window");
-
-            return;
-        }
-
-        let remove_file_payload = if let Err(error) = crate::raw_fs::remove(from) {
-            Some(error)
-        } else {
-            None
-        };
-
-        if remove_file_payload.is_none() {
-            println!("error while deleting after copy");
-        } else {
-            println!("removed after copy successfully");
-        }
-
-        window
-            .emit(&finish_event_name, remove_file_payload)
-            .expect("Can't send message to window");
-    });
-
-    Ok(())
-}
-
 #[tauri::command(async)]
 pub fn copy_file<R: Runtime>(
     // app: AppHandle<R>,
     window: Window<R>,
     state: State<'_, CFSState>,
     from: String,
-    to: String,
+    mut to: String,
     event_id: usize,
-    copy_options: FileCopyOptions,
+    remove_target_on_finish: bool,
 ) -> Result<(), ErrorMessage> {
-    // let path_from = Path::new(&from);
     let path_to = Path::new(&to);
 
     let control_vars = Arc::new((Mutex::new(CopyActions::Pause), Condvar::new()));
@@ -215,20 +150,22 @@ pub fn copy_file<R: Runtime>(
         }
     });
 
-    if copy_options.overwrite && path_to.exists() {
-        let result: Result<(), std::io::Error>;
+    if path_to.exists() {
+        let result = super::utils::handle_duplicate_file(&to, &from, &window);
 
-        if path_to.is_file() {
-            result = std::fs::remove_file(path_to);
-        } else {
-            result = std::fs::remove_dir_all(path_to);
-        }
+        match result {
+            HandleDuplicateFileAnswer::New(new_to) => to = new_to,
+            HandleDuplicateFileAnswer::Error(error) => return Err(error),
+            HandleDuplicateFileAnswer::Merge => {
+                let _ = window.emit(&format!("copy-finished//{}", event_id), ());
 
-        if let Err(error) = result {
-            return Err(ErrorMessage::new_all(
-                "Can't overwrite file".into(),
-                error.to_string(),
-            ));
+                return Ok(());
+            }
+            HandleDuplicateFileAnswer::Skip => {
+                let _ = window.emit(&format!("copy-finished//{}", event_id), ());
+
+                return Ok(());
+            }
         }
     }
 
@@ -238,20 +175,31 @@ pub fn copy_file<R: Runtime>(
         .copy_speed_limit_bytes_per_second;
     let buffer_size = state.app_config.filesystem.copy_buffer_size_bytes;
 
-    state
-        .copy_processes
-        .lock()
-        .unwrap()
-        .insert(event_id, listener_id);
-
-    spawn_copy_thread(
-        window.clone(),
-        copy_speed as u64,
-        buffer_size,
-        from.clone(),
-        to.clone(),
+    let result = copy_file_with_progress(
+        &window,
+        &from,
+        &to,
         event_id,
+        buffer_size,
+        copy_speed as u64,
         control_vars_clone,
-        copy_options.remove_target_on_finish,
-    )
+        0,
+        None,
+    );
+
+    let _ = window.emit(&format!("copy-finished//{}", event_id), ());
+
+    window.unlisten(listener_id);
+
+    match result {
+        CopyResult::Stop => Ok(()),
+        CopyResult::Error(error) => Err(error),
+        CopyResult::Ok => {
+            if remove_target_on_finish {
+                crate::raw_fs::remove(from)
+            } else {
+                Ok(())
+            }
+        }
+    }
 }

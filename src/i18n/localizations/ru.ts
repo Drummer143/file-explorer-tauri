@@ -27,8 +27,10 @@ export default {
         clipboardTrackers: {
             copyingFileFromTo: "Копирование {{filename}} из {{from}} в {{to}}",
             movingFileFromTo: "Перемещение {{filename}} из {{from}} в {{to}}",
+            alreadyExists: "{{filename}} уже существует. Выберите действие:",
             cancel: "Отменить копирование",
             continue: "Продолжить копирование",
+            skipFile: "Пропустить",
             pause: "Приостановить копирование",
             deleteCopiedFile: "Удалить копированный файл?",
             deleteFile: "Удалить файл",

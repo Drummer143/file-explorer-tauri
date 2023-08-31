@@ -7,6 +7,7 @@ interface FileSelectionState {
     setSelectedItems: (items: string[] | ((prev: string[]) => string[])) => void;
     clearSelectedItems: () => void;
     setFirstSelected: (item: string) => void;
+    getSelectedItems: () => string[]
 }
 
 export const useFilesSelectionStore = create<FileSelectionState>((set, get) => ({
@@ -28,5 +29,7 @@ export const useFilesSelectionStore = create<FileSelectionState>((set, get) => (
 
     setFirstSelected: (item) => {
         set({ firstSelected: item, selectedItems: [item] });
-    }
+    },
+
+    getSelectedItems: () => get().selectedItems
 }));

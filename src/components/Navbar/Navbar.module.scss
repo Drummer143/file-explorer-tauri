@@ -1,4 +1,7 @@
 .wrapper {
+    position: relative;
+    z-index: 998;
+
     height: 40px;
 
     display: flex;

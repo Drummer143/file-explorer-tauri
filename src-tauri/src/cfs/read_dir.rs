@@ -5,7 +5,6 @@ use super::{
     types::{ErrorMessage, FileInfo}, get_file_subtype,
 };
 
-/// function checks given file and if its ok returns required info about it
 fn handle_file(file: Result<DirEntry, IOError>) -> Option<FileInfo> {
     if let Ok(file) = file {
         let file_name = file.file_name().to_str().unwrap().to_string();
@@ -14,7 +13,7 @@ fn handle_file(file: Result<DirEntry, IOError>) -> Option<FileInfo> {
         let is_hidden = (meta.file_attributes() & 0x2) > 0;
 
         if !is_hidden {
-            let file_type = get_file_type(&file.path());
+            let file_type = get_file_type(file.path().to_str().unwrap().to_string());
             let file_subtype = get_file_subtype(&file.path());
 
             return Some(FileInfo::new(

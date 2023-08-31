@@ -8,12 +8,6 @@ declare global {
         filename?: string;
     }
 
-    interface OpenExistFileModalDetail {
-        dirname: string;
-        filename: string;
-        filetype: "file" | "folder";
-    }
-
     interface StartTrackingClipboardActionDetail {
         eventId: number;
         filename: string;
@@ -25,7 +19,6 @@ declare global {
 
     interface CustomEventMap {
         openEditFileModal: CustomEvent<OpenEditFileModalDetail>;
-        openExistFileModal: CustomEvent<OpenExistFileModalDetail>;
         startTrackingClipboardAction: CustomEvent<StartTrackingClipboardActionDetail>;
         addNotification: CustomEvent<AppNotification>;
     }

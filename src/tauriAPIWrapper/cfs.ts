@@ -31,43 +31,26 @@ export const rename = (oldName: string, newName: string) => invoke<void>("plugin
 
 export const pathExists = (path: string) => invoke<boolean>("plugin:cfs|exists", { pathToFile: path });
 
-export const copyFile = (from: string, to: string, eventId: number, copyOptions: FileCopyOptions): Promise<void> =>
-    invoke("plugin:cfs|copy_file", {
+export const copyFile = (from: string, to: string, eventId: number, removeTargetOnFinish: boolean) =>
+    invoke<void>("plugin:cfs|copy_file", {
         from,
         to,
         eventId,
-        copyOptions: {
-            overwrite: copyOptions.overwrite,
-            // eslint-disable-next-line camelcase
-            skip_exist: copyOptions.skipExist,
-            // eslint-disable-next-line camelcase
-            remove_target_on_finish: copyOptions.removeTargetOnFinish || false
-        }
+        removeTargetOnFinish
     });
 
 export const copyFolder = (
     from: string,
     to: string,
     eventId: number,
-    copyOptions: DirectoryCopyOptions
+    removeTargetOnFinish: boolean
 ): Promise<void> =>
     invoke("plugin:cfs|copy_directory", {
         from,
         to,
         eventId,
-        copyOptions: {
-            overwrite: copyOptions.overwrite,
-            // eslint-disable-next-line camelcase
-            skip_exist: copyOptions.skipExist,
-            // eslint-disable-next-line camelcase
-            remove_target_on_finish: copyOptions.removeTargetOnFinish || false,
-            // eslint-disable-next-line camelcase
-            duplicate_file_action: copyOptions.duplicateFileAction
-        }
+        removeTargetOnFinish
     });
-
-export const removeCopyProcessFromState = (id: number): Promise<void> =>
-    invoke("plugin:cfs|remove_copy_process_from_state", { id });
 
 export const printCFSState = (): Promise<void> => invoke("plugin:cfs|print_state");
 
@@ -76,3 +59,6 @@ export const addIndexToFilename = (pathToFile: string) =>
 
 export const createFile = (path: string, filetype: Exclude<FileTypes, "disk">) =>
     invoke<void>("plugin:cfs|create_file", { path, filetype });
+
+export const getFileType = (pathToFile: string) =>
+    invoke<Exclude<FileTypes, "disk">>("plugin:cfs|get_file_type", { pathToFile });

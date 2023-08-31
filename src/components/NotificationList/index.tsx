@@ -4,7 +4,6 @@ import { v4 } from "uuid";
 import AppNotificationComponent from "./Notification";
 
 import styles from "./NotificationList.module.scss";
-import { addNotificationFromError } from "@utils";
 
 const NotificationList: React.FC = () => {
     const [notifications, setNotifications] = useState<(AppNotification & { index: string })[]>([]);
@@ -33,10 +32,6 @@ const NotificationList: React.FC = () => {
             document.removeEventListener("addNotification", handleAddNotification);
         };
     }, [notifications]);
-
-    useEffect(() => {
-        addNotificationFromError({ message: "error", reason: "test", error: "reason: \"test\"" });
-    }, []);
 
     return (
         <div

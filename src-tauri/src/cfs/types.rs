@@ -21,6 +21,7 @@ pub enum FileTypes {
     Disk,
     File,
     Folder,
+    Unknown
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, Debug)]
