@@ -107,14 +107,12 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
 
             try {
                 parentDirectory = await dirname(currentPath);
-            } catch (error) {
-                const pathWithoutDiskName = currentPath.split(":").at(1);
 
-                if (!pathWithoutDiskName || pathWithoutDiskName === "\\") {
-                    parentDirectory = "";
-                } else {
-                    throw new Error("Can't get parent directory");
+                if (parentDirectory.endsWith(sep)) {
+                    parentDirectory = parentDirectory.slice(0, -1);
                 }
+            } catch (error) {
+                return console.error(error);
             }
 
             const updatedHistory = history.slice(0, currentPathIndex + 1).concat(parentDirectory);

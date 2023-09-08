@@ -8,3 +8,7 @@
     - Partially error notification
     - Tracking copying/moving progress
     - Localization for all existing interface(ru, en)
+## 0.1.1
+    - feat: Multiple files copying
+    - feat: Multiple files deleting
+    - fix: fixed a bug where the goToParent function in ExplorerHistory store leaves a trailing slash in currentPath
