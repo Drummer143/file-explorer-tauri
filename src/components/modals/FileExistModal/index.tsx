@@ -6,6 +6,7 @@ import { basename, dirname, sep } from "@tauri-apps/api/path";
 import { UnlistenFn, Event as TauriEvent } from "@tauri-apps/api/event";
 
 import { getFileType } from "@tauriAPI";
+import { addNotificationFromError } from "@utils";
 
 import styles from "./FileExistModal.module.scss";
 
@@ -33,6 +34,10 @@ const FileExistModal: React.FC = () => {
             const dirnameTo = await dirname(e.payload.to);
             const filename = await basename(e.payload.from);
             const filetype = await getFileType(e.payload.from);
+
+            if (filetype === "unknown") {
+                return addNotificationFromError("Can't handle unknown file");
+            }
 
             setFileInfo({
                 dirname: dirnameTo,

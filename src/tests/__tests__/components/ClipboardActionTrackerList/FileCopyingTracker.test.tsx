@@ -18,7 +18,6 @@ describe("FileCopyingTracker test", () => {
                 from={__dirname}
                 to={__dirname}
                 onRemove={vi.fn()}
-                type="file"
             />
         );
 
@@ -40,7 +39,6 @@ describe("FileCopyingTracker test", () => {
                 from={__dirname}
                 to={__dirname}
                 onRemove={spyOnRemove}
-                type="file"
             />
         );
 
