@@ -32,23 +32,23 @@ pub struct ErrorMessage {
 }
 
 impl ErrorMessage {
-    pub fn new_all(message: String, reason: String) -> Self {
+    pub fn new_all(message: &str, reason: &str) -> Self {
         Self {
-            message: Some(message),
-            error: Some(reason),
+            message: Some(message.into()),
+            error: Some(reason.into()),
         }
     }
 
-    pub fn new_reason(reason: String) -> Self {
+    pub fn new_reason(reason: &str) -> Self {
         Self {
             message: None,
-            error: Some(reason),
+            error: Some(reason.into()),
         }
     }
 
-    pub fn new_message(message: String) -> Self {
+    pub fn new_message(message: &str) -> Self {
         Self {
-            message: Some(message),
+            message: Some(message.into()),
             error: None,
         }
     }

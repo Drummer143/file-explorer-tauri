@@ -2,20 +2,20 @@ import { sep } from "@tauri-apps/api/path";
 
 import { dispatchCustomEvent } from "./dom";
 import { addNotificationFromError } from "./helpers";
-import { copyFile, copyFolder, getFileType } from "@tauriAPI";
+import { copyFile, copyFolder, copyMultipleFiles, getFileType } from "@tauriAPI";
 
 export const addFileInClipboard = (info: CopiedFileInfo) => {
     document.documentElement.dataset.copiedFileInfo = JSON.stringify(info);
 
-    document.querySelector<HTMLElement>(".cut-file")?.classList.remove("cut-file");
+    document.querySelectorAll<HTMLElement>(".cut-file").forEach(element => element.classList.remove("cut-file"));
 
     if (info.action === "cut") {
         if (Array.isArray(info.files)) {
             info.files.forEach(f => {
-                document.querySelector<HTMLElement>(`[data-filename="${f}"]`)?.classList.add("cut-file");
+                document.querySelector<HTMLElement>(`[data-filename="${f.filename}"]`)?.classList.add("cut-file");
             });
         } else {
-            document.querySelector<HTMLElement>(`[data-filename="${info.files}"]`)?.classList.add("cut-file");
+            document.querySelector<HTMLElement>(`[data-filename="${info.files.filename}"]`)?.classList.add("cut-file");
         }
     }
 };
@@ -25,7 +25,15 @@ export const clearClipboard = () => {
     document.querySelector<HTMLElement>(".cut-file")?.classList.remove("cut-file");
 };
 
-export const prepareDataBeforeCopy = (to: string): false | CopiedFileInfo & { paths: PathsFromTo | PathsFromTo[] } => {
+export const prepareDataBeforeCopy = async (to: string): Promise<false | Omit<CopiedFileInfo, "files"> & ({
+    copyType: "multiple";
+    paths: PathsFromTo[];
+    files: PathsParts[];
+} | {
+    copyType: "file" | "folder";
+    paths: PathsFromTo;
+    files: PathsParts;
+})> => {
     const info = document.documentElement.dataset.copiedFileInfo;
 
     if (!info) {
@@ -36,85 +44,115 @@ export const prepareDataBeforeCopy = (to: string): false | CopiedFileInfo & { pa
         const copiedFileInfo: CopiedFileInfo = JSON.parse(info);
         const mergePathParts = (dirname: string, filename: string) => dirname + sep + filename;
         const isNestedPath = (parentPath: string, nestedPath: string) => parentPath.includes(nestedPath);
-
-        let paths: PathsFromTo | PathsFromTo[];
+        // const copyType: StartTrackingClipboardActionDetail["type"];
 
         if (Array.isArray(copiedFileInfo.files)) {
-            const p: PathsFromTo[] = [];
+            const paths: PathsFromTo[] = [];
 
             copiedFileInfo.files.forEach(from => {
                 const pathFrom = mergePathParts(from.dirname, from.filename);
                 const pathTo = mergePathParts(to, from.filename);
 
-                if (isNestedPath(pathTo, pathFrom)) {
-                    p.push({ from: pathFrom, to: pathTo });
+                if (!isNestedPath(pathTo, pathFrom)) {
+                    paths.push({ from: pathFrom, to: pathTo });
                 }
             });
 
-            if (p.length) {
-                paths = p;
-            } else {
+            if (!paths.length) {
+                console.error("no file to copy");
                 return false;
             }
+
+            return {
+                copyType: "multiple",
+                action: copiedFileInfo.action,
+                files: copiedFileInfo.files,
+                paths
+            };
         } else {
             // if user is pasting file in the same folder where he copied file
             const pathFrom = mergePathParts(copiedFileInfo.files.dirname, copiedFileInfo.files.filename);
             const pathTo = mergePathParts(to, copiedFileInfo.files.filename);
-
+            
             if (isNestedPath(pathTo, pathFrom)) {
                 console.error("copying in nested folder");
                 return false;
             }
 
-            paths = { from: pathFrom, to: pathTo };
-        }
+            const filetype = await getFileType(pathFrom);
 
-        return {
-            ...copiedFileInfo,
-            paths
-        };
-    } catch (_) {
+            if (filetype === "unknown") {
+                console.error("unknown file type", filetype);
+                return false;
+            }
+
+            const paths: PathsFromTo = { from: pathFrom, to: pathTo };
+
+            return {
+                copyType: filetype,
+                paths,
+                action: copiedFileInfo.action,
+                files: copiedFileInfo.files
+            };
+        }
+    } catch (error) {
+        console.error("can't parse clipboard");
         return false;
     }
 };
 
 export const pasteFile = async (to: string) => {
-    const isOk = prepareDataBeforeCopy(to);
+    const data = await prepareDataBeforeCopy(to);
 
-    if (!isOk) {
-        return;
+    if (!data) {
+        return console.error("corrupted data in clipboard");
     }
 
-    const { action, paths, files } = isOk;
-    // const filetype = await getFileType(pathToSourceFile);
+    // if (Array.isArray(paths) || Array.isArray(files)) {
+    //     return console.error("unemplimented");
+    // }
 
-    if (Array.isArray(paths) || Array.isArray(files)) {
-        return console.error("unemplimented");
-    }
+    const eventId = Math.floor(Math.random() * 1000);
 
-    const id = Math.floor(Math.random() * 1000);
-    const filetype = await getFileType(paths.from);
+    if (data.copyType === "multiple") {
+        dispatchCustomEvent("startTrackingClipboardAction", {
+            type: "multiple",
+            action: data.action,
+            paths: data.paths,
+            eventId
+        });
 
-    dispatchCustomEvent("startTrackingClipboardAction", {
-        eventId: id,
-        from: paths.from,
-        to: paths.to,
-        filename: files.filename,
-        action,
-        type: filetype
-    });
+        try {
+            await copyMultipleFiles(data.paths, eventId, data.action === "cut");
 
-    try {
-        if (filetype === "file") {
-            copyFile(paths.from, paths.to, id, action === "cut");
-        } else {
-            copyFolder(paths.from, paths.to, id, action === "cut");
+            if (data.action === "cut") {
+                clearClipboard();
+            }
+        } catch (error) {
+            addNotificationFromError(error);
         }
+    } else {
+        dispatchCustomEvent("startTrackingClipboardAction", {
+            eventId,
+            from: data.paths.from,
+            to: data.paths.to,
+            filename: data.files.filename,
+            action: data.action,
+            type: data.copyType
+        });
 
-        if (action === "cut") {
-            clearClipboard();
+        try {
+            if (data.copyType === "file") {
+                await copyFile(data.paths.from, data.paths.to, eventId, data.action === "cut");
+            } else {
+                await copyFolder(data.paths.from, data.paths.to, eventId, data.action === "cut");
+            }
+
+            if (data.action === "cut") {
+                clearClipboard();
+            }
+        } catch (error) {
+            addNotificationFromError(error);
         }
-    } catch (error) {
-        addNotificationFromError(error);
     }
 };

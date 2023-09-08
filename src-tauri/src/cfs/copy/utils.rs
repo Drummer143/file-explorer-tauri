@@ -1,7 +1,9 @@
 use std::sync::{Arc, Condvar, Mutex};
 use tauri::Runtime;
 
-#[derive(serde::Deserialize, Clone, Debug, Default, PartialEq)]
+use crate::cfs::copy::copy_multiple_files::PathFromTo;
+
+#[derive(serde::Deserialize, Clone, Copy, Debug, Default, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub enum DuplicateFileAction {
     Overwrite,
@@ -12,31 +14,34 @@ pub enum DuplicateFileAction {
     Ask,
 }
 
-pub(super) enum HandleDuplicateFileAnswer {
-    Merge,
-    New(String),
-    Skip,
-    Error(ErrorMessage)
+#[derive(serde::Deserialize, Debug, Clone, Copy)]
+#[serde(rename_all = "camelCase")]
+pub(super) struct DuplicateFileHandleEventPayload {
+    pub(super) action: DuplicateFileAction,
+    pub(super) do_for_all: bool,
 }
 
-use crate::cfs::{
-    add_index_to_filename, copy::copy_multiple_files::PathFromTo, types::ErrorMessage,
-};
-
-pub(super) fn handle_duplicate_file<R: Runtime>(
+pub(super) fn emit_duplicate_file<R: Runtime>(
     to: &str,
     from: &str,
     window: &tauri::Window<R>,
-) -> HandleDuplicateFileAnswer {
-    let _ = window.emit("file-exists", PathFromTo::new(&from, &to));
+    multiple: bool,
+) -> (DuplicateFileAction, bool) {
+    let _ = window.emit("file-exists", (PathFromTo::new(&from, &to), multiple));
 
-    let control_vars = Arc::new((Mutex::new(DuplicateFileAction::Ask), Condvar::new()));
+    let control_vars = Arc::new((
+        Mutex::new(DuplicateFileHandleEventPayload {
+            action: DuplicateFileAction::Ask,
+            do_for_all: false,
+        }),
+        Condvar::new(),
+    ));
     let control_vars_clone = control_vars.clone();
 
     window.once("file-exists-answer", move |e| {
         let payload_str = e.payload().unwrap();
 
-        let payload = serde_json::from_str::<DuplicateFileAction>(payload_str);
+        let payload = serde_json::from_str::<DuplicateFileHandleEventPayload>(payload_str);
 
         let &(ref action, ref cvar) = &*control_vars_clone;
         let mut action = action.lock().unwrap();
@@ -46,7 +51,7 @@ pub(super) fn handle_duplicate_file<R: Runtime>(
         } else {
             println!("can't parse payload: {:#?}", payload_str);
 
-            *action = DuplicateFileAction::Skip;
+            action.action = DuplicateFileAction::Skip;
         }
 
         cvar.notify_one();
@@ -55,29 +60,9 @@ pub(super) fn handle_duplicate_file<R: Runtime>(
     let &(ref action, ref cvar) = &*control_vars;
     let mut action = action.lock().unwrap();
 
-    while *action == DuplicateFileAction::Ask {
+    while action.action == DuplicateFileAction::Ask {
         action = cvar.wait(action).unwrap();
     }
 
-    match *action {
-        DuplicateFileAction::Overwrite => {
-            let result = crate::raw_fs::remove(to.into());
-
-            match result {
-                Err(error) => return HandleDuplicateFileAnswer::Error(error),
-                Ok(_) => return HandleDuplicateFileAnswer::New(to.into()),
-            }
-        }
-        DuplicateFileAction::SaveBoth => {
-            let result = add_index_to_filename(to.into());
-
-            match result {
-                Err(error) => return HandleDuplicateFileAnswer::Error(error),
-                Ok(to) => return HandleDuplicateFileAnswer::New(to),
-            }
-        }
-        DuplicateFileAction::Ask => return HandleDuplicateFileAnswer::Skip,
-        DuplicateFileAction::Skip => return HandleDuplicateFileAnswer::Skip,
-        DuplicateFileAction::Merge => return HandleDuplicateFileAnswer::Merge
-    }
+    (action.action, action.do_for_all)
 }

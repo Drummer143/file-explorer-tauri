@@ -1,25 +1,25 @@
-use std::{path::Path, fs};
+use std::{fs, path::Path};
 
-use super::types::ErrorMessage;
-
-pub fn get_file_size(path: &Path) -> Result<u64, ErrorMessage> {
+pub fn get_file_size(path: &str) -> u64 {
     let metadata = fs::metadata(path);
 
     if metadata.is_err() {
-        return Ok(0);
+        return 0;
     }
 
     let metadata = metadata.unwrap();
 
+    let path = Path::new(path);
+
     if metadata.is_file() {
-        Ok(metadata.len())
+        metadata.len()
     } else if metadata.is_dir() {
         let mut size: u64 = 0;
 
         let dir_entries = fs::read_dir(path);
 
         if dir_entries.is_err() {
-            return Ok(0);
+            return 0;
         }
 
         let dir_entries = dir_entries.unwrap();
@@ -35,10 +35,10 @@ pub fn get_file_size(path: &Path) -> Result<u64, ErrorMessage> {
             let file_name = entry.file_name();
             let new_path = path.join(&file_name);
 
-            size += get_file_size(&new_path)?;
+            size += get_file_size(new_path.to_str().unwrap());
         }
-        Ok(size)
+        size
     } else {
-        Ok(0)
+        0
     }
 }

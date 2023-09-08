@@ -8,14 +8,18 @@ declare global {
         filename?: string;
     }
 
-    interface StartTrackingClipboardActionDetail {
+    type StartTrackingClipboardActionDetail = {
         eventId: number;
-        filename: string;
-        from: string;
-        to: string;
         action: "copy" | "cut";
+    } & ({
         type: "file" | "folder";
-    }
+        to: string;
+        from: string;
+        filename: string;
+    } | {
+        type: "multiple"
+        paths: PathsFromTo[]
+    })
 
     interface CustomEventMap {
         openEditFileModal: CustomEvent<OpenEditFileModalDetail>;
@@ -46,4 +50,4 @@ declare global {
     }
 }
 
-export {};
+export { };

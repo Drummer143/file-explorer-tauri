@@ -11,20 +11,24 @@ type SelectionAreaProps = {
 }
 
 const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelector }) => {
-    const { setSelectedItems } = useFilesSelectionStore(state => state);
+    const { setSelectedItems, getSelectedItems } = useFilesSelectionStore(state => state);
 
     const [hidden, setHidden] = useState(false);
 
     const startPos = useRef({ x: 0, y: 0 });
     const currentPos = useRef({ x: 0, y: 0 });
     const isMoving = useRef(false);
+    const prevSelectedItems = useRef(getSelectedItems());
+    const isCtrlKeyPressed = useRef(false);
 
     const handleMoveArea = useCallback((e: MouseEvent) => {
         if (!isMoving.current) {
             rootElement?.style.setProperty("pointer-events", "none");
             setHidden(false);
 
+            prevSelectedItems.current = getSelectedItems();
             isMoving.current = true;
+            isCtrlKeyPressed.current = e.ctrlKey;
         }
 
         currentPos.current = { y: e.clientY, x: e.clientX };
@@ -35,7 +39,7 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
             return;
         }
 
-        const selectedIds: string[] = [];
+        const selectedIds = isCtrlKeyPressed.current ? new Set(prevSelectedItems.current) : new Set<string>();
 
         const maxX = Math.max(startPos.current.x, currentPos.current.x);
         const minX = Math.min(startPos.current.x, currentPos.current.x);
@@ -45,29 +49,35 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
         Array.from(targets).forEach(target => {
             const rect = target.getBoundingClientRect();
 
+            const filename = (target as HTMLElement)?.dataset.filename;
+
+            if (!filename) {
+                return;
+            }
+
             const isSelected = !(rect.right < minX ||
                 rect.left > maxX ||
                 rect.bottom < minY ||
                 rect.top > maxY);
 
-            const filename = (target as HTMLElement)?.dataset.filename;
+            if (isSelected) {
+                if (selectedIds.has(filename)) {
+                    prevSelectedItems.current.delete(filename);
+                }
 
-            if (isSelected && filename) {
-                selectedIds.push(filename);
+                selectedIds.add(filename);
             }
         });
 
         setSelectedItems(selectedIds);
-    }, [rootElement, setSelectedItems, targetSelector]);
-
-    useEffect(() => {
-        console.log("rerender");
-    }, [setSelectedItems]);
+    }, [getSelectedItems, rootElement, setSelectedItems, targetSelector]);
 
     const handleEndSelecting = useCallback(() => {
         document.removeEventListener("mousemove", handleMoveArea);
 
         isMoving.current = false;
+        isCtrlKeyPressed.current = false;
+        prevSelectedItems.current = new Set();
 
         rootElement?.style.removeProperty("pointer-events");
 

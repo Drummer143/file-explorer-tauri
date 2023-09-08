@@ -9,11 +9,12 @@ use std::{
 use tauri::{Runtime, State, Window};
 
 use crate::cfs::{
+    add_index_to_filename,
     types::{CopyActions, CopyCutProgress, CopyResult, ErrorMessage},
     CFSState,
 };
 
-use super::utils::HandleDuplicateFileAnswer;
+use super::utils::DuplicateFileAction;
 
 pub fn copy_file_with_progress<R: tauri::Runtime>(
     window: &tauri::Window<R>,
@@ -30,8 +31,8 @@ pub fn copy_file_with_progress<R: tauri::Runtime>(
 
     if let Err(error) = file_from {
         return CopyResult::Error(ErrorMessage::new_all(
-            "Can't open target file".into(),
-            error.to_string(),
+            "Can't open target file",
+            &error.to_string(),
         ));
     }
 
@@ -40,8 +41,8 @@ pub fn copy_file_with_progress<R: tauri::Runtime>(
 
     if let Err(error) = file_to {
         return CopyResult::Error(ErrorMessage::new_all(
-            "Can't create file file".into(),
-            error.to_string(),
+            "Can't create file file",
+            &error.to_string(),
         ));
     }
 
@@ -85,8 +86,8 @@ pub fn copy_file_with_progress<R: tauri::Runtime>(
 
         if let Err(error) = bytes_read {
             break CopyResult::Error(ErrorMessage::new_all(
-                "error on reading source file".into(),
-                error.to_string(),
+                "error on reading source file",
+                &error.to_string(),
             ));
         }
 
@@ -101,8 +102,8 @@ pub fn copy_file_with_progress<R: tauri::Runtime>(
 
         if let Err(error) = result {
             break CopyResult::Error(ErrorMessage::new_all(
-                "error on writing on new file file".into(),
-                error.to_string(),
+                "error on writing on new file file",
+                &error.to_string(),
             ));
         }
 
@@ -128,6 +129,7 @@ pub fn copy_file<R: Runtime>(
     mut to: String,
     event_id: usize,
     remove_target_on_finish: bool,
+    duplicate_file_action: DuplicateFileAction,
 ) -> Result<(), ErrorMessage> {
     let path_to = Path::new(&to);
 
@@ -150,18 +152,30 @@ pub fn copy_file<R: Runtime>(
         }
     });
 
-    if path_to.exists() {
-        let result = super::utils::handle_duplicate_file(&to, &from, &window);
+    if duplicate_file_action == DuplicateFileAction::Ask && path_to.exists() {
+        let (duplicate_file_action, _) =
+            super::utils::emit_duplicate_file(&to, &from, &window, false);
 
-        match result {
-            HandleDuplicateFileAnswer::New(new_to) => to = new_to,
-            HandleDuplicateFileAnswer::Error(error) => return Err(error),
-            HandleDuplicateFileAnswer::Merge => {
-                let _ = window.emit(&format!("copy-finished//{}", event_id), ());
+        match duplicate_file_action {
+            DuplicateFileAction::Ask => {}
+            DuplicateFileAction::Merge => {}
+            DuplicateFileAction::SaveBoth => {
+                let result = add_index_to_filename(&to);
 
-                return Ok(());
+                match result {
+                    Ok(new_to) => to = new_to,
+                    Err(error) => return Err(error),
+                }
             }
-            HandleDuplicateFileAnswer::Skip => {
+            DuplicateFileAction::Overwrite => {
+                if let Err(error) = std::fs::remove_dir_all(&to) {
+                    return Err(ErrorMessage::new_all(
+                        "Can't remove root directory",
+                        &error.to_string(),
+                    ));
+                }
+            }
+            DuplicateFileAction::Skip => {
                 let _ = window.emit(&format!("copy-finished//{}", event_id), ());
 
                 return Ok(());
@@ -196,7 +210,7 @@ pub fn copy_file<R: Runtime>(
         CopyResult::Error(error) => Err(error),
         CopyResult::Ok => {
             if remove_target_on_finish {
-                crate::raw_fs::remove(from)
+                crate::raw_fs::remove(&from)
             } else {
                 Ok(())
             }

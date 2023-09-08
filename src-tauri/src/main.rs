@@ -9,6 +9,7 @@ mod raw_fs;
 use std::{path::Path, process::Command};
 
 use cfs::types::ErrorMessage;
+use tauri::{Runtime, Window};
 
 #[tauri::command(async)]
 fn open_file(path_to_file: String) -> Result<(), ErrorMessage> {
@@ -22,8 +23,8 @@ fn open_file(path_to_file: String) -> Result<(), ErrorMessage> {
 
     if let Err(error) = result {
         return Err(ErrorMessage::new_all(
-            "Can't run command".into(),
-            error.to_string(),
+            "Can't run command",
+            &error.to_string(),
         ));
     }
 
@@ -34,10 +35,7 @@ fn open_file(path_to_file: String) -> Result<(), ErrorMessage> {
     } else {
         let error = String::from_utf8_lossy(&output.stderr);
 
-        Err(ErrorMessage::new_all(
-            "error in result".into(),
-            error.into(),
-        ))
+        Err(ErrorMessage::new_all("error in result", &error))
     }
 }
 
@@ -55,8 +53,8 @@ fn open_in_explorer(path_to_file: String) -> Result<(), ErrorMessage> {
 
     if let Err(error) = result {
         return Err(ErrorMessage::new_all(
-            "Can't run command".into(),
-            error.to_string(),
+            "Can't run command",
+            &error.to_string(),
         ));
     }
 
@@ -67,31 +65,13 @@ fn open_in_explorer(path_to_file: String) -> Result<(), ErrorMessage> {
     } else {
         let error = String::from_utf8_lossy(&output.stderr);
 
-        Err(ErrorMessage::new_all(
-            "error in result".into(),
-            error.into(),
-        ))
+        Err(ErrorMessage::new_all("error in result", &error))
     }
 }
 
-// #[tauri::command(async)]
-// fn sw<R: Runtime>(app_handle: AppHandle<R>) -> Result<(), ErrorMessage> {
-//     let result = tauri::WindowBuilder::new(
-//         &app_handle,
-//         "file-exists",
-//         tauri::WindowUrl::App("file-exists.html".into()),
-//     )
-//     .build();
-
-//     if let Err(error) = result {
-//         Err(ErrorMessage::new_all(
-//             "Can't open second window".into(),
-//             error.to_string(),
-//         ))
-//     } else {
-//         Ok(())
-//     }
-// }
+fn print_in_js<R: Runtime>(window: &Window<R>, message: &str) -> Result<(), tauri::Error> {
+    window.eval(&format!("console.log({})", message))
+}
 
 fn main() {
     let ctx = tauri::generate_context!();

@@ -3,8 +3,12 @@ use std::{fs, path::Path};
 use crate::cfs::types::ErrorMessage;
 
 #[tauri::command(async)]
-pub fn remove(path: String) -> Result<(), ErrorMessage> {
+pub fn remove(path: &str) -> Result<(), ErrorMessage> {
     let path = Path::new(&path);
+
+    if !path.exists() {
+        return Err(ErrorMessage::new_message("Path does not exist"));
+    }
 
     let mut error: Option<std::io::Error> = None;
 
@@ -19,7 +23,10 @@ pub fn remove(path: String) -> Result<(), ErrorMessage> {
     }
 
     if let Some(error) = error {
-        return Err(ErrorMessage::new_all("Can't remove file".into(), error.to_string()))
+        return Err(ErrorMessage::new_all(
+            "Can't remove file",
+            &error.to_string(),
+        ));
     }
 
     Ok(())

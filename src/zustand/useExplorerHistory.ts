@@ -20,6 +20,7 @@ interface ExplorerHistoryState {
     goForward: () => boolean;
     clear: () => void;
     goToParent: () => void;
+    getCurrentPath: () => string;
 }
 
 export const useExplorerHistory = create<ExplorerHistoryState>()(
@@ -137,7 +138,9 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
                 currentPathIndex: 0,
                 history: [""]
             });
-        }
+        },
+
+        getCurrentPath: () => get().currentPath
     }) /* , {
         name: "store:history",
         version: 1

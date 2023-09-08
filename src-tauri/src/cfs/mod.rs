@@ -3,8 +3,7 @@ pub(super) mod copy;
 pub(super) mod get_disks;
 pub(super) mod get_file_size;
 pub(super) mod read_dir;
-pub(super) mod remove_directory;
-pub(super) mod remove_file;
+pub(super) mod remove;
 pub(super) mod rename;
 pub(super) mod types;
 pub(super) mod watch_dir;
@@ -24,9 +23,12 @@ use copy::{
 };
 use get_disks::*;
 use read_dir::*;
-use remove_directory::*;
-use remove_file::*;
 use rename::*;
+use remove::{
+    remove_directory::{__cmd__remove_directory,remove_directory},
+    remove_file::{__cmd__remove_file,remove_file},
+    remove_multiple::{__cmd__remove_multiple,remove_multiple}
+};
 use types::*;
 use watch_dir::*;
 
@@ -51,8 +53,8 @@ const DISPLAYABLE_IMAGE_EXTENSIONS: [&str; 13] = [
 const APP_CONFIG_NAME: &str = "app_config.json";
 
 #[tauri::command(async)]
-pub fn get_file_type(path_to_file: String) -> FileTypes {
-    let path_to_file = Path::new(&path_to_file);
+pub fn get_file_type(path_to_file: &str) -> FileTypes {
+    let path_to_file = Path::new(path_to_file);
 
     if path_to_file.is_dir() {
         FileTypes::Folder
@@ -99,7 +101,7 @@ fn remove<R: Runtime>(
 
         let message = format!("{} is not removable", filename);
 
-        Err(ErrorMessage::new_message(message))
+        Err(ErrorMessage::new_message(&message))
     }
 }
 
@@ -112,19 +114,19 @@ fn print_state(state: State<'_, CFSState>) {
 ///
 /// Returns path to file.
 #[tauri::command(async)]
-fn add_index_to_filename(path_to_file: String) -> Result<String, ErrorMessage> {
-    let path = Path::new(&path_to_file);
+fn add_index_to_filename(path_to_file: &str) -> Result<String, ErrorMessage> {
+    let path = Path::new(path_to_file);
     let mut index = 0;
     let filename = path.file_stem().unwrap().to_str();
 
     if filename.is_none() {
-        return Err(ErrorMessage::new_message("Incorrect path".into()));
+        return Err(ErrorMessage::new_message("Incorrect path"));
     }
 
     let dirname = path.parent();
 
     if dirname.is_none() {
-        return Err(ErrorMessage::new_message("Incorrect path".into()));
+        return Err(ErrorMessage::new_message("Incorrect path"));
     }
 
     let dirname = dirname.unwrap();
@@ -157,15 +159,15 @@ pub fn create_file(path: String, filetype: FileTypes) -> Result<(), ErrorMessage
     use std::fs::{create_dir_all, File};
 
     if Path::new(&path).exists() {
-        return Err(ErrorMessage::new_message("File is already exists".into()));
+        return Err(ErrorMessage::new_message("File is already exists"));
     }
 
     match filetype {
         FileTypes::File => {
             if let Err(error) = File::create(path) {
                 Err(ErrorMessage::new_all(
-                    "Can't create file".into(),
-                    error.to_string(),
+                    "Can't create file",
+                    &error.to_string(),
                 ))
             } else {
                 Ok(())
@@ -174,25 +176,20 @@ pub fn create_file(path: String, filetype: FileTypes) -> Result<(), ErrorMessage
         FileTypes::Folder => {
             if let Err(error) = create_dir_all(path) {
                 Err(ErrorMessage::new_all(
-                    "Can't create folder".into(),
-                    error.to_string(),
+                    "Can't create folder",
+                    &error.to_string(),
                 ))
             } else {
                 Ok(())
             }
         }
-        _ => {
-            println!("{:#?}", filetype);
-
-            todo!()
-        }
+        FileTypes::Disk => Ok(()),
+        FileTypes::Unknown => Ok(())
     }
 }
 
 pub fn init<R: Runtime>(config: &Config) -> TauriPlugin<R> {
     let (js_init_script, app_config) = app_config::init(config, APP_CONFIG_NAME);
-
-    println!("{}", js_init_script);
 
     Builder::new("cfs")
         .invoke_handler(tauri::generate_handler![
@@ -209,6 +206,7 @@ pub fn init<R: Runtime>(config: &Config) -> TauriPlugin<R> {
             read_dir,
             remove_directory,
             remove_file,
+            remove_multiple,
             rename,
             unwatch,
             watch_dir,

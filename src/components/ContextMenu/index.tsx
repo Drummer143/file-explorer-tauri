@@ -5,16 +5,14 @@ import ExplorerContextMenu from "./ExplorerContextMenu";
 
 import styles from "./ContextMenu.module.scss";
 
-type ContextMenuInfo =
-    | {
-          CTXComponent: React.ReactNode;
-          opacity: 0 | 1;
-          coordinates: {
-              x: number;
-              y: number;
-          };
-      }
-    | undefined;
+type ContextMenuInfo = {
+    CTXComponent: React.ReactNode;
+    opacity: 0 | 1;
+    coordinates: {
+        x: number;
+        y: number;
+    };
+} | undefined;
 
 const ContextMenu: React.FC = () => {
     const [contextMenuInfo, setContextMenuInfo] = useState<ContextMenuInfo>(undefined);
@@ -141,13 +139,13 @@ const ContextMenu: React.FC = () => {
             style={
                 contextMenuInfo
                     ? {
-                          top: contextMenuInfo.coordinates.y + "px",
-                          left: contextMenuInfo.coordinates.x + "px",
-                          opacity: !contextMenuInfo.opacity ? 0 : undefined
-                      }
+                        top: contextMenuInfo.coordinates.y + "px",
+                        left: contextMenuInfo.coordinates.x + "px",
+                        opacity: !contextMenuInfo.opacity ? 0 : undefined
+                    }
                     : {
-                          display: "none"
-                      }
+                        display: "none"
+                    }
             }
         >
             {contextMenuInfo?.CTXComponent}

@@ -1,8 +1,8 @@
 use std::{fs::DirEntry, io::Error as IOError, os::windows::prelude::MetadataExt};
 
 use super::{
-    get_file_type,
-    types::{ErrorMessage, FileInfo}, get_file_subtype,
+    get_file_subtype, get_file_type,
+    types::{ErrorMessage, FileInfo},
 };
 
 fn handle_file(file: Result<DirEntry, IOError>) -> Option<FileInfo> {
@@ -13,7 +13,7 @@ fn handle_file(file: Result<DirEntry, IOError>) -> Option<FileInfo> {
         let is_hidden = (meta.file_attributes() & 0x2) > 0;
 
         if !is_hidden {
-            let file_type = get_file_type(file.path().to_str().unwrap().to_string());
+            let file_type = get_file_type(file.path().to_str().unwrap());
             let file_subtype = get_file_subtype(&file.path());
 
             return Some(FileInfo::new(
@@ -21,7 +21,7 @@ fn handle_file(file: Result<DirEntry, IOError>) -> Option<FileInfo> {
                 file_type.into(),
                 meta.file_size() as usize,
                 meta.permissions().readonly(),
-                file_subtype
+                file_subtype,
             ));
         }
     }
@@ -34,15 +34,15 @@ pub fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, ErrorMessage> {
     let path_to_dir = std::path::Path::new(&path_to_dir);
 
     if !path_to_dir.exists() {
-        return Err(ErrorMessage::new_message("Path don't exist".into()));
+        return Err(ErrorMessage::new_message("Path don't exist"));
     }
 
     let files = path_to_dir.read_dir();
 
     if let Err(error) = files {
         return Err(ErrorMessage::new_all(
-            "Can't get information about files in directory.".into(),
-            error.to_string(),
+            "Can't get information about files in directory.",
+            &error.to_string(),
         ));
     }
 

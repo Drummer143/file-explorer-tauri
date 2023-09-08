@@ -9,8 +9,8 @@ import styles from "./FolderCopyingTracker.module.scss";
 
 type CopyStatus = "preparing" | "waiting-action" | "copying" | "paused";
 
-type FolderCopyingTrackerProps = StartTrackingClipboardActionDetail & {
-    onRemove: (eventId: number) => void;
+type FolderCopyingTrackerProps = Omit<StartTrackingClipboardActionDetail & { type: "folder" }, "type"> & {
+    onRemove?: (eventId: number) => void;
 };
 
 const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
@@ -59,7 +59,9 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
         });
 
         const finished = await appWindow.once(`copy-finished//${eventId}`, () => {
-            onRemove(eventId);
+            if (onRemove) {
+                onRemove(eventId);
+            }
 
             untrack.current?.progress();
             untrack.current?.preparing();
@@ -77,7 +79,9 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
 
         appWindow.emit(`copy-change-state//${eventId}`, "exit");
 
-        onRemove(eventId);
+        if (onRemove) {
+            onRemove(eventId);
+        }
     };
 
     const handleToggleErrorMessage = () => setIsErrorMessageVisible(prev => !prev);

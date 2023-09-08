@@ -27,6 +27,8 @@ export const removeDirectory = (pathToDirectory: string) =>
 
 export const remove = (pathToFile: string) => invoke<void>("plugin:cfs|remove", { pathToFile });
 
+export const removeMultiple = (paths: string[]) => invoke<void>("plugin:cfs|remove_multiple", { paths });
+
 export const rename = (oldName: string, newName: string) => invoke<void>("plugin:cfs|rename", { oldName, newName });
 
 export const pathExists = (path: string) => invoke<boolean>("plugin:cfs|exists", { pathToFile: path });
@@ -36,7 +38,8 @@ export const copyFile = (from: string, to: string, eventId: number, removeTarget
         from,
         to,
         eventId,
-        removeTargetOnFinish
+        removeTargetOnFinish,
+        duplicateFileAction: "ask"
     });
 
 export const copyFolder = (
@@ -49,8 +52,19 @@ export const copyFolder = (
         from,
         to,
         eventId,
-        removeTargetOnFinish
+        removeTargetOnFinish,
+        duplicateFileAction: "ask"
     });
+
+export const copyMultipleFiles = (
+    paths: PathsFromTo[],
+    eventId: number,
+    removeTargetOnFinish: boolean
+) => invoke<void>("plugin:cfs|copy_multiple_files", {
+    paths,
+    eventId,
+    removeTargetOnFinish
+});
 
 export const printCFSState = (): Promise<void> => invoke("plugin:cfs|print_state");
 

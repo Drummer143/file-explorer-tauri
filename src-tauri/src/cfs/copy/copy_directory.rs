@@ -13,14 +13,7 @@ use crate::cfs::{
     CFSState,
 };
 
-use super::utils::{DuplicateFileAction, HandleDuplicateFileAnswer};
-
-#[derive(serde::Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-struct DuplicateFileHandleEventPayload {
-    action: DuplicateFileAction,
-    do_for_all: bool,
-}
+use super::utils::{DuplicateFileAction, DuplicateFileHandleEventPayload};
 
 type ControlVars = Arc<(Mutex<CopyActions>, Condvar)>;
 
@@ -121,19 +114,13 @@ fn prepare_to_copy_folder<R: Runtime>(
     to: &str,
 ) -> Result<(u64, fs::ReadDir), ErrorMessage> {
     let path_from = Path::new(from);
-    let total_size = get_file_size(path_from);
-
-    if let Err(error) = total_size {
-        return Err(error);
-    }
-
-    let total_size = total_size.unwrap();
+    let total_size = get_file_size(from);
     let root_dir_entry = path_from.read_dir();
 
     if let Err(error) = root_dir_entry {
         return Err(ErrorMessage::new_all(
-            "Can't read directory".into(),
-            error.to_string(),
+            "Can't read directory",
+            &error.to_string(),
         ));
     }
 
@@ -144,8 +131,8 @@ fn prepare_to_copy_folder<R: Runtime>(
     if !path_to.exists() {
         if let Err(error) = fs::create_dir(path_to) {
             return Err(ErrorMessage::new_all(
-                "can't create root folder".into(),
-                error.to_string(),
+                "can't create root folder",
+                &error.to_string(),
             ));
         }
     }
@@ -154,8 +141,8 @@ fn prepare_to_copy_folder<R: Runtime>(
 
     if let Err(ref error) = dir_entry {
         return Err(ErrorMessage::new_all(
-            "can't read folder".into(),
-            error.to_string(),
+            "can't read folder",
+            &error.to_string(),
         ));
     }
 
@@ -172,6 +159,7 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
     buffer_size: usize,
     copy_speed: u64,
     control_vars: ControlVars,
+    duplicate_file_action: DuplicateFileAction,
 ) -> CopyResult {
     if check_lock_thread(control_vars.clone()) {
         let _ = window.emit(&format!("copy-finished//{}", event_id), ());
@@ -188,7 +176,7 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
     let (total_size, dir_entry) = result.unwrap();
     let mut dirs_queue = vec![(dir_entry, String::from(to))];
     let mut total_bytes_copied = 0;
-    let duplicate_file_action = Arc::new(Mutex::new((DuplicateFileAction::Ask, false)));
+    let duplicate_file_action = Arc::new(Mutex::new((duplicate_file_action, false)));
 
     while !dirs_queue.is_empty() {
         let (dir_entry, path_to) = dirs_queue.remove(0);
@@ -227,7 +215,7 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
                         event_id,
                         entry.file_name().to_str().unwrap().into(),
                         path_to_entry.to_str().unwrap().into(),
-                        get_file_type(path_to_entry.to_str().unwrap().to_string()),
+                        get_file_type(path_to_entry.to_str().unwrap()),
                         path_to.clone(),
                         control_vars.clone(),
                     );
@@ -246,7 +234,7 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
                         let _ = fs::remove_file(&path_to_new_entry_str); // FIXME:
                     }
                     DuplicateFileAction::SaveBoth => {
-                        let new_filename = add_index_to_filename(path_to_new_entry_str.into());
+                        let new_filename = add_index_to_filename(&path_to_new_entry_str);
 
                         if new_filename.is_err() {
                             continue; // FIXME:
@@ -306,21 +294,22 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
     CopyResult::Ok
 }
 
-#[tauri::command]
-pub async fn copy_directory<R: Runtime>(
+#[tauri::command(async)]
+pub fn copy_directory<R: Runtime>(
     window: Window<R>,
     state: State<'_, CFSState>,
     from: String,
     mut to: String,
     event_id: usize,
     remove_target_on_finish: bool,
+    duplicate_file_action: DuplicateFileAction,
 ) -> Result<(), ErrorMessage> {
     let path_to = Path::new(&to);
 
     let control_vars = Arc::new((Mutex::new(CopyActions::Pause), Condvar::new()));
     let control_vars_clone = control_vars.clone();
 
-    let listener_id = window.listen(&format!("copy-change-state//{}", event_id), move |e| {
+    let copy_state_change_listener = window.listen(&format!("copy-change-state//{}", event_id), move |e| {
         let payload = e.payload();
 
         let &(ref lock, ref cvar) = &*control_vars;
@@ -336,14 +325,30 @@ pub async fn copy_directory<R: Runtime>(
         }
     });
 
-    if path_to.exists() {
-        let result = super::utils::handle_duplicate_file(&to, &from, &window);
+    if duplicate_file_action == DuplicateFileAction::Ask && path_to.exists() {
+        let (duplicate_file_action, _) =
+            super::utils::emit_duplicate_file(&to, &from, &window, false);
 
-        match result {
-            HandleDuplicateFileAnswer::New(new_to) => to = new_to,
-            HandleDuplicateFileAnswer::Error(error) => return Err(error),
-            HandleDuplicateFileAnswer::Merge => {}
-            HandleDuplicateFileAnswer::Skip => {
+        match duplicate_file_action {
+            DuplicateFileAction::Ask => {}
+            DuplicateFileAction::Merge => {}
+            DuplicateFileAction::SaveBoth => {
+                let result = add_index_to_filename(&to);
+
+                match result {
+                    Ok(new_to) => to = new_to,
+                    Err(error) => return Err(error),
+                }
+            }
+            DuplicateFileAction::Overwrite => {
+                if let Err(error) = fs::remove_dir_all(&to) {
+                    return Err(ErrorMessage::new_all(
+                        "Can't remove root directory",
+                        &error.to_string(),
+                    ));
+                }
+            }
+            DuplicateFileAction::Skip => {
                 let _ = window.emit(&format!("copy-finished//{}", event_id), ());
 
                 return Ok(());
@@ -365,21 +370,25 @@ pub async fn copy_directory<R: Runtime>(
         buffer_size,
         copy_speed as u64,
         control_vars_clone,
+        duplicate_file_action,
     );
 
-    window.unlisten(listener_id);
+    window.unlisten(copy_state_change_listener);
 
     match result {
-        CopyResult::Error(error) => println!("error: {:#?}", error),
-        CopyResult::Ok => println!("finished successfully"),
-        CopyResult::Stop => println!("stopped by user"),
-    }
+        CopyResult::Error(error) => Err(error),
+        CopyResult::Ok => {
+            if remove_target_on_finish {
+                if let Err(error) = fs::remove_dir_all(from) {
+                    return Err(ErrorMessage::new_all(
+                        "Can't delete target folder",
+                        &error.to_string(),
+                    ));
+                }
+            }
 
-    if remove_target_on_finish {
-        if let Err(error) = fs::remove_dir_all(from) {
-            println!("{}", error.to_string());
+            Ok(())
         }
+        CopyResult::Stop => Ok(()),
     }
-
-    Ok(())
 }

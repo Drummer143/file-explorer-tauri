@@ -1,4 +1,4 @@
-type FileTypes = "disk" | "folder" | "file";
+type FileTypes = "disk" | "folder" | "file" | "unknown";
 
 interface ExplorerFile {
     type: "file";

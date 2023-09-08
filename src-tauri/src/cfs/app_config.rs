@@ -35,7 +35,7 @@ console.log(window.appConfig, typeof window.appConfig);
     let data: String;
 
     if !path_to_app_config.exists() {
-        data = "{}".into();
+        data = String::from("{}");
 
         let result = std::fs::write(path_to_app_config, &data);
 
@@ -48,7 +48,7 @@ console.log(window.appConfig, typeof window.appConfig);
         match result {
             Ok(str) => {
                 if str.len() == 0 {
-                    data = "{}".into();
+                    data = String::from("{}");
                 } else {
                     data = str;
                 }

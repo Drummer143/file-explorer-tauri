@@ -48,7 +48,7 @@ fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>
                 if let Ok(metadata) = metadata {
                     file_info = Some(FileInfo::new(
                         filename.to_string(),
-                        get_file_type(path_to_file.to_str().unwrap().to_string()),
+                        get_file_type(path_to_file.to_str().unwrap()),
                         metadata.file_size() as usize,
                         metadata.permissions().readonly(),
                         get_file_subtype(path_to_file),
@@ -81,7 +81,7 @@ pub fn watch_dir<R: Runtime>(
     let path = Path::new(&path_to_dir);
 
     if !path.exists() {
-        return Err(ErrorMessage::new_message("Directory doesn't exist.".into()));
+        return Err(ErrorMessage::new_message("Directory doesn't exist."));
     }
 
     let (tx, rx) = channel();
@@ -89,8 +89,8 @@ pub fn watch_dir<R: Runtime>(
 
     if let Err(error) = watcher {
         return Err(ErrorMessage::new_all(
-            "Can't create watcher".into(),
-            error.to_string(),
+            "Can't create watcher",
+            &error.to_string(),
         ));
     }
 
@@ -103,8 +103,8 @@ pub fn watch_dir<R: Runtime>(
 
     if let Err(error) = result {
         return Err(ErrorMessage::new_all(
-            "Error while trying to create watcher.".into(),
-            error.to_string(),
+            "Error while trying to create watcher.",
+            &error.to_string(),
         ));
     }
 
@@ -126,10 +126,9 @@ pub fn unwatch(state: tauri::State<'_, CFSState>, id: usize) -> Result<(), Error
 
         match res {
             Ok(_) => return Ok(()),
-            Err(error) => return Err(ErrorMessage::new_reason(error.to_string())),
+            Err(error) => return Err(ErrorMessage::new_reason(&error.to_string())),
         }
     } else {
-        // Err(ErrorMessage::new_message("Watcher not found".into()))
         Ok(())
     }
 }

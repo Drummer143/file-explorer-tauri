@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { sep } from "@tauri-apps/api/path";
-
-import { useExplorerHistory } from "@zustand";
-import { openInExplorer, openFile, remove } from "@tauriAPI";
-import { addFileInClipboard, addNotificationFromError, pasteFile } from "@utils";
 import { useTranslation } from "react-i18next";
+
+import { openInExplorer, openFile, remove, removeMultiple } from "@tauriAPI";
+import { useExplorerHistory, useFilesSelectionStore } from "@zustand";
+import { addFileInClipboard, addNotificationFromError, pasteFile } from "@utils";
 
 type FileContextMenuProps = {
     ctxTarget: HTMLElement;
@@ -12,6 +12,8 @@ type FileContextMenuProps = {
 
 const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
     const { currentPath, pushRoute } = useExplorerHistory();
+    const { getSelectedItems, setSelectedItems } = useFilesSelectionStore();
+
     const { t } = useTranslation("translation", { keyPrefix: "ctx" });
 
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -48,7 +50,15 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
     };
 
     const handleDeleteFile = () => {
-        remove(currentPath + sep + filename).catch(addNotificationFromError);
+        const selectedFiles = getSelectedItems();
+
+        if (selectedFiles.size > 0) {
+            const paths = Array.from(selectedFiles).map(file => currentPath + sep + file);
+
+            removeMultiple(paths);
+        } else {
+            remove(currentPath + sep + filename).catch(addNotificationFromError);
+        }
     };
 
     const handleRenameFile = () =>
@@ -67,6 +77,12 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
     };
 
     const handleMovePasteFile = () => pasteFile(currentPath);
+
+    useEffect(() => {
+        if (!getSelectedItems().has(filename)) {
+            setSelectedItems([filename]);
+        }
+    }, [filename, getSelectedItems, setSelectedItems]);
 
     return (
         <>

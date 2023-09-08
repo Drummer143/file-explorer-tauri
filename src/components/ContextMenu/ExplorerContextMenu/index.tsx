@@ -6,8 +6,9 @@ import { dispatchCustomEvent, pasteFile } from "@utils";
 import { useExplorerHistory } from "@zustand";
 
 const ExplorerContextMenu: React.FC = () => {
-    const { currentPath } = useExplorerHistory();
     const { t } = useTranslation("translation", { keyPrefix: "ctx" });
+
+    const { currentPath } = useExplorerHistory();
 
     const handleOpenInExplorer = () => openInExplorer(currentPath);
 

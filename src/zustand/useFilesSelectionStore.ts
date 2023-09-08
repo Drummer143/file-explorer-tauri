@@ -1,34 +1,25 @@
 import { create } from "zustand";
 
-interface FileSelectionState {
-    selectedItems: string[];
-    firstSelected?: string;
+type StrSet = Set<string>;
 
-    setSelectedItems: (items: string[] | ((prev: string[]) => string[])) => void;
+interface FileSelectionState {
+    selectedItems: StrSet;
+
+    setSelectedItems: (items: StrSet | string[] | ((prev: StrSet) => StrSet)) => void;
     clearSelectedItems: () => void;
-    setFirstSelected: (item: string) => void;
-    getSelectedItems: () => string[]
+    getSelectedItems: () => StrSet
 }
 
 export const useFilesSelectionStore = create<FileSelectionState>((set, get) => ({
-    selectedItems: [],
+    selectedItems: new Set(),
 
-    clearSelectedItems: () => set({ selectedItems: [], firstSelected: undefined }),
+    clearSelectedItems: () => set({ selectedItems: new Set() }),
 
     setSelectedItems: (value) => {
-        const { selectedItems: prevSelectedItems, firstSelected: prevFirstSelected } = get();
-        const newSelected = Array.isArray(value) ? value : value(prevSelectedItems);
-        let firstSelected = prevFirstSelected;
+        const { selectedItems } = get();
+        const newSelected: StrSet = typeof value === "function" ? value(selectedItems) : new Set(value);
 
-        if (!prevSelectedItems.length && newSelected.length === 1) {
-            firstSelected = newSelected[0];
-        }
-
-        set({ selectedItems: newSelected, firstSelected });
-    },
-
-    setFirstSelected: (item) => {
-        set({ firstSelected: item, selectedItems: [item] });
+        set({ selectedItems: newSelected });
     },
 
     getSelectedItems: () => get().selectedItems

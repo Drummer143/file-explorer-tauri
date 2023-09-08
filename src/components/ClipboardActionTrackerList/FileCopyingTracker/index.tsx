@@ -9,8 +9,8 @@ import { PlaySVG, PauseSVG, CloseSVG, CheckMarkSVG } from "@assets";
 
 import styles from "./FileCopyingTracker.module.scss";
 
-type FileCopyingTrackerProps = StartTrackingClipboardActionDetail & {
-    onRemove: (id: number) => void;
+type FileCopyingTrackerProps = Omit<StartTrackingClipboardActionDetail & { type: "file" }, "type"> & {
+    onRemove?: (id: number) => void;
 };
 
 const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filename, from, to, onRemove, action }) => {
@@ -35,7 +35,9 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
         });
 
         const finished = await appWindow.once(`copy-finished//${eventId}`, () => {
-            onRemove(eventId);
+            if (onRemove) {
+                onRemove(eventId);
+            }
 
             untrack.current?.progress();
         });
@@ -60,7 +62,11 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
         setTimeout(() => setAskDelete(true));
     };
 
-    const handleRemoveTracker = () => onRemove(eventId);
+    const handleRemoveTracker = () => {
+        if (onRemove) {
+            onRemove(eventId);
+        }
+    };
 
     const handleRemoveTrackerAndDeleteCopiedFile = () => {
         handleRemoveTracker();
@@ -69,13 +75,20 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
     };
 
     useEffect(() => {
-        mountListeners().then(togglePause);
+        console.log("again");
+        mountListeners().then(() => {
+            setPaused(false);
+
+            appWindow.emit(`copy-change-state//${eventId}`, "run");
+        });
 
         return () => {
             untrack.current?.finished();
             untrack.current?.progress();
+
+            untrack.current = null;
         };
-    }, [mountListeners, togglePause]);
+    }, [mountListeners, togglePause, from, to, filename, eventId]);
 
     return (
         <div ref={trackerRef} className={styles.wrapper} data-testid={eventId}>

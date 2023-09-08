@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 
 import FileCopyingTracker from "./FileCopyingTracker";
+import FolderCopyingTracker from "./FolderCopyingTracker";
 
 import styles from "./ClipboardActionTrackerList.module.scss";
-import FolderCopyingTracker from "./FolderCopyingTracker";
+import MultipleFilesTracker from "./MultipleFilesTracker";
 
 type Trackers = StartTrackingClipboardActionDetail[];
 
@@ -18,6 +19,8 @@ const ClipboardActionTrackerList: React.FC = () => {
                 return <FileCopyingTracker key={t.eventId} {...t} onRemove={handleRemoveTracker} />;
             case "folder":
                 return <FolderCopyingTracker key={t.eventId} {...t} onRemove={handleRemoveTracker} />;
+            case "multiple":
+                return <MultipleFilesTracker key={t.eventId} {...t} onRemove={handleRemoveTracker} />;
         }
     };
 
