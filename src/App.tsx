@@ -8,9 +8,11 @@ const App: React.FC = () => {
         appWindow.isFocused().then(isFocused => {
             document.documentElement.classList.add(isFocused ? "appFocused" : "appBlurred");
 
-            appWindow.listen("tauri://focus", () => document.documentElement.classList.replace("appBlurred", "appFocused"));
-            appWindow.listen("tauri://blur", () => document.documentElement.classList.replace("appFocused", "appBlurred"));
-        })
+            appWindow.onFocusChanged((e) => {
+                document.documentElement.classList.toggle("appBlurred");
+                document.documentElement.classList.toggle("appFocused");
+            });
+        });
     }, []);
 
     return <Layout />;

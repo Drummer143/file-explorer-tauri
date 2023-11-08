@@ -6,6 +6,8 @@ import i18n from "../i18n/index.js";
 
 import "@testing-library/jest-dom";
 
+import "vitest-dom/extend-expect.js";
+
 i18n.changeLanguage("en");
 
 vi.mock("zustand");

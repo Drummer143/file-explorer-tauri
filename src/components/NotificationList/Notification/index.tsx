@@ -15,7 +15,7 @@ const NotificationComponent: React.FC<NotificationComponentProps> = ({ message, 
 
     const [isOpened, setIsOpened] = useState(false);
 
-    const updateInterval = useRef<NodeJS.Timer | null>(null);
+    const updateInterval = useRef<NodeJS.Timeout | null>(null);
     const currentTime = useRef<number>(0);
     const notificationRef = useRef<HTMLDivElement>(null);
 
