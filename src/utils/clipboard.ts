@@ -11,8 +11,10 @@ export const addFileInClipboard = (info: CopiedFileInfo) => {
 
     if (info.action === "cut") {
         if (Array.isArray(info.files)) {
+            const parent = document.querySelector<HTMLElement>(`[data-filename="${info.files[0].filename}"]`);
+
             info.files.forEach(f => {
-                document.querySelector<HTMLElement>(`[data-filename="${f.filename}"]`)?.classList.add("cut-file");
+                parent?.querySelector<HTMLElement>(`[data-filename="${f.filename}"]`)?.classList.add("cut-file");
             });
         } else {
             document.querySelector<HTMLElement>(`[data-filename="${info.files.filename}"]`)?.classList.add("cut-file");

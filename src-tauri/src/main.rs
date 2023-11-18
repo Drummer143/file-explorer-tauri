@@ -7,9 +7,9 @@ mod cfs;
 mod raw_fs;
 
 use std::{path::Path, process::Command};
+use tauri::{Runtime, Window};
 
 use cfs::types::ErrorMessage;
-use tauri::{Runtime, Window};
 
 #[tauri::command(async)]
 fn open_file(path_to_file: String) -> Result<(), ErrorMessage> {

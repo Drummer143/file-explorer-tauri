@@ -27,20 +27,22 @@ declare global {
         addNotification: CustomEvent<AppNotification>;
     }
 
+    type MergedEventMap = CustomEventMap & DocumentEventMap;
+
     interface Document {
-        addEventListener<T extends keyof CustomEventMap>(
+        addEventListener<T extends keyof MergedEventMap>(
             event: T,
-            handler: (this: Document, e: CustomEventMap[T]) => void,
+            handler: (this: Document, e: MergedEventMap[T]) => void,
             options?: boolean | AddEventListenerOptions
         );
 
-        removeEventListener<T extends keyof CustomEventMap>(
+        removeEventListener<T extends keyof MergedEventMap>(
             type: T,
-            listener: (this: Document, e: CustomEventMap[T]) => void,
+            listener: (this: Document, e: MergedEventMap[T]) => void,
             options?: boolean | EventListenerOptions
         );
 
-        dispatchEvent<T extends keyof CustomEventMap>(e: CustomEventMap[T]);
+        dispatchEvent<T extends keyof MergedEventMap>(e: MergedEventMap[T]);
     }
 
     type CustomEventHandler<T extends keyof CustomEventMap> = (event: CustomEventMap[T]) => void;

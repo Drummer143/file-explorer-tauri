@@ -13,8 +13,8 @@ use std::{collections::HashMap, ffi::OsStr, path::Path, sync::Mutex};
 use tauri::{
     plugin::{Builder, TauriPlugin},
     Manager, Runtime, State,
+    Config, Window
 };
-use tauri::{Config, Window};
 
 use copy::{
     copy_directory::{__cmd__copy_directory, copy_directory},
@@ -41,8 +41,8 @@ pub struct CFSState {
 impl CFSState {
     pub fn new_app_config(app_config: AppConfig) -> Self {
         Self {
-            watcher: Mutex::default(),
             app_config,
+            ..Default::default()
         }
     }
 }
