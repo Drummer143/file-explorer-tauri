@@ -37,13 +37,13 @@ console.log(window.appConfig, typeof window.appConfig);
     if !path_to_app_config.exists() {
         data = String::from("{}");
 
-        let result = std::fs::write(path_to_app_config, &data);
+        let result = std::fs::write(&path_to_app_config, &data);
 
         if let Err(error) = result {
             println!("can't write file {}", error.to_string());
         }
     } else {
-        let result = std::fs::read_to_string(path_to_app_config);
+        let result = std::fs::read_to_string(&path_to_app_config);
 
         match result {
             Ok(str) => {
@@ -68,7 +68,14 @@ console.log(window.appConfig, typeof window.appConfig);
         Err(error) => {
             println!("Error on parsing app config: {}", error);
 
-            AppConfig::default()
+            let config = AppConfig::default();
+            let result = serde_json::to_string_pretty(&config);
+
+            if let Ok(string) = result {
+                let _ = std::fs::write(path_to_app_config, string);                
+            }
+
+            config
         }
     };
 

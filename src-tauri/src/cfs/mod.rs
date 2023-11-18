@@ -12,8 +12,7 @@ use notify::RecommendedWatcher;
 use std::{collections::HashMap, ffi::OsStr, path::Path, sync::Mutex};
 use tauri::{
     plugin::{Builder, TauriPlugin},
-    Manager, Runtime, State,
-    Config, Window
+    Config, Manager, Runtime, State, Window,
 };
 
 use copy::{
@@ -23,12 +22,12 @@ use copy::{
 };
 use get_disks::*;
 use read_dir::*;
-use rename::*;
 use remove::{
-    remove_directory::{__cmd__remove_directory,remove_directory},
-    remove_file::{__cmd__remove_file,remove_file},
-    remove_multiple::{__cmd__remove_multiple,remove_multiple}
+    remove_directory::{__cmd__remove_directory, remove_directory},
+    remove_file::{__cmd__remove_file, remove_file},
+    remove_multiple::{__cmd__remove_multiple, remove_multiple},
 };
+use rename::*;
 use types::*;
 use watch_dir::*;
 
@@ -184,14 +183,14 @@ pub fn create_file(path: String, filetype: FileTypes) -> Result<(), ErrorMessage
             }
         }
         FileTypes::Disk => Ok(()),
-        FileTypes::Unknown => Ok(())
+        FileTypes::Unknown => Ok(()),
     }
 }
 
 pub fn init<R: Runtime>(config: &Config) -> TauriPlugin<R> {
     let (js_init_script, app_config) = app_config::init(config, APP_CONFIG_NAME);
 
-    Builder::new("cfs")
+    let plugin = Builder::new("cfs")
         .invoke_handler(tauri::generate_handler![
             add_index_to_filename,
             copy_directory,
@@ -216,6 +215,7 @@ pub fn init<R: Runtime>(config: &Config) -> TauriPlugin<R> {
 
             Ok(())
         })
-        .js_init_script(js_init_script)
-        .build()
+        .js_init_script(js_init_script);
+
+    plugin.build()
 }
