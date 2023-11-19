@@ -45,7 +45,7 @@ declare global {
         dispatchEvent<T extends keyof MergedEventMap>(e: MergedEventMap[T]);
     }
 
-    type CustomEventHandler<T extends keyof CustomEventMap> = (event: CustomEventMap[T]) => void;
+    type DocumentEventHandler<T extends keyof MergedEventMap = MergedEventMap> = (event: MergedEventMap[T]) => void;
 
     interface Window {
         appConfig: AppConfig;

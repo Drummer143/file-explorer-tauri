@@ -5,7 +5,7 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "dev:tools": "concurrently \"npm run tauri dev\" \"npm run devtools\"",
+        "dev:tools": "concurrently \"pnpm run tauri dev\" \"pnpm run devtools\"",
         "devtools": "react-devtools",
         "build": "tsc && vite build",
         "preview": "vite preview",

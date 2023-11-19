@@ -14,9 +14,8 @@ import { CTXTypes, addFileInClipboard, findActiveLayerKeys, pasteFile } from "@u
 
 import styles from "./FileList.module.scss";
 
-
 const FileList: React.FC = () => {
-    const { currentPath, prevTargetFile } = useExplorerHistory();
+    const { prevTargetFile, getCurrentPath, currentPath } = useExplorerHistory();
     const {
         selectedItems,
         clearSelectedItems,
@@ -37,14 +36,14 @@ const FileList: React.FC = () => {
                 return (
                     <Disk
                         selected={selectedItems.has(file.mountPoint)}
-                        key={currentPath + file.mountPoint}
+                        key={getCurrentPath() + file.mountPoint}
                         {...file}
                     />
                 );
             case "folder":
-                return <Folder selected={selectedItems.has(file.name)} key={currentPath + file.name} {...file} />;
+                return <Folder selected={selectedItems.has(file.name)} key={getCurrentPath() + file.name} {...file} />;
             case "file":
-                return <File selected={selectedItems.has(file.name)} key={currentPath + file.name} {...file} />;
+                return <File selected={selectedItems.has(file.name)} key={getCurrentPath() + file.name} {...file} />;
             default:
                 console.error("unhandled file", file);
         }
@@ -64,7 +63,7 @@ const FileList: React.FC = () => {
                     const selectedItems = getSelectedItems();
 
                     if (selectedItems.size > 1) {
-                        targets = Array.from(selectedItems).map(filename => ({ dirname: currentPath, filename }));
+                        targets = Array.from(selectedItems).map(filename => ({ dirname: getCurrentPath(), filename }));
                     } else {
                         const filename = target.dataset.filename;
 
@@ -73,7 +72,7 @@ const FileList: React.FC = () => {
                         }
 
                         targets = {
-                            dirname: currentPath,
+                            dirname: getCurrentPath(),
                             filename
                         };
                     }
@@ -90,7 +89,7 @@ const FileList: React.FC = () => {
                     const selectedItems = getSelectedItems();
 
                     if (selectedItems.size > 1) {
-                        targets = Array.from(selectedItems).map(filename => ({ dirname: currentPath, filename }));
+                        targets = Array.from(selectedItems).map(filename => ({ dirname: getCurrentPath(), filename }));
                     } else {
                         const filename = target.dataset.filename;
 
@@ -99,7 +98,7 @@ const FileList: React.FC = () => {
                         }
 
                         targets = {
-                            dirname: currentPath,
+                            dirname: getCurrentPath(),
                             filename
                         };
                     }
@@ -112,7 +111,7 @@ const FileList: React.FC = () => {
                     break;
                 }
                 case "KeyV": {
-                    let to = currentPath;
+                    let to = getCurrentPath();
                     const possibleFocusedFileName = (document.activeElement as HTMLElement | null)?.dataset
                         .contextMenuAdditionalInfo;
                     const isNotFile =
@@ -126,7 +125,7 @@ const FileList: React.FC = () => {
                 }
             }
         },
-        [currentPath, getSelectedItems]
+        [getCurrentPath, getSelectedItems]
     );
 
     const handleSearchItem = useCallback((e: KeyboardEvent) => {
@@ -273,7 +272,7 @@ const FileList: React.FC = () => {
             const selectedItems = getSelectedItems();
             const files = Array.from(listContainerRef.current?.children as unknown as HTMLElement[]);
             const firstSelectedIndex = files.findIndex(f => selectedItems.has(f.dataset.filename || ""));
-            
+
             if (firstSelectedIndex === -1) {
                 setSelectedItems([activeElementFilename]);
                 (document.activeElement as HTMLElement | null)?.focus();

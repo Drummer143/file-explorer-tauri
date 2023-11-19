@@ -2,7 +2,8 @@ use std::{fs::DirEntry, io::Error as IOError, os::windows::prelude::MetadataExt}
 
 use super::{
     get_file_subtype, get_file_type,
-    types::{ErrorMessage, FileInfo},
+    types::{ErrorMessage, FileInfo, FileTypes},
+    CFSState,
 };
 
 fn handle_file(file: Result<DirEntry, IOError>) -> Option<FileInfo> {
@@ -30,29 +31,42 @@ fn handle_file(file: Result<DirEntry, IOError>) -> Option<FileInfo> {
 }
 
 #[tauri::command(async)]
-pub fn read_dir(path_to_dir: String) -> Result<Vec<FileInfo>, ErrorMessage> {
+pub fn read_dir(
+    state: tauri::State<'_, CFSState>,
+    path_to_dir: String,
+) -> Result<Vec<FileInfo>, ErrorMessage> {
     let path_to_dir = std::path::Path::new(&path_to_dir);
 
     if !path_to_dir.exists() {
         return Err(ErrorMessage::new_message("Path don't exist"));
     }
 
-    let files = path_to_dir.read_dir();
+    let dir_entries = path_to_dir.read_dir();
 
-    if let Err(error) = files {
+    if let Err(error) = dir_entries {
         return Err(ErrorMessage::new_all(
             "Can't get information about files in directory.",
             &error.to_string(),
         ));
     }
 
-    let mut dir_entry_info: Vec<FileInfo> = vec![];
+    let mut files: Vec<FileInfo> = vec![];
+    let mut folders: Vec<FileInfo> = vec![];
 
-    files.unwrap().for_each(|file| {
-        if let Some(file_info) = handle_file(file) {
-            dir_entry_info.push(file_info);
+    dir_entries.unwrap().for_each(|file| {
+        if let Some(file) = handle_file(file) {
+            if file.r#type == FileTypes::Folder {
+                folders.push(file);
+            } else {
+                files.push(file);
+            }
         }
     });
 
-    Ok(dir_entry_info)
+    if !state.app_config.filesystem.sort_config.increasing {
+        files.reverse();
+        folders.reverse();
+    }
+
+    Ok([folders, files].concat())
 }

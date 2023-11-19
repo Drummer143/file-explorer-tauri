@@ -15,7 +15,7 @@ pub enum FileSubtypes {
     Image,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
+#[derive(serde::Serialize, serde::Deserialize, Clone, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub enum FileTypes {
     Disk,
@@ -137,9 +137,9 @@ impl Default for NotificationConfig {
     }
 }
 
-#[derive(serde::Deserialize, serde::Serialize, Debug)]
+#[derive(serde::Deserialize, serde::Serialize, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
-enum SortOrders {
+pub enum SortOrders {
     Name,
     Type,
 }
@@ -152,8 +152,8 @@ impl Default for SortOrders {
 
 #[derive(serde::Deserialize, serde::Serialize, Debug)]
 pub struct SortConfig {
-    increasing: bool,
-    order: SortOrders
+    pub increasing: bool,
+    pub order: SortOrders
 }
 
 impl Default for SortConfig {
