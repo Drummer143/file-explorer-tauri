@@ -131,6 +131,10 @@ const ContextMenu: React.FC = () => {
         }));
     }, [contextMenuInfo]);
 
+    if (!contextMenuInfo?.CTXComponent) {
+        return;
+    }
+
     return (
         <div
             className={styles.wrapper}
@@ -148,7 +152,7 @@ const ContextMenu: React.FC = () => {
                     }
             }
         >
-            {contextMenuInfo?.CTXComponent}
+            {contextMenuInfo.CTXComponent}
         </div>
     );
 };
