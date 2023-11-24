@@ -6,6 +6,8 @@ import "overlayscrollbars/styles/overlayscrollbars.css";
 import "./style.scss";
 import "./defaultColorTheme.scss";
 
+import "./appConfig";
+
 import App from "./App";
 import i18n from "@i18n";
 import ReactModal from "react-modal";

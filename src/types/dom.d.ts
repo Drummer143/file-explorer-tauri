@@ -48,7 +48,7 @@ declare global {
     type DocumentEventHandler<T extends keyof MergedEventMap = MergedEventMap> = (event: MergedEventMap[T]) => void;
 
     interface Window {
-        appConfig: AppConfig;
+        appConfig: IAppConfig;
     }
 }
 

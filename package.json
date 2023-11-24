@@ -21,6 +21,8 @@
         "@tauri-apps/api": "^1.5.1",
         "i18next": "^23.6.0",
         "i18next-browser-languagedetector": "^7.1.0",
+        "mobx": "^6.11.0",
+        "mobx-react-lite": "^4.0.5",
         "overlayscrollbars": "^2.4.4",
         "overlayscrollbars-react": "^0.5.3",
         "react": "^18.2.0",

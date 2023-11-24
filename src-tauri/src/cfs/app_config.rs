@@ -8,7 +8,7 @@ pub fn init(config: &tauri::Config, app_config_name: &str) -> (String, AppConfig
             r#"
 console.log("log from js init script in rust");
 
-window.appConfig = {};
+window.c = {};
 
 console.log(window.appConfig, typeof window.appConfig);
 "#,
