@@ -5,6 +5,7 @@ pub(super) mod get_file_size;
 pub(super) mod read_dir;
 pub(super) mod remove;
 pub(super) mod rename;
+pub(super) mod sort_files;
 pub(super) mod types;
 pub(super) mod watch_dir;
 

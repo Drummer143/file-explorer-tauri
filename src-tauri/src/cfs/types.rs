@@ -137,32 +137,17 @@ impl Default for NotificationConfig {
     }
 }
 
-#[derive(serde::Deserialize, serde::Serialize, Debug, PartialEq)]
+#[derive(serde::Deserialize, serde::Serialize, Debug, PartialEq, Clone, Copy)]
 #[serde(rename_all = "camelCase")]
-pub enum SortOrders {
+pub enum SortOrder {
     Name,
-    Type,
+    Size,
 }
 
-impl Default for SortOrders {
-    fn default() -> Self {
-        Self::Name
-    }
-}
-
-#[derive(serde::Deserialize, serde::Serialize, Debug)]
+#[derive(serde::Deserialize, serde::Serialize, Debug, Clone, Copy)]
 pub struct SortConfig {
     pub increasing: bool,
-    pub order: SortOrders
-}
-
-impl Default for SortConfig {
-    fn default() -> Self {
-        Self {
-            increasing: true,
-            order: SortOrders::default()
-        }
-    }
+    pub order: SortOrder
 }
 
 #[derive(serde::Deserialize, serde::Serialize, Debug)]
@@ -179,7 +164,10 @@ impl Default for FilesystemConfig {
             file_size_in_trashcan_limit_in_bytes: 10485760,
             copy_speed_limit_bytes_per_second: 12582912,
             copy_buffer_size_bytes: 65536,
-            sort_config: SortConfig::default()
+            sort_config: SortConfig {
+                increasing: true,
+                order: SortOrder::Name
+            }
         }
     }
 }

@@ -2,7 +2,7 @@ use std::{fs::DirEntry, io::Error as IOError, os::windows::prelude::MetadataExt}
 
 use super::{
     get_file_subtype, get_file_type,
-    types::{ErrorMessage, FileInfo, FileTypes},
+    types::{ErrorMessage, FileInfo, FileTypes, SortConfig, SortOrder},
     CFSState,
 };
 
@@ -34,6 +34,7 @@ fn handle_file(file: Result<DirEntry, IOError>) -> Option<FileInfo> {
 pub fn read_dir(
     state: tauri::State<'_, CFSState>,
     path_to_dir: String,
+    sort_config: Option<SortConfig>,
 ) -> Result<Vec<FileInfo>, ErrorMessage> {
     let path_to_dir = std::path::Path::new(&path_to_dir);
 
@@ -63,9 +64,14 @@ pub fn read_dir(
         }
     });
 
-    if !state.app_config.filesystem.sort_config.increasing {
-        files.reverse();
-        folders.reverse();
+    let sort_config = sort_config.unwrap_or(state.app_config.filesystem.sort_config);
+    let is_sort_default = sort_config.increasing && sort_config.order == SortOrder::Name;
+
+    if !is_sort_default {
+        use super::sort_files::sort_files;
+
+        files = sort_files(files, sort_config.order, sort_config.increasing);
+        folders = sort_files(folders, sort_config.order, sort_config.increasing);
     }
 
     Ok([folders, files].concat())
