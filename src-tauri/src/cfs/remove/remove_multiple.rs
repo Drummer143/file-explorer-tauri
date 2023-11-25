@@ -10,11 +10,6 @@ pub fn remove_multiple<R: Runtime>(
     state: State<'_, CFSState>,
     paths: Vec<String>,
 ) -> Result<(), ErrorMessage> {
-    let _ = crate::print_in_js(
-        &window,
-        &format!("multiple removing is not implemented. paths: {:#?}", paths),
-    );
-
     let confirmed = dialog::blocking::ask(
         Some(&window),
         "Confirm action",

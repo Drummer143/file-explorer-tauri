@@ -71,11 +71,6 @@ pub fn copy_multiple_files<R: Runtime>(
 
         let _ = window.emit(&file_finished_event_name, (index, filetype.clone()));
 
-        let _ = crate::print_in_js(
-            &window,
-            &format!("{{{}, {}}}", path_pair.from, path_pair.to),
-        );
-
         let mut copy_error: Option<ErrorMessage> = None;
 
         match filetype {

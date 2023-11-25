@@ -12,3 +12,4 @@
     - feat: Multiple files copying
     - feat: Multiple files deleting
     - fix: fixed a bug where the goToParent function in ExplorerHistory store leaves a trailing slash in currentPath
+    - feat: sorting files by size and name

@@ -7,7 +7,6 @@ mod cfs;
 mod raw_fs;
 
 use std::{path::Path, process::Command};
-use tauri::{Runtime, Window};
 
 use cfs::types::ErrorMessage;
 
@@ -67,10 +66,6 @@ fn open_in_explorer(path_to_file: String) -> Result<(), ErrorMessage> {
 
         Err(ErrorMessage::new_all("error in result", &error))
     }
-}
-
-fn print_in_js<R: Runtime>(window: &Window<R>, message: &str) -> Result<(), tauri::Error> {
-    window.eval(&format!("console.log({})", message))
 }
 
 fn main() {
