@@ -84,9 +84,8 @@ pub fn read_dir(
     if !is_sort_default {
         use super::sort_files::sort_files;
 
-        files = sort_files(files, sort_config.order, sort_config.increasing);
-        folders = sort_files(folders, sort_config.order, sort_config.increasing);
+        Ok(sort_files(files, folders, sort_config.order, sort_config.increasing))
+    } else {
+        Ok([folders, files].concat())
     }
-
-    Ok([folders, files].concat())
 }

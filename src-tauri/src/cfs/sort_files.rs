@@ -2,33 +2,80 @@ use std::cmp::Ordering;
 
 use super::types::{FileInfo, SortOrder};
 
-pub fn sort_files(mut files: Vec<FileInfo>, order: SortOrder, increasing: bool) -> Vec<FileInfo> {
-    let comparator: fn(&FileInfo, &FileInfo) -> Ordering = match order {
-        SortOrder::Name => |a, b| {
-            if a.name > b.name {
-                Ordering::Greater
-            } else if a.name < b.name {
-                Ordering::Less
-            } else {
-                Ordering::Equal
-            }
-        },
-        SortOrder::Size => |a, b| {
-            if a.size > b.size {
-                Ordering::Greater
-            } else if a.size < b.size {
-                Ordering::Less
-            } else {
-                Ordering::Equal
-            }
-        },
-    };
-
-    files.sort_by(comparator);
-
-    if !increasing {
-        files.reverse();
+fn get_ordering(increasing: bool) -> (Ordering, Ordering) {
+    if increasing {
+        (Ordering::Less, Ordering::Greater)
+    } else {
+        (Ordering::Greater, Ordering::Less)
     }
+}
 
-    files
+fn concat_files(files: Vec<FileInfo>, folders: Vec<FileInfo>, increasing: bool) -> Vec<FileInfo> {
+    if increasing {
+        [folders, files].concat()
+    } else {
+        [files, folders].concat()
+    }
+}
+
+fn sort_by_name(
+    mut files: Vec<FileInfo>,
+    mut folders: Vec<FileInfo>,
+    increasing: bool,
+) -> Vec<FileInfo> {
+    let (less, greater) = get_ordering(increasing);
+
+    files.sort_by(|a, b| {
+        if a.name > b.name {
+            greater
+        } else if a.name < b.name {
+            less
+        } else {
+            Ordering::Equal
+        }
+    });
+
+    folders.sort_by(|a, b| {
+        if a.name > b.name {
+            greater
+        } else if a.name < b.name {
+            less
+        } else {
+            Ordering::Equal
+        }
+    });
+
+    concat_files(files, folders, increasing)
+}
+
+fn sort_by_size(
+    mut files: Vec<FileInfo>,
+    folders: Vec<FileInfo>,
+    increasing: bool,
+) -> Vec<FileInfo> {
+    let (less, greater) = get_ordering(increasing);
+
+    files.sort_by(|a, b| {
+        if a.size > b.size {
+            greater
+        } else if a.size < b.size {
+            less
+        } else {
+            Ordering::Equal
+        }
+    });
+
+    concat_files(files, folders, increasing)
+}
+
+pub fn sort_files(
+    files: Vec<FileInfo>,
+    folders: Vec<FileInfo>,
+    order: SortOrder,
+    increasing: bool,
+) -> Vec<FileInfo> {
+    match order {
+        SortOrder::Name => sort_by_name(files, folders, increasing),
+        SortOrder::Size => sort_by_size(files, folders, increasing),
+    }
 }
