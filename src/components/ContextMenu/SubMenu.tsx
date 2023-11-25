@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import styles from "../ContextMenu.module.scss";
+import styles from "./ContextMenu.module.scss";
+import { ChevronRightArrowSVG } from "@assets";
 
 type CTXSubMenuPositionTuple = ["left" | "right", "top" | "bottom"];
 
@@ -65,7 +66,10 @@ const SubMenu: React.FC<SubMenuProps> = ({ children, title }) => {
 
     return (
         <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className="relative">
-            <p className={styles.submenuTitle}>{title}</p>
+            <p className={styles.submenuTitle}>
+                {title}
+                <ChevronRightArrowSVG width={16} height={16} stroke="#fff" fill="#fff" strokeWidth={3} />
+            </p>
 
             {isMenuOpened && (
                 <div

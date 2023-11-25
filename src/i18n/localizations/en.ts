@@ -22,7 +22,12 @@ export default {
             delete: "Delete",
             rename: "Rename",
             createNewFile: "Create new file",
-            createNewFolder: "Create new folder"
+            createNewFolder: "Create new folder",
+            sorting: "Sorting",
+            name: "Name",
+            size: "Size",
+            increasing: "Increasing",
+            decreasing: "Decreasing"
         },
         clipboardTrackers: {
             copyingFileFromTo: "Copying {{filename}} from {{from}} to {{to}}",

@@ -5,15 +5,15 @@ import { initReactI18next } from "react-i18next";
 import en from "./localizations/en";
 import ru from "./localizations/ru";
 
+export const supportedLanguages = ["en", "ru"] as const;
+
 i18n
     .use(LanguageDetector)
     .use(initReactI18next)
     .init({
-        debug: false,
-        fallbackLng: ["en"],
-        interpolation: {
-            escapeValue: false
-        },
+        debug: import.meta.env.DEV,
+        fallbackLng: "en",
+        supportedLngs: supportedLanguages,
         resources: {
             en,
             ru

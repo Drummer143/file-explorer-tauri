@@ -16,12 +16,7 @@ import styles from "./FileList.module.scss";
 
 const FileList: React.FC = () => {
     const { prevTargetFile, getCurrentPath, currentPath } = useExplorerHistory();
-    const {
-        selectedItems,
-        clearSelectedItems,
-        setSelectedItems,
-        getSelectedItems
-    } = useFilesSelectionStore();
+    const { selectedItems, clearSelectedItems, setSelectedItems, getSelectedItems } = useFilesSelectionStore();
 
     const gridWidth = useRef(0);
     const searchPattern = useRef("");
@@ -145,87 +140,90 @@ const FileList: React.FC = () => {
         }, 2000);
     }, []);
 
-    const handleListArrowNavigation = useCallback((e: KeyboardEvent) => {
-        if (!listContainerRef.current) {
-            return;
-        }
+    const handleListArrowNavigation = useCallback(
+        (e: KeyboardEvent) => {
+            if (!listContainerRef.current) {
+                return;
+            }
 
-        e.preventDefault();
+            e.preventDefault();
 
-        let focusedElementIndex = Array.from(listContainerRef.current.children as unknown as HTMLElement[]).findIndex(
-            e => e.dataset.filename === (document.activeElement as HTMLElement)?.dataset.filename
-        );
+            let focusedElementIndex = Array.from(
+                listContainerRef.current.children as unknown as HTMLElement[]
+            ).findIndex(e => e.dataset.filename === (document.activeElement as HTMLElement)?.dataset.filename);
 
-        if (focusedElementIndex === -1) {
-            const selectedItems = getSelectedItems();
+            if (focusedElementIndex === -1) {
+                const selectedItems = getSelectedItems();
 
-            if (selectedItems.size) {
-                for (const item of Array.from(listContainerRef.current.children)) {
-                    const filename = (item as HTMLElement)?.dataset.filename;
+                if (selectedItems.size) {
+                    for (const item of Array.from(listContainerRef.current.children)) {
+                        const filename = (item as HTMLElement)?.dataset.filename;
 
-                    if (filename && selectedItems.has(filename)) {
-                        (item as HTMLElement)?.focus();
+                        if (filename && selectedItems.has(filename)) {
+                            (item as HTMLElement)?.focus();
+                            setSelectedItems([filename]);
+
+                            break;
+                        }
+                    }
+                } else {
+                    const firstElement = listContainerRef.current.children.item(0) as HTMLElement | null;
+                    const filename = firstElement?.dataset.filename;
+
+                    if (filename) {
+                        firstElement.focus();
                         setSelectedItems([filename]);
-
-                        break;
                     }
                 }
-            } else {
-                const firstElement = listContainerRef.current.children.item(0) as HTMLElement | null;
-                const filename = firstElement?.dataset.filename;
 
-                if (filename) {
-                    firstElement.focus();
-                    setSelectedItems([filename]);
+                return;
+            }
+
+            switch (e.code) {
+                case "ArrowLeft": {
+                    focusedElementIndex--;
+                    break;
+                }
+                case "ArrowRight": {
+                    if (focusedElementIndex === listContainerRef.current.children.length - 1) {
+                        return;
+                    }
+
+                    focusedElementIndex++;
+
+                    if (focusedElementIndex >= listContainerRef.current.children.length) {
+                        focusedElementIndex = listContainerRef.current.children.length - gridWidth.current;
+                    }
+
+                    break;
+                }
+                case "ArrowUp":
+                    focusedElementIndex -= gridWidth.current;
+
+                    break;
+                case "ArrowDown": {
+                    const modIndex = listContainerRef.current.children.length % gridWidth.current;
+
+                    focusedElementIndex += gridWidth.current;
+
+                    if (modIndex && focusedElementIndex >= listContainerRef.current.children.length) {
+                        focusedElementIndex = listContainerRef.current.children.length - 1;
+                    }
+
+                    break;
                 }
             }
 
-            return;
-        }
+            const newFocused = listContainerRef.current.children.item(focusedElementIndex) as HTMLElement | null;
+            const filename = newFocused?.dataset.filename;
 
-        switch (e.code) {
-            case "ArrowLeft": {
-                focusedElementIndex--;
-                break;
+            if (filename) {
+                newFocused?.focus();
+                setSelectedItems([filename]);
             }
-            case "ArrowRight": {
-                if (focusedElementIndex === listContainerRef.current.children.length - 1) {
-                    return;
-                }
-
-                focusedElementIndex++;
-
-                if (focusedElementIndex >= listContainerRef.current.children.length) {
-                    focusedElementIndex = listContainerRef.current.children.length - gridWidth.current;
-                }
-
-                break;
-            }
-            case "ArrowUp":
-                focusedElementIndex -= gridWidth.current;
-
-                break;
-            case "ArrowDown": {
-                const modIndex = listContainerRef.current.children.length % gridWidth.current;
-
-                focusedElementIndex += gridWidth.current;
-
-                if (modIndex && focusedElementIndex >= listContainerRef.current.children.length) {
-                    focusedElementIndex = listContainerRef.current.children.length - 1;
-                }
-
-                break;
-            }
-        }
-
-        const newFocused = listContainerRef.current.children.item(focusedElementIndex) as HTMLElement | null;
-        const filename = newFocused?.dataset.filename;
-
-        if (filename) {
-            newFocused?.focus();
-            setSelectedItems([filename]);
-        }
-    }, [getSelectedItems, setSelectedItems]);
+        },
+        [getSelectedItems, setSelectedItems]
+    );
 
     const handleKeyDown = useCallback(
         (e: KeyboardEvent) => {
@@ -252,66 +250,69 @@ const FileList: React.FC = () => {
         [handleKeyDownWithCtrlKey, handleListArrowNavigation, handleSearchItem]
     );
 
-    const handleListWrapperClick: React.MouseEventHandler<HTMLDivElement> = useCallback(e => {
-        const target = e.target as HTMLElement;
+    const handleListWrapperClick: React.MouseEventHandler<HTMLDivElement> = useCallback(
+        e => {
+            const target = e.target as HTMLElement;
 
-        if (!e.ctrlKey && e.currentTarget.isSameNode(target) && getSelectedItems().size > 0) {
-            return clearSelectedItems();
-        }
-
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const targetFilename = target.dataset.filename!;
-
-        if (e.shiftKey) {
-            const activeElementFilename = (document.activeElement as HTMLElement | null)?.dataset.filename;
-
-            if (!activeElementFilename) {
-                return;
+            if (!e.ctrlKey && e.currentTarget.isSameNode(target) && getSelectedItems().size > 0) {
+                return clearSelectedItems();
             }
 
-            const selectedItems = getSelectedItems();
-            const files = Array.from(listContainerRef.current?.children as unknown as HTMLElement[]);
-            const firstSelectedIndex = files.findIndex(f => selectedItems.has(f.dataset.filename || ""));
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const targetFilename = target.dataset.filename!;
 
-            if (firstSelectedIndex === -1) {
-                setSelectedItems([activeElementFilename]);
-                (document.activeElement as HTMLElement | null)?.focus();
+            if (e.shiftKey) {
+                const activeElementFilename = (document.activeElement as HTMLElement | null)?.dataset.filename;
 
-                return;
-            }
-
-            const targetIndex = files.findIndex(f => f.dataset.filename === targetFilename);
-            let startIndex = Math.min(firstSelectedIndex, targetIndex);
-            const endIndex = Math.max(firstSelectedIndex, targetIndex);
-            const newSelected = new Set<string>();
-
-            for (; startIndex <= endIndex; startIndex++) {
-                const filename = files[startIndex].dataset.filename;
-
-                if (filename) {
-                    newSelected.add(filename);
+                if (!activeElementFilename) {
+                    return;
                 }
+
+                const selectedItems = getSelectedItems();
+                const files = Array.from(listContainerRef.current?.children as unknown as HTMLElement[]);
+                const firstSelectedIndex = files.findIndex(f => selectedItems.has(f.dataset.filename || ""));
+
+                if (firstSelectedIndex === -1) {
+                    setSelectedItems([activeElementFilename]);
+                    (document.activeElement as HTMLElement | null)?.focus();
+
+                    return;
+                }
+
+                const targetIndex = files.findIndex(f => f.dataset.filename === targetFilename);
+                let startIndex = Math.min(firstSelectedIndex, targetIndex);
+                const endIndex = Math.max(firstSelectedIndex, targetIndex);
+                const newSelected = new Set<string>();
+
+                for (; startIndex <= endIndex; startIndex++) {
+                    const filename = files[startIndex].dataset.filename;
+
+                    if (filename) {
+                        newSelected.add(filename);
+                    }
+                }
+
+                return setSelectedItems(newSelected);
             }
 
-            return setSelectedItems(newSelected);
-        }
+            if (e.ctrlKey) {
+                const selected = getSelectedItems();
 
-        if (e.ctrlKey) {
-            const selected = getSelectedItems();
+                if (selected.has(targetFilename)) {
+                    selected.delete(targetFilename);
+                } else {
+                    selected.add(targetFilename);
+                }
 
-            if (selected.has(targetFilename)) {
-                selected.delete(targetFilename);
-            } else {
-                selected.add(targetFilename);
+                setSelectedItems(selected);
+
+                return;
             }
 
-            setSelectedItems(selected);
-
-            return;
-        }
-
-        setSelectedItems([targetFilename]);
-    }, [clearSelectedItems, getSelectedItems, setSelectedItems]);
+            setSelectedItems([targetFilename]);
+        },
+        [clearSelectedItems, getSelectedItems, setSelectedItems]
+    );
 
     useEffect(() => {
         clearSelectedItems();

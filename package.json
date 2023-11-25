@@ -21,8 +21,6 @@
         "@tauri-apps/api": "^1.5.1",
         "i18next": "^23.6.0",
         "i18next-browser-languagedetector": "^7.1.0",
-        "mobx": "^6.11.0",
-        "mobx-react-lite": "^4.0.5",
         "overlayscrollbars": "^2.4.4",
         "overlayscrollbars-react": "^0.5.3",
         "react": "^18.2.0",
@@ -31,6 +29,7 @@
         "react-i18next": "^13.3.1",
         "react-modal": "^3.16.1",
         "uuid": "^9.0.1",
+        "valtio": "^1.12.0",
         "xbytes": "^1.8.0",
         "zustand": "^4.4.6"
     },

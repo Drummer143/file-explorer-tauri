@@ -22,7 +22,12 @@ export default {
             delete: "Удалить",
             rename: "Переименовать",
             createNewFile: "Создать новый файл",
-            createNewFolder: "Создать новую папку"
+            createNewFolder: "Создать новую папку",
+            sorting: "Сортировка",
+            name: "Имя",
+            size: "Размер",
+            increasing: "По возрастанию",
+            decreasing: "По убыванию"
         },
         clipboardTrackers: {
             copyingFileFromTo: "Копирование {{filename}} из {{from}} в {{to}}",

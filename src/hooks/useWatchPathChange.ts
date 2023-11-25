@@ -6,18 +6,20 @@ import { useExplorerHistory } from "../zustand";
 import { Event as TauriEvent } from "@tauri-apps/api/event";
 import { addNotificationFromError } from "@utils";
 import { readDir, getDisks, watchDir } from "../tauriAPIWrapper";
+import { useSnapshot } from "valtio";
 
 export const useWatchPathChange = () => {
-    const { currentPath } = useExplorerHistory();
+    const { getCurrentPath, currentPath } = useExplorerHistory();
+    const { filesystem: { sort_config: sortConfig } } = useSnapshot(appConfig, { sync: true });
 
     const [loading, setLoading] = useState(false);
     const [files, setFiles] = useState<CFile[]>([]);
 
     const untrackCurrentDir = useRef<
         | {
-              unwatch: () => Promise<void>;
-              unlisten: UnlistenFn;
-          }
+            unwatch: () => Promise<void>;
+            unlisten: UnlistenFn;
+        }
         | undefined
     >(undefined);
 
@@ -65,10 +67,12 @@ export const useWatchPathChange = () => {
         }
 
         try {
+            const currentPath = getCurrentPath();
+
             if (currentPath) {
                 const path = currentPath + sep;
 
-                setFiles(await readDir(path));
+                setFiles(await readDir(path, sortConfig));
 
                 untrackCurrentDir.current = await watchDir(path, e => updateFilesOnDirChange(e, setFiles));
             } else {
@@ -79,7 +83,7 @@ export const useWatchPathChange = () => {
         }
 
         setLoading(false);
-    }, [currentPath, updateFilesOnDirChange]);
+    }, [getCurrentPath, sortConfig, updateFilesOnDirChange]);
 
     useEffect(() => {
         if (untrackCurrentDir.current) {

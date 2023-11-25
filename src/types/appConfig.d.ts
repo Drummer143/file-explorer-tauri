@@ -4,8 +4,10 @@ interface NotificationConfig {
     lifetime_ms: number;
 }
 
+type SortOrder = "name" | "size"
+
 interface SortConfig {
-    order: "name" | "type";
+    order: SortOrder;
     increasing: boolean;
 }
 
@@ -16,7 +18,7 @@ interface FilesystemConfig {
     sort_config: SortConfig;
 }
 
-interface IAppConfig {
+interface AppConfig {
     notification: NotificationConfig;
     filesystem: FilesystemConfig;
 }

@@ -16,7 +16,8 @@ export const watchDir = async (path: string, onChangeInDir: (e: event.Event<Chan
     };
 };
 
-export const readDir = (path: string) => invoke<ExplorerDirectory[]>("plugin:cfs|read_dir", { pathToDir: path });
+export const readDir = (path: string, sortConfig = appConfig.filesystem.sort_config) =>
+    invoke<ExplorerDirectory[]>("plugin:cfs|read_dir", { pathToDir: path, sortConfig });
 
 export const getDisks = () => invoke<ExplorerDisk[]>("plugin:cfs|get_disks");
 
