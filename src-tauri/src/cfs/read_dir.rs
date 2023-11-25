@@ -2,7 +2,7 @@ use std::{fs::DirEntry, io::Error as IOError, os::windows::prelude::MetadataExt}
 
 use super::{
     get_file_subtype, get_file_type,
-    types::{ErrorMessage, FileInfo, FileTypes, SortConfig, SortOrder},
+    types::{ErrorMessage, FileInfo, FileType, SortConfig, SortOrder},
     CFSState,
 };
 
@@ -16,6 +16,19 @@ fn handle_file(file: Result<DirEntry, IOError>) -> Option<FileInfo> {
         if !is_hidden {
             let file_type = get_file_type(file.path().to_str().unwrap());
             let file_subtype = get_file_subtype(&file.path());
+            let ext = if file_type != FileType::Folder {
+                if let Some(ext) = file.path().extension() {
+                    if let Some(ext) = ext.to_str() {
+                        Some(String::from(ext))
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            } else {
+                None
+            };
 
             return Some(FileInfo::new(
                 file_name,
@@ -23,6 +36,7 @@ fn handle_file(file: Result<DirEntry, IOError>) -> Option<FileInfo> {
                 meta.file_size() as usize,
                 meta.permissions().readonly(),
                 file_subtype,
+                ext,
             ));
         }
     }
@@ -56,7 +70,7 @@ pub fn read_dir(
 
     dir_entries.unwrap().for_each(|file| {
         if let Some(file) = handle_file(file) {
-            if file.r#type == FileTypes::Folder {
+            if file.r#type == FileType::Folder {
                 folders.push(file);
             } else {
                 files.push(file);

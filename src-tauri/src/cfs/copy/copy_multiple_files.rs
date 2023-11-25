@@ -4,7 +4,7 @@ use tauri::{Runtime, State, Window};
 
 use crate::cfs::{
     get_file_type,
-    types::{ErrorMessage, FileTypes},
+    types::{ErrorMessage, FileType},
     CFSState,
 };
 
@@ -79,7 +79,7 @@ pub fn copy_multiple_files<R: Runtime>(
         let mut copy_error: Option<ErrorMessage> = None;
 
         match filetype {
-            FileTypes::File => {
+            FileType::File => {
                 let result = copy_file(
                     window.clone(),
                     state.clone(),
@@ -94,7 +94,7 @@ pub fn copy_multiple_files<R: Runtime>(
                     copy_error = Some(error);
                 }
             }
-            FileTypes::Folder => {
+            FileType::Folder => {
                 let result = copy_directory(
                     window.clone(),
                     state.clone(),
@@ -109,8 +109,8 @@ pub fn copy_multiple_files<R: Runtime>(
                     copy_error = Some(error);
                 }
             }
-            FileTypes::Disk => unreachable!(),
-            FileTypes::Unknown => unreachable!(),
+            FileType::Disk => unreachable!(),
+            FileType::Unknown => unreachable!(),
         }
 
         index += 1;

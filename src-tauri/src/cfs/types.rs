@@ -11,17 +11,17 @@ pub enum FileChangeEventType {
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
-pub enum FileSubtypes {
+pub enum FileSubtype {
     Image,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
-pub enum FileTypes {
+pub enum FileType {
     Disk,
     File,
     Folder,
-    Unknown
+    Unknown,
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, PartialEq, Debug)]
@@ -59,7 +59,7 @@ impl ErrorMessage {
 pub struct DiskInfo {
     pub mount_point: String,
     pub name: String,
-    pub r#type: FileTypes,
+    pub r#type: FileType,
     pub total_space: usize,
     pub available_space: usize,
 }
@@ -76,7 +76,7 @@ impl DiskInfo {
             name,
             total_space,
             available_space,
-            r#type: FileTypes::Disk,
+            r#type: FileType::Disk,
         }
     }
 }
@@ -85,20 +85,29 @@ impl DiskInfo {
 #[serde(rename_all = "camelCase")]
 pub struct FileInfo {
     pub name: String,
-    pub r#type: FileTypes,
+    pub r#type: FileType,
     pub size: usize,
     pub readonly: bool,
-    pub subtype: Option<FileSubtypes>,
+    pub ext: Option<String>,
+    pub subtype: Option<FileSubtype>,
 }
 
 impl FileInfo {
-    pub fn new(name: String, r#type: FileTypes, size: usize, readonly: bool, subtype: Option<FileSubtypes>) -> FileInfo {
-        FileInfo {
+    pub fn new(
+        name: String,
+        r#type: FileType,
+        size: usize,
+        readonly: bool,
+        subtype: Option<FileSubtype>,
+        ext: Option<String>,
+    ) -> Self {
+        Self {
             name,
             r#type,
             size,
             readonly,
-            subtype
+            subtype,
+            ext,
         }
     }
 }
@@ -147,7 +156,7 @@ pub enum SortOrder {
 #[derive(serde::Deserialize, serde::Serialize, Debug, Clone, Copy)]
 pub struct SortConfig {
     pub increasing: bool,
-    pub order: SortOrder
+    pub order: SortOrder,
 }
 
 #[derive(serde::Deserialize, serde::Serialize, Debug)]
@@ -155,7 +164,7 @@ pub struct FilesystemConfig {
     pub file_size_in_trashcan_limit_in_bytes: usize,
     pub copy_speed_limit_bytes_per_second: usize,
     pub copy_buffer_size_bytes: usize,
-    pub sort_config: SortConfig
+    pub sort_config: SortConfig,
 }
 
 impl Default for FilesystemConfig {
@@ -166,8 +175,8 @@ impl Default for FilesystemConfig {
             copy_buffer_size_bytes: 65536,
             sort_config: SortConfig {
                 increasing: true,
-                order: SortOrder::Name
-            }
+                order: SortOrder::Name,
+            },
         }
     }
 }

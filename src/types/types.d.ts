@@ -2,10 +2,12 @@ type FileTypes = "disk" | "folder" | "file" | "unknown";
 
 interface ExplorerFile {
     type: "file";
-    subtype?: "image";
     name: string;
     size: number;
     readonly: boolean;
+
+    ext?: string;
+    subtype?: "image";
 }
 
 interface ExplorerDirectory {

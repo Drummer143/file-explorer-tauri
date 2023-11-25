@@ -9,7 +9,7 @@ use crate::cfs::{
     add_index_to_filename,
     get_file_size::get_file_size,
     get_file_type,
-    types::{CopyActions, CopyResult, ErrorMessage, FileTypes},
+    types::{CopyActions, CopyResult, ErrorMessage, FileType},
     CFSState,
 };
 
@@ -21,7 +21,7 @@ type ControlVars = Arc<(Mutex<CopyActions>, Condvar)>;
 struct ExistingEntryInfo {
     path: String,
     filename: String,
-    r#type: FileTypes,
+    r#type: FileType,
     path_to_new_dirname: String,
 }
 
@@ -83,7 +83,7 @@ fn emit_duplicate_file<R: Runtime>(
     event_id: usize,
     filename: String,
     path: String,
-    r#type: FileTypes,
+    r#type: FileType,
     path_to_new_dirname: String,
     control_vars: ControlVars,
 ) -> bool {

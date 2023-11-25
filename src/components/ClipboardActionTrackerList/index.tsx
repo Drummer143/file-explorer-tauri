@@ -25,7 +25,7 @@ const ClipboardActionTrackerList: React.FC = () => {
     };
 
     useEffect(() => {
-        const handleAddTracker: CustomEventHandler<"startTrackingClipboardAction"> = e => {
+        const handleAddTracker: DocumentEventHandler<"startTrackingClipboardAction"> = e => {
             setTrackers(prev => prev.concat(e.detail));
         };
 

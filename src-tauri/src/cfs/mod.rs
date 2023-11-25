@@ -53,17 +53,17 @@ const DISPLAYABLE_IMAGE_EXTENSIONS: [&str; 13] = [
 const APP_CONFIG_NAME: &str = "app_config.json";
 
 #[tauri::command(async)]
-pub fn get_file_type(path_to_file: &str) -> FileTypes {
+pub fn get_file_type(path_to_file: &str) -> FileType {
     let path_to_file = Path::new(path_to_file);
 
     if path_to_file.is_dir() {
-        FileTypes::Folder
+        FileType::Folder
     } else {
-        FileTypes::File
+        FileType::File
     }
 }
 
-fn get_file_subtype(path_to_file: &Path) -> Option<FileSubtypes> {
+fn get_file_subtype(path_to_file: &Path) -> Option<FileSubtype> {
     if path_to_file.is_dir() {
         return None;
     }
@@ -72,7 +72,7 @@ fn get_file_subtype(path_to_file: &Path) -> Option<FileSubtypes> {
 
     if let Some(extension) = extension {
         if DISPLAYABLE_IMAGE_EXTENSIONS.contains(&extension) {
-            return Some(FileSubtypes::Image);
+            return Some(FileSubtype::Image);
         }
     }
 
@@ -155,7 +155,7 @@ fn add_index_to_filename(path_to_file: &str) -> Result<String, ErrorMessage> {
 }
 
 #[tauri::command(async)]
-pub fn create_file(path: String, filetype: FileTypes) -> Result<(), ErrorMessage> {
+pub fn create_file(path: String, filetype: FileType) -> Result<(), ErrorMessage> {
     use std::fs::{create_dir_all, File};
 
     if Path::new(&path).exists() {
@@ -163,7 +163,7 @@ pub fn create_file(path: String, filetype: FileTypes) -> Result<(), ErrorMessage
     }
 
     match filetype {
-        FileTypes::File => {
+        FileType::File => {
             if let Err(error) = File::create(path) {
                 Err(ErrorMessage::new_all(
                     "Can't create file",
@@ -173,7 +173,7 @@ pub fn create_file(path: String, filetype: FileTypes) -> Result<(), ErrorMessage
                 Ok(())
             }
         }
-        FileTypes::Folder => {
+        FileType::Folder => {
             if let Err(error) = create_dir_all(path) {
                 Err(ErrorMessage::new_all(
                     "Can't create folder",
@@ -183,8 +183,8 @@ pub fn create_file(path: String, filetype: FileTypes) -> Result<(), ErrorMessage
                 Ok(())
             }
         }
-        FileTypes::Disk => Ok(()),
-        FileTypes::Unknown => Ok(()),
+        FileType::Disk => Ok(()),
+        FileType::Unknown => Ok(()),
     }
 }
 

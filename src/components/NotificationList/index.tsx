@@ -11,7 +11,7 @@ const NotificationList: React.FC = () => {
     const handleRemoveNotification = (index: string) => setNotifications(prev => prev.filter(n => n.index !== index));
 
     useEffect(() => {
-        const handleAddNotification: CustomEventHandler<"addNotification"> = e => {
+        const handleAddNotification: DocumentEventHandler<"addNotification"> = e => {
             // eslint-disable-next-line no-console
             console[e.detail.type]("ERROR\nMessage: ", e.detail.message, "\nReason: ", e.detail.reason);
 
