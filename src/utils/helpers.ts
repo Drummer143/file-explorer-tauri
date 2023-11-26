@@ -17,7 +17,7 @@ export const isErrorMessage = (error: unknown): error is ErrorMessage => {
 };
 
 export const addNotificationFromError = (
-    error: unknown,
+    error: ErrorMessage | unknown,
     type: "error" | "warn" | "info" = "error"
 ): Omit<AppNotification, "type"> | void => {
     if (isErrorMessage(error)) {
