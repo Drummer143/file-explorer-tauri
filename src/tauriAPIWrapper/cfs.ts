@@ -67,8 +67,6 @@ export const copyMultipleFiles = (
     removeTargetOnFinish
 });
 
-export const printCFSState = (): Promise<void> => invoke("plugin:cfs|print_state");
-
 export const addIndexToFilename = (pathToFile: string) =>
     invoke<string>("plugin:cfs|add_index_to_filename", { pathToFile });
 
@@ -77,3 +75,5 @@ export const createFile = (path: string, filetype: Exclude<FileTypes, "disk">) =
 
 export const getFileType = (pathToFile: string) =>
     invoke<Exclude<FileTypes, "disk">>("plugin:cfs|get_file_type", { pathToFile });
+
+export const dirname = (path: string): Promise<string> => invoke("plugin:cfs|dirname", { path });

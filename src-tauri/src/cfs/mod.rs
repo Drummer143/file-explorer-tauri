@@ -13,24 +13,27 @@ use notify::RecommendedWatcher;
 use std::{collections::HashMap, ffi::OsStr, path::Path, sync::Mutex};
 use tauri::{
     plugin::{Builder, TauriPlugin},
-    Config, Manager, Runtime, State, Window,
+    Manager, Runtime, State, Window,
 };
 
-use copy::{
-    copy_directory::{__cmd__copy_directory, copy_directory},
-    copy_file::{__cmd__copy_file, copy_file},
-    copy_multiple_files::{__cmd__copy_multiple_files, copy_multiple_files},
+use self::{
+    copy::{
+        copy_directory::{__cmd__copy_directory, copy_directory},
+        copy_file::{__cmd__copy_file, copy_file},
+        copy_multiple_files::{__cmd__copy_multiple_files, copy_multiple_files},
+    },
+    get_disks::{__cmd__get_disks, get_disks},
+    read_dir::{__cmd__read_dir, read_dir},
+    remove::{
+        remove_directory::{__cmd__remove_directory, remove_directory},
+        remove_file::{__cmd__remove_file, remove_file},
+        remove_multiple::{__cmd__remove_multiple, remove_multiple},
+    },
+    rename::{__cmd__rename, rename},
+    types::{AppConfig, FileType},
+    types::{ErrorMessage, FileSubtype},
+    watch_dir::{__cmd__unwatch, __cmd__watch_dir, unwatch, watch_dir},
 };
-use get_disks::*;
-use read_dir::*;
-use remove::{
-    remove_directory::{__cmd__remove_directory, remove_directory},
-    remove_file::{__cmd__remove_file, remove_file},
-    remove_multiple::{__cmd__remove_multiple, remove_multiple},
-};
-use rename::*;
-use types::*;
-use watch_dir::*;
 
 #[derive(Default, Debug)]
 pub struct CFSState {
@@ -42,7 +45,7 @@ impl CFSState {
     pub fn new_app_config(app_config: AppConfig) -> Self {
         Self {
             app_config,
-            ..Default::default()
+            watcher: Mutex::default(),
         }
     }
 }
@@ -50,7 +53,7 @@ impl CFSState {
 const DISPLAYABLE_IMAGE_EXTENSIONS: [&str; 13] = [
     "jpg", "jpeg", "jpe", "jif", "jfif", "jfi", "webp", "png", "gif", "svg", "svgz", "bmp", "dib",
 ];
-const APP_CONFIG_NAME: &str = "app_config.json";
+static APP_CONFIG_NAME: &'static str = "app_config.json";
 
 #[tauri::command(async)]
 pub fn get_file_type(path_to_file: &str) -> FileType {
@@ -188,16 +191,28 @@ pub fn create_file(path: String, filetype: FileType) -> Result<(), ErrorMessage>
     }
 }
 
-pub fn init<R: Runtime>(config: &Config) -> TauriPlugin<R> {
-    let (js_init_script, app_config) = app_config::init(config, APP_CONFIG_NAME);
+#[tauri::command(async)]
+pub fn dirname(path: String) -> Result<String, ErrorMessage> {
+    if let Some(dirname) = Path::new(&path).parent() {
+        Ok(dirname.to_str().unwrap().into())
+    } else if path.ends_with(':') {
+        Ok("".into())
+    } else {
+        Err(ErrorMessage::new_message("Can't get dirname"))
+    }
+}
 
-    let plugin = Builder::new("cfs")
+pub fn init<R: Runtime>(config: &tauri::Config) -> TauriPlugin<R> {
+    let (js_init_script, app_config) = app_config::init(tauri::api::path::app_config_dir(config));
+
+    Builder::new("cfs")
         .invoke_handler(tauri::generate_handler![
             add_index_to_filename,
             copy_directory,
             copy_file,
             copy_multiple_files,
             create_file,
+            dirname,
             exists,
             get_disks,
             get_file_type,
@@ -216,7 +231,6 @@ pub fn init<R: Runtime>(config: &Config) -> TauriPlugin<R> {
 
             Ok(())
         })
-        .js_init_script(js_init_script);
-
-    plugin.build()
+        .js_init_script(js_init_script)
+        .build()
 }

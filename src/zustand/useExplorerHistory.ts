@@ -1,6 +1,8 @@
+import { sep } from "@tauri-apps/api/path";
 import { create } from "zustand";
 // import { persist } from "zustand/middleware";
-import { dirname, sep } from "@tauri-apps/api/path";
+
+import { dirname } from "@tauriAPI";
 
 type HistoryUpdateType = "back" | "forward" | "push" | "init";
 
@@ -24,7 +26,7 @@ interface ExplorerHistoryState {
 }
 
 export const useExplorerHistory = create<ExplorerHistoryState>()(
-    /* persist( */ (set, get) => ({
+    /* persist( */(set, get) => ({
         canGoBack: false,
         canGoForward: false,
         currentPath: "",

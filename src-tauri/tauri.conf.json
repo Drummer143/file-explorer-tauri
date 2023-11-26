@@ -29,12 +29,7 @@
             ]
         },
         "allowlist": {
-            "all": true,
-            "protocol": {
-                "all": true,
-                "asset": true,
-                "assetScope": ["**"]
-            }
+            "all": true
         },
         "bundle": {
             "active": true,

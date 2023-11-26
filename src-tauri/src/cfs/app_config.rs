@@ -1,8 +1,8 @@
+use std::path::PathBuf;
+
 use super::AppConfig;
 
-pub fn init(config: &tauri::Config, app_config_name: &str) -> (String, AppConfig) {
-    let config_dir = tauri::api::path::app_config_dir(&config);
-
+pub fn init(config_dir: Option<PathBuf>) -> (String, AppConfig) {
     let create_js_init = |app_config: &str| {
         format!(
             r#"
@@ -30,7 +30,7 @@ console.log(window.appConfig, typeof window.appConfig);
     let config_dir = config_dir.unwrap();
     let config_dir = config_dir.as_path();
 
-    let path_to_app_config = config_dir.join(app_config_name);
+    let path_to_app_config = config_dir.join(&super::APP_CONFIG_NAME);
 
     let data: String;
 

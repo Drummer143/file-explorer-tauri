@@ -78,6 +78,9 @@ fn main() {
             open_in_explorer
         ])
         .plugin(cfs::init(ctx.config()))
+        .on_page_load(|window, payload| {
+            let _ = window.eval(&format!("console.log('{}');", payload.url()));
+        })
         .run(ctx)
         .expect("Can't run app.");
 }
