@@ -1,4 +1,3 @@
-pub(super) mod app_config;
 pub(super) mod copy;
 pub(super) mod get_disks;
 pub(super) mod get_file_size;
@@ -11,44 +10,12 @@ pub(super) mod watch_dir;
 
 use notify::RecommendedWatcher;
 use std::{collections::HashMap, ffi::OsStr, path::Path, sync::Mutex};
-use tauri::{
-    plugin::{Builder, TauriPlugin},
-    Manager, Runtime, State, Window,
-};
+use tauri::{Runtime, State, Window};
 
 use self::{
-    copy::{
-        copy_directory::{__cmd__copy_directory, copy_directory},
-        copy_file::{__cmd__copy_file, copy_file},
-        copy_multiple_files::{__cmd__copy_multiple_files, copy_multiple_files},
-    },
-    get_disks::{__cmd__get_disks, get_disks},
-    read_dir::{__cmd__read_dir, read_dir},
-    remove::{
-        remove_directory::{__cmd__remove_directory, remove_directory},
-        remove_file::{__cmd__remove_file, remove_file},
-        remove_multiple::{__cmd__remove_multiple, remove_multiple},
-    },
-    rename::{__cmd__rename, rename},
-    types::{AppConfig, FileType},
-    types::{ErrorMessage, FileSubtype},
-    watch_dir::{__cmd__unwatch, __cmd__watch_dir, unwatch, watch_dir},
+    remove::{remove_directory, remove_file},
+    types::{FileSubtype, FileType},
 };
-
-#[derive(Default, Debug)]
-pub struct CFSState {
-    watcher: Mutex<HashMap<usize, (RecommendedWatcher, String)>>,
-    app_config: AppConfig,
-}
-
-impl CFSState {
-    pub fn new_app_config(app_config: AppConfig) -> Self {
-        Self {
-            app_config,
-            watcher: Mutex::default(),
-        }
-    }
-}
 
 const DISPLAYABLE_IMAGE_EXTENSIONS: [&str; 13] = [
     "jpg", "jpeg", "jpe", "jif", "jfif", "jfi", "webp", "png", "gif", "svg", "svgz", "bmp", "dib",
@@ -202,35 +169,35 @@ pub fn dirname(path: String) -> Result<String, ErrorMessage> {
     }
 }
 
-pub fn init<R: Runtime>(config: &tauri::Config) -> TauriPlugin<R> {
-    let (js_init_script, app_config) = app_config::init(tauri::api::path::app_config_dir(config));
+// pub fn init<R: Runtime>(config: &tauri::Config) -> TauriPlugin<R> {
+//     let (js_init_script, app_config) = app_config::init(tauri::api::path::app_config_dir(config));
 
-    Builder::new("cfs")
-        .invoke_handler(tauri::generate_handler![
-            add_index_to_filename,
-            copy_directory,
-            copy_file,
-            copy_multiple_files,
-            create_file,
-            dirname,
-            exists,
-            get_disks,
-            get_file_type,
-            print_state,
-            remove,
-            read_dir,
-            remove_directory,
-            remove_file,
-            remove_multiple,
-            rename,
-            unwatch,
-            watch_dir,
-        ])
-        .setup(|app| {
-            app.manage(CFSState::new_app_config(app_config));
+//     Builder::new("cfs")
+//         .invoke_handler(tauri::generate_handler![
+//             add_index_to_filename,
+//             copy_directory,
+//             copy_file,
+//             copy_multiple_files,
+//             create_file,
+//             dirname,
+//             exists,
+//             get_disks,
+//             get_file_type,
+//             print_state,
+//             remove,
+//             read_dir,
+//             remove_directory,
+//             remove_file,
+//             remove_multiple,
+//             rename,
+//             unwatch,
+//             watch_dir,
+//         ])
+//         .setup(|app| {
+//             app.manage(CFSState::new_app_config(app_config));
 
-            Ok(())
-        })
-        .js_init_script(js_init_script)
-        .build()
-}
+//             Ok(())
+//         })
+//         .js_init_script(js_init_script)
+//         .build()
+// }

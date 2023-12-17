@@ -4,11 +4,16 @@
 )]
 
 mod cfs;
+mod types;
 mod raw_fs;
+mod app_config;
 
 use std::{path::Path, process::Command};
 
-use cfs::types::ErrorMessage;
+use cfs::{
+    create_file, dirname, get_file_type,
+    types::ErrorMessage,
+};
 
 #[tauri::command(async)]
 fn open_file(path_to_file: String) -> Result<(), ErrorMessage> {
@@ -69,18 +74,19 @@ fn open_in_explorer(path_to_file: String) -> Result<(), ErrorMessage> {
 }
 
 fn main() {
-    let ctx = tauri::generate_context!();
-
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             open_file,
             raw_fs::remove,
-            open_in_explorer
+            open_in_explorer,
+            create_file,
+            dirname,
+            get_file_type,
         ])
-        .plugin(cfs::init(ctx.config()))
+        // .plugin(cfs::init(ctx.config()))
         .on_page_load(|window, payload| {
             let _ = window.eval(&format!("console.log('{}');", payload.url()));
         })
-        .run(ctx)
+        .run(tauri::generate_context!())
         .expect("Can't run app.");
 }
