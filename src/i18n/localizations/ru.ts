@@ -74,6 +74,9 @@ export default {
         },
         save: "Сохранить",
         cancel: "Отменить",
-        close: "Закрыть"
+        close: "Закрыть",
+        errorHappened: "Произошла ошибка",
+        showDetails: "Показать подробности",
+        unexpectedError: "Неожиданная ошибка"
     }
 };

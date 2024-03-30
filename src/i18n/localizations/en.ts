@@ -74,6 +74,9 @@ export default {
         },
         save: "Save",
         cancel: "Cancel",
-        close: "Close"
+        close: "Close",
+        errorHappened: "An error happened",
+        showDetails: "Show details",
+        unexpectedError: "Unexpected error"
     }
 };
