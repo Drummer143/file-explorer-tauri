@@ -48,8 +48,8 @@ export const copyFolder = (
     to: string,
     eventId: number,
     removeTargetOnFinish: boolean
-): Promise<void> =>
-    invoke("plugin:cfs|copy_directory", {
+) =>
+    invoke<void>("plugin:cfs|copy_directory", {
         from,
         to,
         eventId,
@@ -76,4 +76,7 @@ export const createFile = (path: string, filetype: Exclude<FileTypes, "disk">) =
 export const getFileType = (pathToFile: string) =>
     invoke<Exclude<FileTypes, "disk">>("plugin:cfs|get_file_type", { pathToFile });
 
-export const dirname = (path: string): Promise<string> => invoke("plugin:cfs|dirname", { path });
+export const dirname = (path: string) => invoke<string>("plugin:cfs|dirname", { path });
+
+export const getNestedDirnames = (pathToDir: string) =>
+    invoke<string[]>("plugin:cfs|get_nested_dirnames", { pathToDir });

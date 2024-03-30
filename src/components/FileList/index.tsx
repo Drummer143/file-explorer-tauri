@@ -1,11 +1,11 @@
 /* eslint-disable max-lines */
 import React, { useCallback, useEffect, useRef } from "react";
 import { sep } from "@tauri-apps/api/path";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 
 import Disk from "./Disk";
 import File from "./File";
 import Folder from "./Folder";
+import Scrollbars from "../Scrollbars";
 import SelectionArea from "../SelectionArea";
 import { EditFileModal, FileExistModal } from "../modals";
 import { useExplorerHistory, useFilesSelectionStore } from "@zustand";
@@ -345,20 +345,7 @@ const FileList: React.FC = () => {
 
     return (
         <>
-            <OverlayScrollbarsComponent
-                element="div"
-                defer
-                data-file-list-scrollbar
-                options={{
-                    overflow: {
-                        x: "hidden"
-                    },
-                    scrollbars: {
-                        autoHide: "leave",
-                        autoHideDelay: 150
-                    }
-                }}
-            >
+            <Scrollbars data-file-list-scrollbar>
                 <div
                     ref={listContainerRef}
                     className={styles.wrapper}
@@ -368,7 +355,7 @@ const FileList: React.FC = () => {
                 >
                     {loading ? <div className={styles.loader}></div> : files.map(selectFileComponent)}
                 </div>
-            </OverlayScrollbarsComponent>
+            </Scrollbars>
 
             <FileExistModal />
             <EditFileModal />
