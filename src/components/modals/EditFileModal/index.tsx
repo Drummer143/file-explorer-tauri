@@ -122,7 +122,7 @@ const CreateFileModal: React.FC = () => {
     };
 
     useEffect(() => {
-        const handleOpenCreateFIleModal: CustomEventHandler<"openEditFileModal"> = e => {
+        const handleOpenCreateFIleModal: DocumentEventHandler<"openEditFileModal"> = e => {
             if (e.detail.filetype === "file") {
                 setIsExtensionInputHidden(false);
             }

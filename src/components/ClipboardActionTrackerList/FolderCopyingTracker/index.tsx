@@ -3,6 +3,7 @@ import { appWindow } from "@tauri-apps/api/window";
 import { UnlistenFn } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 
+import { joinCN } from "@utils";
 import { PlaySVG, PauseSVG, CloseSVG } from "@assets";
 
 import styles from "./FolderCopyingTracker.module.scss";
@@ -119,7 +120,7 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
     }, [status]);
 
     return (
-        <div ref={trackerRef} className={styles.wrapper.concat(errorFilename ? ` ${styles.error}` : "")}>
+        <div ref={trackerRef} className={joinCN(styles.wrapper, errorFilename && styles.error)}>
             <div className={styles.info}>
                 {status === "preparing" ? (
                     <p title={t("preparingToCopyFolder")} className={styles.text}>
