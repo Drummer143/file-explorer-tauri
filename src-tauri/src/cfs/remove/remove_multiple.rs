@@ -20,20 +20,21 @@ pub fn remove_multiple<R: Runtime>(
         return Ok(());
     }
 
-    let mut sum_size: u64 = 0;
+    let mut sum_size: isize = -1;
 
     for path in paths.clone() {
-        sum_size += get_file_size(&path);
+        sum_size += get_file_size(&path) as isize;
     }
 
-    if sum_size == 0 {
+    if sum_size == -1 {
         return Err(ErrorMessage::new_message("Can't remove all files"));
     }
 
+    let sum_size = sum_size as usize;
     let trashcan_limit = state
         .app_config
         .filesystem
-        .file_size_in_trashcan_limit_in_bytes as u64;
+        .file_size_in_trashcan_limit_in_bytes;
 
     let mut remove_permanently = true;
 

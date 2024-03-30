@@ -112,7 +112,7 @@ fn prepare_to_copy_folder<R: Runtime>(
     event_id: usize,
     from: &str,
     to: &str,
-) -> Result<(u64, fs::ReadDir), ErrorMessage> {
+) -> Result<(usize, fs::ReadDir), ErrorMessage> {
     let path_from = Path::new(from);
     let total_size = get_file_size(from);
     let root_dir_entry = path_from.read_dir();
@@ -157,7 +157,7 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
     to: &str,
     event_id: usize,
     buffer_size: usize,
-    copy_speed: u64,
+    copy_speed: usize,
     control_vars: ControlVars,
     duplicate_file_action: DuplicateFileAction,
 ) -> CopyResult {
@@ -368,7 +368,7 @@ pub fn copy_directory<R: Runtime>(
         &to,
         event_id,
         buffer_size,
-        copy_speed as u64,
+        copy_speed,
         control_vars_clone,
         duplicate_file_action,
     );

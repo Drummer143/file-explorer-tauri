@@ -7,7 +7,6 @@ interface FileSelectionState {
 
     setSelectedItems: (items: StrSet | string[] | ((prev: StrSet) => StrSet)) => void;
     clearSelectedItems: () => void;
-    getSelectedItems: () => StrSet
 }
 
 export const useFilesSelectionStore = create<FileSelectionState>((set, get) => ({
@@ -20,7 +19,5 @@ export const useFilesSelectionStore = create<FileSelectionState>((set, get) => (
         const newSelected: StrSet = typeof value === "function" ? value(selectedItems) : new Set(value);
 
         set({ selectedItems: newSelected });
-    },
-
-    getSelectedItems: () => get().selectedItems
+    }
 }));

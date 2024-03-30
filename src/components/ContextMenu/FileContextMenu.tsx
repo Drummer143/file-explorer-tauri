@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { sep } from "@tauri-apps/api/path";
 import { useTranslation } from "react-i18next";
 
-import { openInExplorer, openFile, remove, removeMultiple } from "@tauriAPI";
+import { useRefState } from "@hooks";
 import { useExplorerHistory, useFilesSelectionStore } from "@zustand";
+import { openInExplorer, openFile, remove, removeMultiple } from "@tauriAPI";
 import { addFileInClipboard, addNotificationFromError, pasteFile } from "@utils";
 
 type FileContextMenuProps = {
@@ -12,7 +13,9 @@ type FileContextMenuProps = {
 
 const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
     const { currentPath, pushRoute } = useExplorerHistory();
-    const { getSelectedItems, setSelectedItems } = useFilesSelectionStore();
+    const { setSelectedItems, selectedItems } = useFilesSelectionStore();
+
+    const selectedItemsRef = useRefState(selectedItems);
 
     const { t } = useTranslation("translation", { keyPrefix: "ctx" });
 
@@ -49,15 +52,19 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
         openInExplorer(path).catch(addNotificationFromError);
     };
 
-    const handleDeleteFile = () => {
-        const selectedFiles = getSelectedItems();
+    const handleDeleteFile = async () => {
+        const selectedFiles = selectedItemsRef.current;
 
-        if (selectedFiles.size > 0) {
-            const paths = Array.from(selectedFiles).map(file => currentPath + sep + file);
+        try {
+            if (selectedFiles.size > 1) {
+                const paths = Array.from(selectedFiles).map(file => currentPath + sep + file);
 
-            removeMultiple(paths);
-        } else {
-            remove(currentPath + sep + filename).catch(addNotificationFromError);
+                removeMultiple(paths);
+            } else {
+                remove(currentPath + sep + filename);
+            }
+        } catch (error) {
+            addNotificationFromError(error);
         }
     };
 
@@ -79,10 +86,10 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
     const handleMovePasteFile = () => pasteFile(currentPath);
 
     useEffect(() => {
-        if (!getSelectedItems().has(filename)) {
+        if (!selectedItemsRef.current.has(filename)) {
             setSelectedItems([filename]);
         }
-    }, [filename, getSelectedItems, setSelectedItems]);
+    }, [filename, selectedItemsRef, setSelectedItems]);
 
     return (
         <>

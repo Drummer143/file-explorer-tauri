@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
+import { useRefState } from "@hooks";
 import { useFilesSelectionStore } from "@zustand";
 
 import styles from "./SelectionArea.module.scss";
@@ -11,22 +12,24 @@ type SelectionAreaProps = {
 }
 
 const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelector }) => {
-    const { setSelectedItems, getSelectedItems } = useFilesSelectionStore(state => state);
+    const { setSelectedItems, selectedItems } = useFilesSelectionStore(state => state);
 
     const [hidden, setHidden] = useState(false);
 
     const startPos = useRef({ x: 0, y: 0 });
     const currentPos = useRef({ x: 0, y: 0 });
     const isMoving = useRef(false);
-    const prevSelectedItems = useRef(getSelectedItems());
+    const prevSelectedItems = useRef(selectedItems);
     const isCtrlKeyPressed = useRef(false);
+
+    const selectedItemsRef = useRefState(selectedItems);
 
     const handleMoveArea = useCallback((e: MouseEvent) => {
         if (!isMoving.current) {
             rootElement?.style.setProperty("pointer-events", "none");
             setHidden(false);
 
-            prevSelectedItems.current = getSelectedItems();
+            prevSelectedItems.current = selectedItemsRef.current;
             isMoving.current = true;
             isCtrlKeyPressed.current = e.ctrlKey;
         }
@@ -70,7 +73,7 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
         });
 
         setSelectedItems(selectedIds);
-    }, [getSelectedItems, rootElement, setSelectedItems, targetSelector]);
+    }, [rootElement, selectedItemsRef, setSelectedItems, targetSelector]);
 
     const handleEndSelecting = useCallback(() => {
         document.removeEventListener("mousemove", handleMoveArea);

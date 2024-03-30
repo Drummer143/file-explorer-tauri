@@ -22,10 +22,10 @@ pub fn copy_file_with_progress<R: tauri::Runtime>(
     to: &str,
     event_id: usize,
     buffer_size: usize,
-    copy_speed: u64,
+    copy_speed: usize,
     control_vars: Arc<(Mutex<CopyActions>, Condvar)>,
     mut total_bytes_copied: usize,
-    total_size: Option<u64>,
+    total_size: Option<usize>,
 ) -> CopyResult {
     let file_from = File::open(&from);
 
@@ -53,7 +53,7 @@ pub fn copy_file_with_progress<R: tauri::Runtime>(
     let file_size = if let Some(total_size) = total_size {
         total_size
     } else {
-        file_from.metadata().unwrap().len()
+        file_from.metadata().unwrap().len() as usize
     };
 
     loop {
@@ -109,7 +109,7 @@ pub fn copy_file_with_progress<R: tauri::Runtime>(
 
         total_bytes_copied += bytes_read;
 
-        let elapsed_seconds = start_time.elapsed().as_secs();
+        let elapsed_seconds = start_time.elapsed().as_secs() as usize;
         let elapsed_bytes = total_bytes_copied;
         let expected_bytes = copy_speed * elapsed_seconds;
 
@@ -195,7 +195,7 @@ pub fn copy_file<R: Runtime>(
         &to,
         event_id,
         buffer_size,
-        copy_speed as u64,
+        copy_speed,
         control_vars_clone,
         0,
         None,

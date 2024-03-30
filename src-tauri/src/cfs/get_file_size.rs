@@ -1,6 +1,6 @@
 use std::{fs, path::Path};
 
-pub fn get_file_size(path: &str) -> u64 {
+pub fn get_file_size(path: &str) -> usize {
     let metadata = fs::metadata(path);
 
     if metadata.is_err() {
@@ -12,9 +12,9 @@ pub fn get_file_size(path: &str) -> u64 {
     let path = Path::new(path);
 
     if metadata.is_file() {
-        metadata.len()
+        metadata.len() as usize
     } else if metadata.is_dir() {
-        let mut size: u64 = 0;
+        let mut size: usize = 0;
 
         let dir_entries = fs::read_dir(path);
 
