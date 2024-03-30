@@ -14,11 +14,21 @@ pub fn get_disks() -> Result<Vec<DiskInfo>, ErrorMessage> {
     for disk in sys.disks() {
         let mount = disk.mount_point().to_str().unwrap_or("").replace("\\", "");
 
+        let mut total_space = disk.total_space() as usize;
+        let mut available_space = disk.available_space() as usize;
+        let mut total_space_copy = total_space;
+
+        while total_space_copy / 1024 > 0 {
+            total_space_copy = total_space_copy / 1024;
+            total_space = total_space / 1024 * 1000;
+            available_space = available_space / 1024 * 1000;
+        }
+
         disks.push(DiskInfo::new(
             mount,
             disk.name().to_str().unwrap_or("").into(),
-            disk.total_space() as usize,
-            disk.available_space() as usize,
+            total_space,
+            available_space,
         ));
     }
 
