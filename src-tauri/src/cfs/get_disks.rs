@@ -18,7 +18,7 @@ pub fn get_disks() -> Result<Vec<DiskInfo>, ErrorMessage> {
         let mut available_space = disk.available_space() as usize;
         let mut total_space_copy = total_space;
 
-        while total_space_copy / 1024 > 0 {
+        while total_space_copy > 1024 {
             total_space_copy = total_space_copy / 1024;
             total_space = total_space / 1024 * 1000;
             available_space = available_space / 1024 * 1000;
