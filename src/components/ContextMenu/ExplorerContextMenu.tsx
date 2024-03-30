@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import SubMenu from "./SubMenu";
 import Divider from "./Divider";
 import MenuButton from "./MenuButton";
+import { useRefState } from "@hooks";
 import { openInExplorer } from "@tauriAPI";
 import { useExplorerHistory } from "@zustand";
 import { dispatchCustomEvent, pasteFile } from "@utils";
@@ -11,20 +12,22 @@ import { dispatchCustomEvent, pasteFile } from "@utils";
 const ExplorerContextMenu: React.FC = () => {
     const { t } = useTranslation("translation", { keyPrefix: "ctx" });
 
-    const { getCurrentPath } = useExplorerHistory();
+    const { currentPath } = useExplorerHistory();
 
-    const handleOpenInExplorer = () => openInExplorer(getCurrentPath());
+    const currentPathRef = useRefState(currentPath);
 
-    const handleMovePasteFile = async () => pasteFile(getCurrentPath());
+    const handleOpenInExplorer = () => openInExplorer(currentPathRef.current);
+
+    const handleMovePasteFile = async () => pasteFile(currentPathRef.current);
 
     const handleCreateNewEntity = (type: "file" | "folder") =>
-        dispatchCustomEvent("openEditFileModal", { filetype: type, dirname: getCurrentPath() });
+        dispatchCustomEvent("openEditFileModal", { filetype: type, dirname: currentPathRef.current });
 
     const setSortType = (order: SortOrder) => (appConfig.filesystem.sort_config.order = order);
 
     const setIncreasing = (increasing: boolean) => (appConfig.filesystem.sort_config.increasing = increasing);
 
-    if (!getCurrentPath()) {
+    if (!currentPath) {
         return <></>;
     }
 

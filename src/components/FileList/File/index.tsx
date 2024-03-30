@@ -1,7 +1,6 @@
 import React from "react";
 import xbytes from "xbytes";
 import { sep } from "@tauri-apps/api/path";
-import { convertFileSrc } from "@tauri-apps/api/tauri";
 
 import { FileSVG } from "@assets";
 import { CTXTypes } from "@utils";
@@ -31,14 +30,14 @@ const File: React.FC<FileProps> = ({ name, size, readonly, selected, type }) => 
             className="fileItemWrapper"
             data-file-type="file"
             data-readonly={readonly}
-            data-file-subtype={type.file}
+            data-file-subtype={type}
             data-context-menu-type={CTXTypes.file}
             data-filename={name}
             data-filename-lowercased={name.toLocaleLowerCase()}
             aria-selected={selected}
         >
             <div className="fileItemIcon">
-                {type.file === "image" ? <img src={convertFileSrc(currentPath + sep + name)} /> : <FileSVG />}
+                {/* type === "image" ? <img src={convertFileSrc(currentPath + sep + name)} /> :  */<FileSVG />}
             </div>
 
             <div className="fileItemDescription">
