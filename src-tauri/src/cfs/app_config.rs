@@ -23,12 +23,22 @@ console.log(window.appConfig, typeof window.appConfig);
         (create_js_init(&str_config), default_config)
     };
 
+    println!("config_dir_is_none: {:?}", config_dir.is_none());
+
     if config_dir.is_none() {
         return create_default_values();
     }
 
     let config_dir = config_dir.unwrap();
     let config_dir = config_dir.as_path();
+
+    println!("config_dir: {:?}", config_dir);
+
+    if !config_dir.exists() {
+        if let Err(error) = std::fs::create_dir_all(config_dir) {
+            println!("can't create config dir {}", error.to_string());
+        }
+    }
 
     let path_to_app_config = config_dir.join(&super::APP_CONFIG_NAME);
 
