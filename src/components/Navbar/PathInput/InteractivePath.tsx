@@ -16,14 +16,10 @@ const InteractivePath: React.FC = () => {
     const [dirList, setDirList] = React.useState<string[] | undefined>(undefined);
     const [targetDir, setTargetDir] = React.useState<string>(currentPath);
     const [dirListIndex, setDirListIndex] = React.useState(0);
+    const [dirToReplace, setDirToReplace] = React.useState<string | undefined>(undefined);
 
     const dirListRef = useRef<HTMLDivElement | null>(null);
     const wrapperRef = useRef<HTMLDivElement | null>(null);
-
-    useClickAway(dirListRef, () => {
-        setDirList(undefined);
-        setDirListIndex(-1);
-    }, ["click"]);
 
     const handlePathPartClick = (partIndex: number) => {
         const currentPathParts = currentPath.split(sep);
@@ -39,7 +35,9 @@ const InteractivePath: React.FC = () => {
         pushRoute(newPath);
     };
 
-    const openDirsList = async (e: MouseEvent<HTMLButtonElement>, path: string, index: number) => {
+    const openDirsList = async (e: MouseEvent<HTMLButtonElement>, splittedPath: string[], index: number) => {
+        const path = splittedPath.slice(0, index).join(sep);
+
         if (!path) {
             return setDirList(undefined);
         }
@@ -47,9 +45,10 @@ const InteractivePath: React.FC = () => {
         try {
             const dirs = await getNestedDirnames(path);
 
-            setTargetDir(path);
             setDirList(dirs);
+            setTargetDir(path);
             setDirListIndex(index);
+            setDirToReplace(splittedPath[index]);
 
             const wrapperLeft = (wrapperRef.current?.getBoundingClientRect().left || 0);
             const dirListX = (e.currentTarget || e.target)?.getBoundingClientRect().left || 0;
@@ -60,6 +59,13 @@ const InteractivePath: React.FC = () => {
         }
     };
 
+    const handleRemoveDirsList = () => {
+        setDirList(undefined);
+        setDirListIndex(-1);
+    };
+
+    useClickAway(dirListRef, handleRemoveDirsList, ["mousedown"]);
+
     return (
         <>
             <div className={styles.interactivePath} ref={wrapperRef}>
@@ -69,7 +75,7 @@ const InteractivePath: React.FC = () => {
                             type="button"
                             className={joinCN(styles.pathPart, i === dirListIndex && styles.selected)}
                             onClick={() => handlePathPartClick(i)}
-                            onContextMenu={e => openDirsList(e, arr.slice(0, i).join(sep), i)}
+                            onContextMenu={e => openDirsList(e, arr, i)}
                         >
                             {pathPart}
                         </button>
@@ -81,10 +87,12 @@ const InteractivePath: React.FC = () => {
 
             {dirList && (
                 <DirsList
-                    onClose={() => setDirList(undefined)}
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    dirToReplace={dirToReplace!}
                     targetDir={targetDir}
-                    ref={dirListRef}
+                    onClose={handleRemoveDirsList}
                     files={dirList}
+                    ref={dirListRef}
                     x={x}
                 />
             )}
