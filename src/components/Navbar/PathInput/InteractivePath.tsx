@@ -15,7 +15,7 @@ const InteractivePath: React.FC = () => {
     const [x, setX] = React.useState(0);
     const [dirList, setDirList] = React.useState<string[] | undefined>(undefined);
     const [targetDir, setTargetDir] = React.useState<string>(currentPath);
-    const [dirListIndex, setDirListIndex] = React.useState(0);
+    const [dirListIndex, setDirListIndex] = React.useState(-1);
     const [dirToReplace, setDirToReplace] = React.useState<string | undefined>(undefined);
 
     const dirListRef = useRef<HTMLDivElement | null>(null);
