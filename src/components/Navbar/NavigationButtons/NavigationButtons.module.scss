@@ -18,7 +18,8 @@
     place-items: center;
 
     border-radius: 50%;
-    transition: opacity 150ms, transform 150ms;
+    outline: 1px solid transparent;
+    transition: opacity 150ms, transform 150ms, outline-color 150ms;
     background-color: #555;
 
     &:disabled {
@@ -32,6 +33,10 @@
 
     &:active:not(:disabled) {
         transform: scale(0.9);
+    }
+
+    &:focus {
+        outline-color: rgba($color: #fff, $alpha: 0.55);
     }
 
     svg {

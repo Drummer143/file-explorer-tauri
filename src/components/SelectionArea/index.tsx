@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useRefState } from "@hooks";
 import { useFilesSelectionStore } from "@zustand";
 
 import styles from "./SelectionArea.module.scss";
+import { appWindow } from "@tauri-apps/api/window";
 
 type SelectionAreaProps = {
     targetSelector: string;
@@ -15,6 +16,18 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
     const { setSelectedItems, selectedItems } = useFilesSelectionStore(state => state);
 
     const [hidden, setHidden] = useState(false);
+
+    const rootRect = useMemo((): { top: number; bottom: number; left: number; right: number } => {
+        if (!rootElement) {
+            return { bottom: 0, top: 0, left: 0, right: 0 };
+        }
+
+        const rect = rootElement.getBoundingClientRect();
+
+        return rect;
+    }, [rootElement]);
+
+    console.count("rerender");
 
     const startPos = useRef({ x: 0, y: 0 });
     const currentPos = useRef({ x: 0, y: 0 });
@@ -34,7 +47,10 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
             isCtrlKeyPressed.current = e.ctrlKey;
         }
 
-        currentPos.current = { y: e.clientY, x: e.clientX };
+        currentPos.current = {
+            y: Math.max(Math.min(e.clientY, rootRect.bottom), rootRect.top),
+            x: Math.max(Math.min(e.clientX, rootRect.right), rootRect.left)
+        };
 
         const targets = rootElement?.querySelectorAll(targetSelector);
 
@@ -78,6 +94,8 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
     const handleEndSelecting = useCallback(() => {
         document.removeEventListener("mousemove", handleMoveArea);
 
+        appWindow.setResizable(true);
+
         isMoving.current = false;
         isCtrlKeyPressed.current = false;
         prevSelectedItems.current = new Set();
@@ -91,6 +109,8 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
         if (!e.target || !e.currentTarget || !(e.currentTarget as HTMLElement).isSameNode(e.target as HTMLElement)) {
             return;
         }
+
+        appWindow.setResizable(false);
 
         document.addEventListener("mousemove", handleMoveArea);
         document.addEventListener("mouseup", handleEndSelecting, { once: true });
@@ -125,4 +145,4 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
     );
 };
 
-export default SelectionArea;
+export default memo(SelectionArea);

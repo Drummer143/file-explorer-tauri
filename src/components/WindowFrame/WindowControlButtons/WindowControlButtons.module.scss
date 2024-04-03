@@ -14,6 +14,8 @@
 
     padding: 0.125rem;
     border-radius: 0.25rem;
+    outline: 1px solid transparent;
+    transition: outline-color 150ms;
 
     overflow: hidden;
 
@@ -37,6 +39,10 @@
 
     &:active::after {
         background-color: var(--window-control-button-active-color);
+    }
+
+    &:focus {
+        outline-color: rgba($color: #fff, $alpha: 0.55);
     }
 
     svg {
