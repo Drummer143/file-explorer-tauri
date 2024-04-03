@@ -75,7 +75,6 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
     };
 
     useEffect(() => {
-        console.log("again");
         mountListeners().then(() => {
             setPaused(false);
 

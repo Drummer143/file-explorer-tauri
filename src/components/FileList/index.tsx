@@ -35,15 +35,15 @@ const FileList: React.FC = () => {
             case "disk":
                 return (
                     <Disk
-                        selected={selectedItems.has(file.mountPoint)}
+                        selected={selectedItems.includes(file.mountPoint)}
                         key={currentPath + file.mountPoint}
                         {...file}
                     />
                 );
             case "folder":
-                return <Folder selected={selectedItems.has(file.name)} key={currentPath + file.name} {...file} />;
+                return <Folder selected={selectedItems.includes(file.name)} key={currentPath + file.name} {...file} />;
             case "file":
-                return <File selected={selectedItems.has(file.name)} key={currentPath + file.name} {...file} />;
+                return <File selected={selectedItems.includes(file.name)} key={currentPath + file.name} {...file} />;
             default:
                 console.error("unhandled file", file);
         }
@@ -63,7 +63,7 @@ const FileList: React.FC = () => {
                 case "KeyX": {
                     let targets: PathsParts | PathsParts[];
 
-                    if (selectedItems.size > 1) {
+                    if (selectedItems.length > 1) {
                         targets = Array.from(selectedItems).map(filename => ({ dirname, filename }));
                     } else {
                         const filename = target.dataset.filename;
@@ -85,7 +85,7 @@ const FileList: React.FC = () => {
                 case "KeyC": {
                     let targets: PathsParts | PathsParts[];
 
-                    if (selectedItems.size > 1) {
+                    if (selectedItems.length > 1) {
                         targets = Array.from(selectedItems).map(filename => ({ dirname, filename }));
                     } else {
                         const filename = target.dataset.filename;
@@ -154,11 +154,11 @@ const FileList: React.FC = () => {
 
             if (focusedElementIndex === -1) {
 
-                if (selectedItems.size) {
+                if (selectedItems.length) {
                     for (const item of Array.from(listContainerRef.current.children)) {
                         const filename = (item as HTMLElement)?.dataset.filename;
 
-                        if (filename && selectedItems.has(filename)) {
+                        if (filename && selectedItems.includes(filename)) {
                             (item as HTMLElement)?.focus();
                             setSelectedItems([filename]);
 
@@ -253,7 +253,7 @@ const FileList: React.FC = () => {
         const target = e.target as HTMLElement;
         const selectedItems = selectedItemsRef.current;
 
-        if (!e.ctrlKey && e.currentTarget.isSameNode(target) && selectedItems.size > 0) {
+        if (!e.ctrlKey && e.currentTarget.isSameNode(target) && selectedItems.length > 0) {
             return clearSelectedItems();
         }
 
@@ -268,7 +268,7 @@ const FileList: React.FC = () => {
             }
 
             const files = Array.from(listContainerRef.current?.children as unknown as HTMLElement[]);
-            const firstSelectedIndex = files.findIndex(f => selectedItems.has(f.dataset.filename || ""));
+            const firstSelectedIndex = files.findIndex(f => selectedItems.includes(f.dataset.filename || ""));
 
             if (firstSelectedIndex === -1) {
                 setSelectedItems([activeElementFilename]);
@@ -280,13 +280,13 @@ const FileList: React.FC = () => {
             const targetIndex = files.findIndex(f => f.dataset.filename === targetFilename);
             let startIndex = Math.min(firstSelectedIndex, targetIndex);
             const endIndex = Math.max(firstSelectedIndex, targetIndex);
-            const newSelected = new Set<string>();
+            const newSelected: string[] = [];
 
             for (; startIndex <= endIndex; startIndex++) {
                 const filename = files[startIndex].dataset.filename;
 
                 if (filename) {
-                    newSelected.add(filename);
+                    newSelected.push(filename);
                 }
             }
 
@@ -294,10 +294,12 @@ const FileList: React.FC = () => {
         }
 
         if (e.ctrlKey) {
-            if (selectedItems.has(targetFilename)) {
-                selectedItems.delete(targetFilename);
+            const targetIndex = selectedItems.findIndex(entry => entry === targetFilename);
+
+            if (targetIndex === -1) {
+                selectedItems.push(targetFilename);
             } else {
-                selectedItems.add(targetFilename);
+                selectedItems.splice(targetIndex, 1); // remove
             }
 
             setSelectedItems(selectedItems);

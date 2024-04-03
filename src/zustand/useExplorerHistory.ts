@@ -41,8 +41,6 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
                 return;
             }
 
-            console.log("Pushing route", route);
-
             const updatedHistory = history.slice(0, currentPathIndex + 1).concat(route);
 
             set({

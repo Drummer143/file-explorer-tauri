@@ -1,10 +1,10 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { appWindow } from "@tauri-apps/api/window";
 import { useRefState } from "@hooks";
 import { useFilesSelectionStore } from "@zustand";
 
 import styles from "./SelectionArea.module.scss";
-import { appWindow } from "@tauri-apps/api/window";
 
 type SelectionAreaProps = {
     targetSelector: string;
@@ -13,7 +13,7 @@ type SelectionAreaProps = {
 }
 
 const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelector }) => {
-    const { setSelectedItems, selectedItems } = useFilesSelectionStore(state => state);
+    const { setSelectedItems, selectedItems } = useFilesSelectionStore();
 
     const [hidden, setHidden] = useState(false);
 
@@ -26,8 +26,6 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
 
         return rect;
     }, [rootElement]);
-
-    console.count("rerender");
 
     const startPos = useRef({ x: 0, y: 0 });
     const currentPos = useRef({ x: 0, y: 0 });
@@ -58,7 +56,7 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
             return;
         }
 
-        const selectedIds = isCtrlKeyPressed.current ? new Set(prevSelectedItems.current) : new Set<string>();
+        const selectedIds = isCtrlKeyPressed.current ? prevSelectedItems.current.concat() : [];
 
         const maxX = Math.max(startPos.current.x, currentPos.current.x);
         const minX = Math.min(startPos.current.x, currentPos.current.x);
@@ -80,15 +78,18 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
                 rect.top > maxY);
 
             if (isSelected) {
-                if (selectedIds.has(filename)) {
-                    prevSelectedItems.current.delete(filename);
+                const targetIndex = selectedItems.findIndex(entry => entry === filename);
+
+                if (targetIndex !== -1) {
+                    prevSelectedItems.current.splice(targetIndex, 1);
                 }
 
-                selectedIds.add(filename);
+                selectedIds.push(filename);
             }
         });
 
         setSelectedItems(selectedIds);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [rootElement, selectedItemsRef, setSelectedItems, targetSelector]);
 
     const handleEndSelecting = useCallback(() => {
@@ -98,7 +99,7 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
 
         isMoving.current = false;
         isCtrlKeyPressed.current = false;
-        prevSelectedItems.current = new Set();
+        prevSelectedItems.current = [];
 
         rootElement?.style.removeProperty("pointer-events");
 

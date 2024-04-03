@@ -56,7 +56,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
         const selectedFiles = selectedItemsRef.current;
 
         try {
-            if (selectedFiles.size > 1) {
+            if (selectedFiles.length > 1) {
                 const paths = Array.from(selectedFiles).map(file => currentPath + sep + file);
 
                 removeMultiple(paths);
@@ -86,7 +86,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
     const handleMovePasteFile = () => pasteFile(currentPath);
 
     useEffect(() => {
-        if (!selectedItemsRef.current.has(filename)) {
+        if (!selectedItemsRef.current.includes(filename)) {
             setSelectedItems([filename]);
         }
     }, [filename, selectedItemsRef, setSelectedItems]);

@@ -19,5 +19,5 @@ export const registerGlobalHotKeys = () => unregisterAll()
 
             window.requestUserAttention(UserAttentionType.Critical);
         });
-    })
-    .then(() => console.log("listeners installed"));
+    });
+    // .then(() => console.log("listeners installed"));

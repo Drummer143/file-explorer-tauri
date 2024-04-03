@@ -1,22 +1,20 @@
 import { create } from "zustand";
 
-type StrSet = Set<string>;
-
 interface FileSelectionState {
-    selectedItems: StrSet;
+    selectedItems: string[];
 
-    setSelectedItems: (items: StrSet | string[] | ((prev: StrSet) => StrSet)) => void;
+    setSelectedItems: (items: string[] | ((prev: string[]) => string[])) => void;
     clearSelectedItems: () => void;
 }
 
 export const useFilesSelectionStore = create<FileSelectionState>((set, get) => ({
-    selectedItems: new Set(),
+    selectedItems: [],
 
-    clearSelectedItems: () => set({ selectedItems: new Set() }),
+    clearSelectedItems: () => set({ selectedItems: [] }),
 
     setSelectedItems: (value) => {
         const { selectedItems } = get();
-        const newSelected: StrSet = typeof value === "function" ? value(selectedItems) : new Set(value);
+        const newSelected: string[] = typeof value === "function" ? value(selectedItems) : value;
 
         set({ selectedItems: newSelected });
     }

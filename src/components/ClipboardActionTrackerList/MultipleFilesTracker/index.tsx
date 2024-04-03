@@ -51,7 +51,7 @@ const MultipleFilesTracker: React.FC<MultipleFilesTrackerProps> = ({
     }, [eventId, onRemove]);
 
     useEffect(() => {
-        mountListeners().then(() => console.log("mounted"));
+        mountListeners();
     }, [mountListeners]);
 
     return (

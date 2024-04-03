@@ -86,6 +86,7 @@ export const useWatchPathChange = () => {
         }
 
         setLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sortConfig, updateFilesOnDirChange]);
 
     useEffect(() => {
