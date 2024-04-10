@@ -79,4 +79,7 @@ export const getFileType = (pathToFile: string) =>
 export const dirname = (path: string) => invoke<string>("plugin:cfs|dirname", { path });
 
 export const getNestedDirnames = (pathToDir: string) =>
-    invoke<string[]>("plugin:cfs|get_nested_dirnames", { pathToDir });
+    invoke<string[]>("plugin:cfs|get_dirnames", { pathToDir });
+
+export const getDiskNames = () =>
+    invoke<string[]>("plugin:cfs|get_disk_names");

@@ -3,7 +3,7 @@
 use super::types::ErrorMessage;
 
 #[tauri::command(async)]
-pub fn get_nested_dirnames(path_to_dir: String) -> Result<Vec<String>, ErrorMessage> {
+pub fn get_dirnames(path_to_dir: String) -> Result<Vec<String>, ErrorMessage> {
     let path = Path::new(&path_to_dir);
 
     if !path.exists() {

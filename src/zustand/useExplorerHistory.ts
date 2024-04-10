@@ -4,8 +4,6 @@ import { create } from "zustand";
 
 import { dirname } from "@tauriAPI";
 
-type HistoryUpdateType = "back" | "forward" | "push" | "init";
-
 interface ExplorerHistoryState {
     history: string[];
     canGoBack: boolean;
@@ -13,7 +11,6 @@ interface ExplorerHistoryState {
     currentPath: string;
     currentPathIndex: number;
     hasParent: boolean;
-    lastHistoryUpdateType: HistoryUpdateType;
 
     prevTargetFile?: string;
 
@@ -32,7 +29,6 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
         history: [""],
         currentPathIndex: 0,
         hasParent: false,
-        lastHistoryUpdateType: "init",
 
         pushRoute: route => {
             const { history, currentPathIndex, currentPath } = get();
@@ -50,7 +46,6 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
                 currentPathIndex: currentPathIndex + 1,
                 currentPath: route,
                 hasParent: !!route,
-                lastHistoryUpdateType: "push",
                 prevTargetFile: undefined
             });
         },
@@ -71,7 +66,6 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
                 canGoForward: true,
                 currentPathIndex: newIndex,
                 hasParent: !!history[newIndex],
-                lastHistoryUpdateType: "back",
                 prevTargetFile: currentPath.split(sep).at(-1)
             });
 
@@ -94,7 +88,6 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
                 canGoBack: true,
                 currentPathIndex: newIndex,
                 hasParent: !!history[newIndex],
-                lastHistoryUpdateType: "forward",
                 prevTargetFile: history[newIndex + 1]?.split(sep).at(-1)
             });
 
@@ -138,7 +131,7 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
                 history: [""]
             });
         }
-    }) /* , {
+    })/* , {
         name: "store:history",
         version: 1
     }) */

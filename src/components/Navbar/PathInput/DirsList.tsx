@@ -28,7 +28,11 @@ const DirsList: ForwardRefRenderFunction<HTMLDivElement, DirsListProps> = ({
     const handleClick = (e: MouseEvent, file: string) => {
         e.stopPropagation();
 
-        pushRoute(`${targetDir}${sep}${file}`);
+        if (targetDir) {
+            pushRoute(`${targetDir}${sep}${file}`);
+        } else {
+            pushRoute(file);
+        }
 
         onClose();
     };

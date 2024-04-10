@@ -1,9 +1,10 @@
 pub(super) mod app_config;
 pub(super) mod copy;
+pub(super) mod get_dirnames;
+pub(super) mod get_disk_names;
 pub(super) mod get_disks;
 pub(super) mod get_file_size;
 pub(super) mod read_dir;
-pub(super) mod read_dir_simplified;
 pub(super) mod remove;
 pub(super) mod rename;
 pub(super) mod sort_files;
@@ -23,9 +24,10 @@ use self::{
         copy_file::{__cmd__copy_file, copy_file},
         copy_multiple_files::{__cmd__copy_multiple_files, copy_multiple_files},
     },
+    get_dirnames::{__cmd__get_dirnames, get_dirnames},
+    get_disk_names::{__cmd__get_disk_names, get_disk_names},
     get_disks::{__cmd__get_disks, get_disks},
     read_dir::{__cmd__read_dir, read_dir},
-    read_dir_simplified::{__cmd__get_nested_dirnames, get_nested_dirnames},
     remove::{
         remove_directory::{__cmd__remove_directory, remove_directory},
         remove_file::{__cmd__remove_file, remove_file},
@@ -216,9 +218,10 @@ pub fn init<R: Runtime>(config: &tauri::Config) -> TauriPlugin<R> {
             create_file,
             dirname,
             exists,
+            get_dirnames,
             get_disks,
+            get_disk_names,
             get_file_type,
-            get_nested_dirnames,
             print_state,
             remove,
             read_dir,

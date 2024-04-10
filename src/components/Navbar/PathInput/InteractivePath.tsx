@@ -3,7 +3,7 @@ import { sep } from "@tauri-apps/api/path";
 
 import DirsList from "./DirsList";
 import { useClickAway } from "@hooks";
-import { getNestedDirnames } from "@tauriAPI";
+import { getDiskNames, getNestedDirnames } from "@tauriAPI";
 import { useExplorerHistory } from "@zustand";
 import { addNotificationFromError, joinCN } from "@utils";
 
@@ -38,12 +38,14 @@ const InteractivePath: React.FC = () => {
     const openDirsList = async (e: MouseEvent<HTMLButtonElement>, splittedPath: string[], index: number) => {
         const path = splittedPath.slice(0, index).join(sep);
 
-        if (!path) {
-            return setDirList(undefined);
-        }
-
         try {
-            const dirs = await getNestedDirnames(path);
+            let dirs: string[] = [];
+
+            if (!path) {
+                dirs = await getDiskNames();
+            } else {
+                dirs = await getNestedDirnames(path);
+            }
 
             setDirList(dirs);
             setTargetDir(path);
