@@ -1,10 +1,17 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 
 import { appWindow } from "@tauri-apps/api/window";
-import { useRefState } from "@hooks";
+import { useRefState, useResizeObserver } from "@hooks";
 import { useFilesSelectionStore } from "@zustand";
 
 import styles from "./SelectionArea.module.scss";
+
+interface RootRect {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number
+}
 
 type SelectionAreaProps = {
     targetSelector: string;
@@ -17,16 +24,7 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
 
     const [hidden, setHidden] = useState(false);
 
-    const rootRect = useMemo((): { top: number; bottom: number; left: number; right: number } => {
-        if (!rootElement) {
-            return { bottom: 0, top: 0, left: 0, right: 0 };
-        }
-
-        const rect = rootElement.getBoundingClientRect();
-
-        return rect;
-    }, [rootElement]);
-
+    const rootRect = useRef<RootRect>({ bottom: 0, top: 0, left: 0, right: 0 });
     const startPos = useRef({ x: 0, y: 0 });
     const currentPos = useRef({ x: 0, y: 0 });
     const isMoving = useRef(false);
@@ -34,6 +32,16 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
     const isCtrlKeyPressed = useRef(false);
 
     const selectedItemsRef = useRefState(selectedItems);
+
+    useResizeObserver({
+        target: rootElement,
+        onResize: ([e]) => {
+            const { bottom, top, left, right } = e.target.getBoundingClientRect();
+
+            rootRect.current = { bottom, top, left, right };
+        }
+    });
+
 
     const handleMoveArea = useCallback((e: MouseEvent) => {
         if (!isMoving.current) {
@@ -46,8 +54,8 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
         }
 
         currentPos.current = {
-            y: Math.max(Math.min(e.clientY, rootRect.bottom), rootRect.top),
-            x: Math.max(Math.min(e.clientX, rootRect.right), rootRect.left)
+            y: Math.max(Math.min(e.clientY, rootRect.current.bottom), rootRect.current.top),
+            x: Math.max(Math.min(e.clientX, rootRect.current.right), rootRect.current.left)
         };
 
         const targets = rootElement?.querySelectorAll(targetSelector);
@@ -78,7 +86,7 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
                 rect.top > maxY);
 
             if (isSelected) {
-                const targetIndex = selectedItems.findIndex(entry => entry === filename);
+                const targetIndex = selectedItemsRef.current.findIndex(entry => entry === filename);
 
                 if (targetIndex !== -1) {
                     prevSelectedItems.current.splice(targetIndex, 1);
@@ -89,8 +97,8 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
         });
 
         setSelectedItems(selectedIds);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [rootElement, selectedItemsRef, setSelectedItems, targetSelector]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [rootElement, setSelectedItems, targetSelector]);
 
     const handleEndSelecting = useCallback(() => {
         document.removeEventListener("mousemove", handleMoveArea);
