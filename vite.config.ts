@@ -1,10 +1,11 @@
 import svgr from "vite-plugin-svgr";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import { fileURLToPath } from "node:url";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [react(), svgr()],
+    plugins: [react(), svgr({ include: "**/*.svg?react" })],
 
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
     // prevent vite from obscuring rust errors
@@ -32,16 +33,19 @@ export default defineConfig({
         sourcemap: !!process.env.TAURI_DEBUG
     },
     resolve: {
-        alias: {
-            "@src": "src",
-            "@utils": "src/utils/index.ts",
-            "@i18n": "src/i18n/index.ts",
-            "@tauriAPI": "src/tauriAPIWrapper/index.ts",
-            "@hooks": "src/hooks/index.ts",
-            "@assets": "src/assets/index.ts",
-            "@zustand": "src/zustand/index.ts",
-            "@test-utils": "src/tests/test-utils.tsx",
-            "@components": "src/components/"
-        }
+        alias: [
+            { find: "@", replacement: fileURLToPath(new URL("/src", import.meta.url)) },
+            { find: "@hooks", replacement: fileURLToPath(new URL("./src/hooks/index.ts", import.meta.url)) },
+            { find: "@utils", replacement: fileURLToPath(new URL("./src/utils/index.ts", import.meta.url)) },
+            { find: "@i18n", replacement: fileURLToPath(new URL("./src/i18n/index.ts", import.meta.url)) },
+            { find: "@assets", replacement: fileURLToPath(new URL("./src/assets/index.ts", import.meta.url)) },
+            {
+                find: "@tauriAPI",
+                replacement: fileURLToPath(new URL("./src/tauriAPIWrapper/index.ts", import.meta.url))
+            },
+            { find: "@zustand", replacement: fileURLToPath(new URL("./src/zustand/index.ts", import.meta.url)) },
+            { find: "@components", replacement: fileURLToPath(new URL("./src/components/index.ts", import.meta.url)) },
+            { find: "@contexts", replacement: fileURLToPath(new URL("./src/contexts/index.ts", import.meta.url)) }
+        ]
     }
 });

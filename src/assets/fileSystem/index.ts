@@ -1,3 +1,5 @@
-export { ReactComponent as DiskSVG } from "./disk.svg";
-export { ReactComponent as FolderSVG } from "./folder.svg";
-export { ReactComponent as FileSVG } from "./file.svg";
+import DiskSVG from "./disk.svg?react";
+import FolderSVG from "./folder.svg?react";
+import FileSVG from "./file.svg?react";
+
+export { DiskSVG, FolderSVG, FileSVG };

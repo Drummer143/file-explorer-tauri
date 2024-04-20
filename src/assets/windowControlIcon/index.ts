@@ -1,4 +1,6 @@
-export { ReactComponent as CloseSVG } from "./close.svg";
-export { ReactComponent as MinimizeSVG } from "./minimize.svg";
-export { ReactComponent as MaximizeSVG } from "./maximize.svg";
-export { ReactComponent as RestoreToWindowSVG } from "./restoreToWindow.svg";
+import CloseSVG from "./close.svg?react";
+import MinimizeSVG from "./minimize.svg?react";
+import MaximizeSVG from "./maximize.svg?react";
+import RestoreToWindowSVG from "./restoreToWindow.svg?react";
+
+export { CloseSVG, MinimizeSVG, MaximizeSVG, RestoreToWindowSVG };
