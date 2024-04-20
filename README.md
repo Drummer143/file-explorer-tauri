@@ -56,7 +56,6 @@ TODO:
     -   [ ] Refactor the naming of fields in localization objects to names associated with the HTML structure
 -   [x] Context Menu
 -   [ ] Side Menu
--   [ ] Drag and drop
 -   [x] Custom scrollbar
 -   [ ] Hotkeys
 -   [ ] Customization
@@ -74,6 +73,10 @@ TODO:
 -   [ ] Track all long-term actions
     -   [x] File copying/moving
     -   [x] Folder copying/moving/deleting(if not empty)
+
+tauri v2 waiting room
+-   [ ] Drag and drop
+
 
 BUGS:
 
