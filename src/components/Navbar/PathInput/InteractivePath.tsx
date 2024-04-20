@@ -71,7 +71,7 @@ const InteractivePath: React.FC = () => {
     return (
         <>
             <div className={styles.interactivePath} ref={wrapperRef}>
-                {currentPath.split(sep).map((pathPart, i, arr) => (
+                {currentPath.split(sep).filter(Boolean).map((pathPart, i, arr) => (
                     <React.Fragment key={pathPart + i}>
                         <button
                             type="button"

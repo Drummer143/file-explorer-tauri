@@ -206,12 +206,32 @@ pub fn dirname(path: String) -> Result<String, ErrorMessage> {
     }
 }
 
+#[tauri::command(async)]
+pub fn canonicalize(path: &Path) -> Result<String, ErrorMessage> {
+    match path.canonicalize() {
+        Ok(canonicalized) => {
+            let mut canonicalized = canonicalized.to_str().unwrap();
+
+            canonicalized
+                .starts_with("\\\\?\\")
+                .then(|| canonicalized = &canonicalized[4..]);
+
+            Ok(canonicalized.into())
+        }
+        Err(error) => Err(ErrorMessage::new_all(
+            "Can't get canonicalized path",
+            &error.to_string(),
+        )),
+    }
+}
+
 pub fn init<R: Runtime>(config: &tauri::Config) -> TauriPlugin<R> {
     let (js_init_script, app_config) = app_config::init(tauri::api::path::app_config_dir(config));
 
     Builder::new("cfs")
         .invoke_handler(tauri::generate_handler![
             add_index_to_filename,
+            canonicalize,
             copy_directory,
             copy_file,
             copy_multiple_files,

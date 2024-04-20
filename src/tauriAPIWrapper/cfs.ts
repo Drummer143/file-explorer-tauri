@@ -83,3 +83,5 @@ export const getNestedDirnames = (pathToDir: string) =>
 
 export const getDiskNames = () =>
     invoke<string[]>("plugin:cfs|get_disk_names");
+
+export const canonicalize = (path: string) => invoke<string>("plugin:cfs|canonicalize", { path });

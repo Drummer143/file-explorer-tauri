@@ -6,6 +6,7 @@ export const useClickAway = <E extends Event = Event>(
     events: (keyof MergedEventMap)[] = ["mousedown", "touchstart"]
 ) => {
     const savedCallback = useRef(onClickAway);
+    const handlerRef = useRef<((event: unknown) => void) | null>(null);
 
     useEffect(() => {
         savedCallback.current = onClickAway;
@@ -19,14 +20,24 @@ export const useClickAway = <E extends Event = Event>(
             el && !el.contains(event.target) && savedCallback.current(event);
         };
 
+        handlerRef.current = handler;
+
         for (const eventName of events) {
-            document.addEventListener(eventName, handler);
+            document.addEventListener(eventName, handler, { once: true });
         }
-        
+
         return () => {
             for (const eventName of events) {
                 document.removeEventListener(eventName, handler);
             }
         };
     }, [events, ref]);
+
+    return () => {
+        if (!handlerRef.current) return;
+
+        for (const eventName of events) {
+            document.removeEventListener(eventName, handlerRef.current);
+        }
+    };
 };

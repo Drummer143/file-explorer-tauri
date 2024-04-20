@@ -1,27 +1,45 @@
-import React, { ChangeEventHandler, FormEventHandler, useEffect, useState } from "react";
+import React, { ChangeEventHandler, FormEventHandler, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { message } from "@tauri-apps/api/dialog";
-import { normalize } from "@tauri-apps/api/path";
 
 import InteractivePath from "./InteractivePath";
-import { pathExists } from "@tauriAPI";
+import InputSuggestions from "./InputSuggestions";
+import { useClickAway } from "@hooks";
 import { useExplorerHistory } from "@zustand";
+import { canonicalize, pathExists } from "@tauriAPI";
 
 import styles from "./PathInput.module.scss";
+import { joinCN } from "@utils";
+import { sep } from "@tauri-apps/api/path";
 
 const PathInput: React.FC = () => {
     const { currentPath, pushRoute } = useExplorerHistory();
 
+    const formRef = useRef<HTMLFormElement | null>(null);
+    const inputRef = useRef<HTMLInputElement | null>(null);
+    const inputTextSizeTrackerRef = useRef<HTMLSpanElement | null>(null);
+
     const [inputValue, setInputValue] = useState(currentPath);
+    const [focusOnList, setFocusOnList] = useState(false);
+    const [isInputActive, setIsInputActive] = useState(false);
+    const [inputTextWidth, setInputTextWidth] = useState(0);
+
+    const unmountClickAway = useClickAway(inputRef, () => setIsInputActive(false), ["mousedown"]);
 
     const handleSubmit: FormEventHandler<HTMLFormElement & { path: HTMLInputElement }> = async e => {
         e.preventDefault();
 
         const form = e.currentTarget;
         const isExists = await pathExists(inputValue);
-        const normalizedPath = await normalize(inputValue);
+        const normalizedPath = await canonicalize(inputValue);
+
+        const resetInput = () => {
+            inputRef.current?.blur();
+            unmountClickAway();
+            setIsInputActive(false);
+        };
 
         if (normalizedPath === currentPath) {
-            return;
+            return resetInput();
         }
 
         if (!isExists) {
@@ -32,29 +50,90 @@ const PathInput: React.FC = () => {
             return;
         }
 
+        resetInput();
         pushRoute(normalizedPath);
         setInputValue(normalizedPath);
     };
 
-    const handleChange: ChangeEventHandler<HTMLInputElement> = e => {
-        setInputValue(e.target.value);
+    const handleChange: ChangeEventHandler<HTMLInputElement> = e => setInputValue(e.target.value);
+
+    const handleSuggestionClick = (path: string) => {
+        setInputValue(path);
+        inputRef.current?.focus();
     };
+
+    const handleInputKeydown: React.KeyboardEventHandler<HTMLInputElement> = e => {
+        if (e.key === "Escape") {
+            e.stopPropagation();
+            e.preventDefault();
+
+            if (inputValue === currentPath) {
+                inputRef.current?.blur();
+                unmountClickAway();
+                setIsInputActive(false);
+            } else {
+                setInputValue(currentPath);
+            }
+        } else if (e.key === "ArrowDown") {
+            e.preventDefault();
+            e.stopPropagation();
+            setFocusOnList(true);
+        }
+    };
+
+    const handleInputFocus = () => {
+        setFocusOnList(false);
+        setIsInputActive(true);
+    };
+
+    const handleToggleInputFocusFromSuggestions = () => {
+        setFocusOnList(false);
+        inputRef.current?.focus();
+        setTimeout(() =>
+            inputRef.current?.setSelectionRange(inputValue.length, inputValue.length)
+        );
+    };
+
+    useLayoutEffect(() => {
+        setInputTextWidth(inputTextSizeTrackerRef.current?.clientWidth || 0);
+    }, [inputValue]);
 
     useEffect(() => setInputValue(currentPath), [currentPath]);
 
     return (
-        <form className={styles.wrapper} onSubmit={handleSubmit}>
-            <div className={styles.inputContainer} data-current-path={currentPath}>
+        <form className={styles.wrapper} onSubmit={handleSubmit} ref={formRef}>
+            <div
+                className={styles.inputContainer}
+                data-current-path={currentPath}
+            >
+                <span
+                    ref={inputTextSizeTrackerRef}
+                    className={styles.invisibleTextSizeTracker}
+                >{inputValue.split(sep).slice(0, -1).join(sep)}\</span>
+
                 <input
+                    ref={inputRef}
                     type="text"
                     name="path"
                     autoComplete="off"
-                    className={styles.input}
+                    className={joinCN(styles.input, isInputActive && styles.inputActive)}
                     value={inputValue}
+                    onKeyDown={handleInputKeydown}
                     onChange={handleChange}
+                    onFocus={handleInputFocus}
                 />
 
-                {currentPath && <InteractivePath />}
+                {isInputActive && (
+                    <InputSuggestions
+                        onInputFocus={handleToggleInputFocusFromSuggestions}
+                        left={inputTextWidth}
+                        focusOnList={focusOnList}
+                        onSelect={handleSuggestionClick}
+                        pathForSuggestions={inputValue}
+                    />
+                )}
+
+                {!isInputActive && <InteractivePath />}
             </div>
         </form>
     );
