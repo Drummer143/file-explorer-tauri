@@ -44,7 +44,7 @@ export const prepareDataBeforeCopy = async (to: string): Promise<false | Omit<Co
 
     try {
         const copiedFileInfo: CopiedFileInfo = JSON.parse(info);
-        const mergePathParts = (dirname: string, filename: string) => dirname + sep + filename;
+        const mergePathParts = (dirname: string, filename: string) => dirname + sep() + filename;
         const isNestedPath = (parentPath: string, nestedPath: string) => parentPath.includes(nestedPath);
         // const copyType: StartTrackingClipboardActionDetail["type"];
 

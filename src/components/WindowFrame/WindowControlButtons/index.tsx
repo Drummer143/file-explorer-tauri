@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { appWindow } from "@tauri-apps/api/window";
+import { getCurrent } from "@tauri-apps/api/window";
 import { useTranslation } from "react-i18next";
 
 import { CloseSVG, MaximizeSVG, MinimizeSVG, RestoreToWindowSVG } from "@assets";
@@ -10,6 +10,8 @@ const WindowControlButtons: React.FC = () => {
     const { t } = useTranslation("translation", { keyPrefix: "windowControlButtons" });
 
     const [isMaximized, setIsMaximized] = useState(false);
+
+    const appWindow = getCurrent();
 
     const isWindowMaximized = async () => {
         const isMaximized = await appWindow.isMaximized();

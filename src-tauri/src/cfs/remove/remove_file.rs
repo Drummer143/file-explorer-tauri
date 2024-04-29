@@ -1,14 +1,14 @@
 use std::{ffi::OsStr, os::windows::prelude::MetadataExt, path::Path};
 use tauri::{Runtime, Window};
 
-use crate::cfs::types::ErrorMessage;
+use crate::{cfs::types::ErrorMessage, AppState};
 
 use super::{confirm_deletion::{confirm_deletion, RemoveFileOptions}, move_to_trash::move_to_trash};
 
 #[tauri::command(async)]
 pub fn remove_file<R: Runtime>(
     window: Window<R>,
-    state: tauri::State<'_, crate::cfs::CFSState>,
+    state: tauri::State<'_, AppState>,
     path_to_file: String,
 ) -> Result<(), ErrorMessage> {
     let path = Path::new(&path_to_file);

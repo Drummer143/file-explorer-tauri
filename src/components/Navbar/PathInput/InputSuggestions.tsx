@@ -33,15 +33,17 @@ const InputSuggestions: React.FC<InputSuggestionsProps> = ({
             return;
         }
 
+        const separator = sep();
+
         try {
-            const splittedPath = path.split(sep);
-            const targetPath = splittedPath.at(-1) ? splittedPath.slice(0, -1).join(sep) : path;
+            const splittedPath = path.split(separator);
+            const targetPath = splittedPath.at(-1) ? splittedPath.slice(0, -1).join(separator) : path;
             const dirs = await getNestedDirnames(targetPath);
 
             setSuggestedPaths(dirs);
 
-            if (!path.endsWith(sep)) {
-                const currentDirName = path.split(sep).pop()?.toLowerCase() || "";
+            if (!path.endsWith(separator)) {
+                const currentDirName = path.split(separator).pop()?.toLowerCase() || "";
                 const filtered = dirs.filter((suggestion) => suggestion.toLowerCase().startsWith(currentDirName));
 
                 if (filtered.length) {
@@ -59,9 +61,11 @@ const InputSuggestions: React.FC<InputSuggestionsProps> = ({
     };
 
     const onSuggestionClick = (suggestion: string) => {
+        const separator = sep();
+
         setFilteredSuggestedPaths(undefined);
         setSuggestedPaths(undefined);
-        onSelect(`${pathForSuggestions.split(sep).slice(0, -1).join(sep)}${sep}${suggestion}`);
+        onSelect(`${pathForSuggestions.split(separator).slice(0, -1).join(separator)}${separator}${suggestion}`);
     };
 
     const onListKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {

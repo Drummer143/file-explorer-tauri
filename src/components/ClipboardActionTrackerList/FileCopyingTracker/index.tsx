@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { sep } from "@tauri-apps/api/path";
-import { appWindow } from "@tauri-apps/api/window";
 import { UnlistenFn } from "@tauri-apps/api/event";
+import { getCurrent } from "@tauri-apps/api/window";
 import { useTranslation } from "react-i18next";
 
 import { removeRaw } from "@tauriAPI";
@@ -24,6 +24,8 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
         progress: UnlistenFn;
         finished: UnlistenFn;
     } | null>(null);
+
+    const appWindow = getCurrent();
 
     const mountListeners = useCallback(async () => {
         if (untrack.current) {
@@ -71,7 +73,7 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
     const handleRemoveTrackerAndDeleteCopiedFile = () => {
         handleRemoveTracker();
 
-        removeRaw(to + sep + filename).catch(error => console.error(error));
+        removeRaw(to + sep() + filename).catch(error => console.error(error));
     };
 
     useEffect(() => {

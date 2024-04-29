@@ -107,12 +107,12 @@ const CreateFileModal: React.FC = () => {
             }
 
             if (targetFile.current?.filename) {
-                const from = targetFile.current.dirname + sep + targetFile.current.filename;
-                const to = targetFile.current.dirname + sep + mergedFilename;
+                const from = targetFile.current.dirname + sep() + targetFile.current.filename;
+                const to = targetFile.current.dirname + sep() + mergedFilename;
 
                 rename(from, to).catch(addNotificationFromError);
             } else {
-                createFile(targetFile.current.dirname + sep + mergedFilename, filetype);
+                createFile(targetFile.current.dirname + sep() + mergedFilename, filetype);
             }
         } catch (error) {
             addNotificationFromError(error);

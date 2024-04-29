@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { sep } from "@tauri-apps/api/path";
-import { appWindow } from "@tauri-apps/api/window";
 import { UnlistenFn } from "@tauri-apps/api/event";
+import { getCurrent } from "@tauri-apps/api/window";
 import { useTranslation } from "react-i18next";
 
 import FileCopyingTracker from "../FileCopyingTracker";
@@ -29,6 +29,8 @@ const MultipleFilesTracker: React.FC<MultipleFilesTrackerProps> = ({
         fileCopied: UnlistenFn;
         allFinished: UnlistenFn;
     } | null>(null);
+
+    const appWindow = getCurrent();
 
     const mountListeners = useCallback(async () => {
         appWindow.listen<[number, FileTypes]>(`copy-next-file//${eventId}`, e => {
@@ -68,7 +70,7 @@ const MultipleFilesTracker: React.FC<MultipleFilesTrackerProps> = ({
                     eventId={eventId}
                     from={paths[index].from}
                     to={paths[index].to}
-                    filename={paths[index].from.split(sep).at(-1)!}
+                    filename={paths[index].from.split(sep()).at(-1)!}
                 />
             ) : fileType === "folder" ? (
                 <FolderCopyingTracker
@@ -76,7 +78,7 @@ const MultipleFilesTracker: React.FC<MultipleFilesTrackerProps> = ({
                     eventId={eventId}
                     from={paths[index].from}
                     to={paths[index].to}
-                    filename={paths[index].from.split(sep).at(-1)!}
+                    filename={paths[index].from.split(sep()).at(-1)!}
                 />
             ) : (
                 <div>{t("preparingToCopyFolder")}</div>

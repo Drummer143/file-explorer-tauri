@@ -1,75 +1,25 @@
 {
+    "productName": "file-explorer",
+    "version": "0.1.1",
+    "identifier": "com.evgeny-berg.file-explorer",
     "build": {
-        "beforeDevCommand": "npm run dev",
-        "beforeBuildCommand": "npm run build",
-        "devPath": "http://localhost:1420",
-        "distDir": "../dist"
+        "beforeDevCommand": "pnpm dev",
+        "devUrl": "http://localhost:1420",
+        "beforeBuildCommand": "pnpm build",
+        "frontendDist": "../dist"
     },
-    "package": {
-        "productName": "file-explorer",
-        "version": "0.1.1"
+    "bundle": {
+        "active": true,
+        "targets": "all",
+        "icon": [
+            "icons/32x32.png",
+            "icons/128x128.png",
+            "icons/128x128@2x.png",
+            "icons/icon.icns",
+            "icons/icon.ico"
+        ]
     },
-    "tauri": {
-        "cli": {
-            "args": [
-                {
-                    "name": "path",
-                    "short": "p",
-                    "takesValue": true,
-                    "description": "Start path",
-                    "multiple": false
-                },
-                {
-                    "name": "focused",
-                    "short": "f",
-                    "takesValue": true,
-                    "description": "Filename of focused element. Must be relative",
-                    "multiple": false
-                }
-            ]
-        },
-        "allowlist": {
-            "all": true
-        },
-        "bundle": {
-            "active": true,
-            "category": "DeveloperTool",
-            "copyright": "",
-            "deb": {
-                "depends": []
-            },
-            "externalBin": [],
-            "icon": [
-                "icons/32x32.png",
-                "icons/128x128.png",
-                "icons/128x128@2x.png",
-                "icons/icon.icns",
-                "icons/icon.ico"
-            ],
-            "identifier": "file-explorer",
-            "longDescription": "",
-            "macOS": {
-                "entitlements": null,
-                "exceptionDomain": "",
-                "frameworks": [],
-                "providerShortName": null,
-                "signingIdentity": null
-            },
-            "resources": [],
-            "shortDescription": "",
-            "targets": "all",
-            "windows": {
-                "certificateThumbprint": null,
-                "digestAlgorithm": "sha256",
-                "timestampUrl": ""
-            }
-        },
-        "security": {
-            "csp": null
-        },
-        "updater": {
-            "active": false
-        },
+    "app": {
         "windows": [
             {
                 "decorations": false,
@@ -78,9 +28,11 @@
                 "label": "main",
                 "resizable": true,
                 "title": "file-explorer",
-                "width": 800,
-                "fileDropEnabled": true
+                "width": 800
             }
-        ]
+        ],
+        "security": {
+            "csp": null
+        }
     }
 }

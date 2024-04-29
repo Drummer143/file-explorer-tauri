@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import ReactModal from "react-modal";
-import { appWindow } from "@tauri-apps/api/window";
+import { getCurrent } from "@tauri-apps/api/window";
 import { useTranslation } from "react-i18next";
 import { basename, dirname, sep } from "@tauri-apps/api/path";
 import { UnlistenFn, Event as TauriEvent } from "@tauri-apps/api/event";
@@ -20,7 +20,7 @@ const FileExistModal: React.FC = () => {
     const closeModal = () => setFileInfo(undefined);
 
     const handleClick = async (action: "overwrite" | "saveBoth" | "skip" | "merge") => {
-        appWindow.emit("file-exists-answer", action);
+        getCurrent().emit("file-exists-answer", action);
 
         closeModal();
     };
@@ -47,7 +47,7 @@ const FileExistModal: React.FC = () => {
         };
 
         const mountListener = async () => {
-            unlistenExistFile.current = await appWindow.listen("file-exists", handleOpenModal);
+            unlistenExistFile.current = await getCurrent().listen("file-exists", handleOpenModal);
         };
 
         mountListener();
@@ -74,7 +74,7 @@ const FileExistModal: React.FC = () => {
         >
             <p>
                 {t("modals.fileExistModal.modalText", {
-                    filename: fileInfo?.filename.split(sep).at(-1),
+                    filename: fileInfo?.filename.split(sep()).at(-1),
                     targetFolder: fileInfo?.dirname || "this folder"
                 })}
             </p>

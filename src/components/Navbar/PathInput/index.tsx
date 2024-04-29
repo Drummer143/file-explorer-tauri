@@ -1,15 +1,15 @@
 import React, { ChangeEventHandler, FormEventHandler, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { message } from "@tauri-apps/api/dialog";
+import { sep } from "@tauri-apps/api/path";
+import { message } from "@tauri-apps/plugin-dialog";
 
 import InteractivePath from "./InteractivePath";
 import InputSuggestions from "./InputSuggestions";
+import { joinCN } from "@utils";
 import { useClickAway } from "@hooks";
 import { useExplorerHistory } from "@zustand";
 import { canonicalize, pathExists } from "@tauriAPI";
 
 import styles from "./PathInput.module.scss";
-import { joinCN } from "@utils";
-import { sep } from "@tauri-apps/api/path";
 
 const PathInput: React.FC = () => {
     const { currentPath, pushRoute } = useExplorerHistory();
@@ -43,7 +43,7 @@ const PathInput: React.FC = () => {
         }
 
         if (!isExists) {
-            message("This path doesn't exist", { type: "error" });
+            message("This path doesn't exist", { kind: "error" });
 
             form.path.focus();
 
@@ -100,6 +100,8 @@ const PathInput: React.FC = () => {
 
     useEffect(() => setInputValue(currentPath), [currentPath]);
 
+    const separator = sep();
+
     return (
         <form className={styles.wrapper} onSubmit={handleSubmit} ref={formRef}>
             <div
@@ -109,7 +111,7 @@ const PathInput: React.FC = () => {
                 <span
                     ref={inputTextSizeTrackerRef}
                     className={styles.invisibleTextSizeTracker}
-                >{inputValue.split(sep).slice(0, -1).join(sep)}\</span>
+                >{inputValue.split(separator).slice(0, -1).join(separator)}\</span>
 
                 <input
                     ref={inputRef}

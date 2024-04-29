@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useRefState } from "@hooks";
 import { useExplorerHistory, useFilesSelectionStore } from "@zustand";
-import { openInExplorer, openFile, remove, removeMultiple } from "@tauriAPI";
+import { openInExplorer, openFile, removeAny, removeMultiple } from "@tauriAPI";
 import { addFileInClipboard, addNotificationFromError, pasteFile } from "@utils";
 
 type FileContextMenuProps = {
@@ -26,7 +26,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
     const [readonly] = useState(ctxTarget.dataset.readonly === "true");
 
     const handleOpenFile = () => {
-        const path = currentPath ? currentPath + sep + filename : filename;
+        const path = currentPath ? currentPath + sep() + filename : filename;
 
         if (filetype === "file") {
             openFile(path);
@@ -40,12 +40,12 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
 
         switch (filetype) {
             case "disk":
-                path = filename + sep;
+                path = filename + sep();
                 break;
             case "folder":
             case "file":
             default:
-                path = currentPath + sep + filename;
+                path = currentPath + sep() + filename;
                 break;
         }
 
@@ -57,11 +57,11 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
 
         try {
             if (selectedFiles.length > 1) {
-                const paths = Array.from(selectedFiles).map(file => currentPath + sep + file);
+                const paths = Array.from(selectedFiles).map(file => currentPath + sep() + file);
 
                 removeMultiple(paths);
             } else {
-                remove(currentPath + sep + filename);
+                removeAny(currentPath + sep() + filename);
             }
         } catch (error) {
             addNotificationFromError(error);

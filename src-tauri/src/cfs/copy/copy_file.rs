@@ -6,13 +6,12 @@ use std::{
     thread,
     time::{Duration, Instant},
 };
-use tauri::{Runtime, State, Window};
+use tauri::{Manager, Runtime, State, Window};
 
-use crate::cfs::{
+use crate::{cfs::{
     add_index_to_filename,
-    types::{CopyActions, CopyCutProgress, CopyResult, ErrorMessage},
-    CFSState,
-};
+    types::{CopyActions, CopyCutProgress, CopyResult, ErrorMessage}
+}, AppState};
 
 use super::utils::DuplicateFileAction;
 
@@ -124,7 +123,7 @@ pub fn copy_file_with_progress<R: tauri::Runtime>(
 pub fn copy_file<R: Runtime>(
     // app: AppHandle<R>,
     window: Window<R>,
-    state: State<'_, CFSState>,
+    state: State<'_, AppState>,
     from: String,
     mut to: String,
     event_id: usize,
@@ -142,13 +141,11 @@ pub fn copy_file<R: Runtime>(
         let &(ref lock, ref cvar) = &*control_vars;
         let mut state = lock.lock().unwrap();
 
-        if let Some(payload) = payload {
-            let parsed_value = CopyActions::from_window_event_payload(payload);
+        let parsed_value = CopyActions::from_window_event_payload(payload);
 
-            if let Ok(parsed) = parsed_value {
-                *state = parsed;
-                cvar.notify_one();
-            }
+        if let Ok(parsed) = parsed_value {
+            *state = parsed;
+            cvar.notify_one();
         }
     });
 

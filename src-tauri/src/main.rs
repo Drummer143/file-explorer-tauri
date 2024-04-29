@@ -6,81 +6,98 @@
 mod cfs;
 mod raw_fs;
 
-use std::{path::Path, process::Command};
+use notify::RecommendedWatcher;
+use std::{collections::HashMap, sync::Mutex};
+use tauri::Manager;
 
-use cfs::types::ErrorMessage;
+use cfs::{
+    add_index_to_filename, app_config, canonicalize,
+    copy::{
+        copy_directory::copy_directory, copy_file::copy_file,
+        copy_multiple_files::copy_multiple_files,
+    },
+    create_file, dirname, exists, get_config,
+    get_dirnames::get_dirnames,
+    get_disk_names::get_disk_names,
+    get_disks::get_disks,
+    get_file_type, open_file, open_in_explorer, print_state,
+    read_dir::read_dir,
+    remove::{
+        remove_directory::remove_directory, remove_file::remove_file,
+        remove_multiple::remove_multiple,
+    },
+    remove_any,
+    rename::rename,
+    types,
+    watch_dir::{unwatch, watch_dir},
+};
 
-#[tauri::command(async)]
-fn open_file(path_to_file: String) -> Result<(), ErrorMessage> {
-    let path_to_file = Path::new(&path_to_file);
-
-    if !path_to_file.exists() {
-        return Err(ErrorMessage::new_message("Path don't exist".into()));
-    }
-
-    let result = Command::new("explorer").arg(&path_to_file).output();
-
-    if let Err(error) = result {
-        return Err(ErrorMessage::new_all(
-            "Can't run command",
-            &error.to_string(),
-        ));
-    }
-
-    let output = result.unwrap();
-
-    if !output.status.success() {
-        Ok(())
-    } else {
-        let error = String::from_utf8_lossy(&output.stderr);
-
-        Err(ErrorMessage::new_all("error in result", &error))
-    }
+#[derive(Default, Debug)]
+pub struct AppState {
+    watcher: Mutex<HashMap<usize, (RecommendedWatcher, String)>>,
+    app_config: types::AppSettings,
 }
 
-#[tauri::command(async)]
-fn open_in_explorer(path_to_file: String) -> Result<(), ErrorMessage> {
-    let path = Path::new(&path_to_file);
-
-    let mut command = Command::new("explorer");
-
-    if path.is_file() {
-        command.arg("/select,");
-    }
-
-    let result = command.arg(&path_to_file).output();
-
-    if let Err(error) = result {
-        return Err(ErrorMessage::new_all(
-            "Can't run command",
-            &error.to_string(),
-        ));
-    }
-
-    let output = result.unwrap();
-
-    if !output.status.success() {
-        Ok(())
-    } else {
-        let error = String::from_utf8_lossy(&output.stderr);
-
-        Err(ErrorMessage::new_all("error in result", &error))
+impl AppState {
+    pub fn new_app_config(app_config: types::AppSettings) -> Self {
+        Self {
+            app_config,
+            watcher: Mutex::default(),
+        }
     }
 }
 
 fn main() {
-    let ctx = tauri::generate_context!();
-
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             open_file,
             raw_fs::remove,
-            open_in_explorer
+            open_in_explorer,
+            //
+            // cfs
+            add_index_to_filename,
+            canonicalize,
+            copy_directory,
+            copy_file,
+            copy_multiple_files,
+            create_file,
+            dirname,
+            exists,
+            get_dirnames,
+            get_disks,
+            get_disk_names,
+            get_file_type,
+            get_config,
+            print_state,
+            remove_any,
+            read_dir,
+            remove_directory,
+            remove_file,
+            remove_multiple,
+            rename,
+            unwatch,
+            watch_dir,
         ])
-        .plugin(cfs::init(ctx.config()))
+        .plugin(tauri_plugin_dialog::init())
         .on_page_load(|window, payload| {
             let _ = window.eval(&format!("console.log('{}');", payload.url()));
         })
-        .run(ctx)
+        .setup(|app| {
+            let app_config_path = app.path().app_config_dir();
+
+            let app_config_path_ref = match app_config_path {
+                Ok(path) => path,
+                Err(error) => {
+                    panic!("Can't get app config path: {}", error);
+                }
+            };
+
+            let app_config = app_config::init(&app_config_path_ref);
+
+            app.manage(AppState::new_app_config(app_config));
+
+            Ok(())
+        })
+        .run(tauri::generate_context!())
         .expect("Can't run app.");
 }

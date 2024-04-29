@@ -66,7 +66,7 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
                 canGoForward: true,
                 currentPathIndex: newIndex,
                 hasParent: !!history[newIndex],
-                prevTargetFile: currentPath.split(sep).at(-1)
+                prevTargetFile: currentPath.split(sep()).at(-1)
             });
 
             return true;
@@ -88,7 +88,7 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
                 canGoBack: true,
                 currentPathIndex: newIndex,
                 hasParent: !!history[newIndex],
-                prevTargetFile: history[newIndex + 1]?.split(sep).at(-1)
+                prevTargetFile: history[newIndex + 1]?.split(sep()).at(-1)
             });
 
             return true;
@@ -102,7 +102,7 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
             try {
                 parentDirectory = await dirname(currentPath);
 
-                if (parentDirectory.endsWith(sep)) {
+                if (parentDirectory.endsWith(sep())) {
                     parentDirectory = parentDirectory.slice(0, -1);
                 }
             } catch (error) {

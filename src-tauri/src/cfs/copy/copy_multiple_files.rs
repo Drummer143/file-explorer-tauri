@@ -1,12 +1,11 @@
 use std::sync::{Arc, Condvar, Mutex, RwLock};
 
-use tauri::{Runtime, State, Window};
+use tauri::{Manager, Runtime, State, Window};
 
-use crate::cfs::{
+use crate::{cfs::{
     get_file_type,
-    types::{ErrorMessage, FileType},
-    CFSState,
-};
+    types::{ErrorMessage, FileType}
+}, AppState};
 
 use super::{copy_directory::copy_directory, copy_file::copy_file};
 
@@ -28,7 +27,7 @@ impl PathFromTo {
 #[tauri::command(async)]
 pub fn copy_multiple_files<R: Runtime>(
     window: Window<R>,
-    state: State<'_, CFSState>,
+    state: State<'_, AppState>,
     paths: Vec<PathFromTo>,
     event_id: usize,
     remove_target_on_finish: bool,

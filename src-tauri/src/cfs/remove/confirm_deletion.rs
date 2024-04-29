@@ -1,4 +1,5 @@
-use tauri::{api::dialog, Runtime, Window};
+use tauri::{Runtime, Window};
+use tauri_plugin_dialog::DialogExt;
 
 pub(crate) enum RemoveFileOptions {
     Permanent,
@@ -16,7 +17,11 @@ pub(super) fn confirm_deletion<R: Runtime>(
         let dialog_title = format!("Remove {filename}");
         let dialog_message = format!("Remove {}?", filename);
 
-        let confirmed = dialog::blocking::confirm(Some(&window), dialog_title, dialog_message);
+        let confirmed = window
+            .dialog()
+            .message(dialog_message)
+            .title(dialog_title)
+            .blocking_show();
 
         if !confirmed {
             return RemoveFileOptions::Cancel;
@@ -24,11 +29,11 @@ pub(super) fn confirm_deletion<R: Runtime>(
     }
 
     if ask_about_deletion_options {
-        let remove_permanently = dialog::blocking::ask(
-            Some(&window),
-            format!("{filename} deletion"),
-            format!("{filename} is too large. Remove permanently?"),
-        );
+        let remove_permanently = window
+            .dialog()
+            .message(format!("{filename} deletion"))
+            .title(format!("{filename} is too large. Remove permanently?"))
+            .blocking_show();
 
         if remove_permanently {
             return RemoveFileOptions::Permanent;

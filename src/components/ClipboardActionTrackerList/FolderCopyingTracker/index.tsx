@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { appWindow } from "@tauri-apps/api/window";
 import { UnlistenFn } from "@tauri-apps/api/event";
+import { getCurrent } from "@tauri-apps/api/window";
 import { useTranslation } from "react-i18next";
 
 import { joinCN } from "@utils";
@@ -36,6 +36,8 @@ const FolderCopyingTracker: React.FC<FolderCopyingTrackerProps> = ({
         error: UnlistenFn;
         finished: UnlistenFn;
     } | null>(null);
+
+    const appWindow = getCurrent();
 
     const togglePause = useCallback(() => {
         setStatus(prev => {

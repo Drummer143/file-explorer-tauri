@@ -1,5 +1,5 @@
 use std::sync::{Arc, Condvar, Mutex};
-use tauri::Runtime;
+use tauri::{Manager, Runtime};
 
 use crate::cfs::copy::copy_multiple_files::PathFromTo;
 
@@ -39,7 +39,7 @@ pub(super) fn emit_duplicate_file<R: Runtime>(
     let control_vars_clone = control_vars.clone();
 
     window.once("file-exists-answer", move |e| {
-        let payload_str = e.payload().unwrap();
+        let payload_str = e.payload();
 
         let payload = serde_json::from_str::<DuplicateFileHandleEventPayload>(payload_str);
 
