@@ -3,15 +3,14 @@ use std::{
     path::Path,
     sync::{Arc, Condvar, Mutex},
 };
-use tauri::{Runtime, State, Window};
+use tauri::{Manager, Runtime, State, Window};
 
-use crate::cfs::{
+use crate::{cfs::{
     add_index_to_filename,
     get_file_size::get_file_size,
     get_file_type,
-    types::{CopyActions, CopyResult, ErrorMessage, FileType},
-    CFSState,
-};
+    types::{CopyActions, CopyResult, ErrorMessage, FileType}
+}, AppState};
 
 use super::utils::{DuplicateFileAction, DuplicateFileHandleEventPayload};
 
@@ -47,9 +46,7 @@ fn mount_duplicate_file_listener<R: Runtime>(
     control_vars: ControlVars,
 ) {
     window.once(&format!("copy-handle-duplicate//{}", event_id), move |e| {
-        let payload_str = e.payload().unwrap();
-
-        println!("{}", payload_str);
+        let payload_str = e.payload();
 
         let payload = serde_json::from_str::<DuplicateFileHandleEventPayload>(payload_str);
 
@@ -297,7 +294,7 @@ fn copy_directory_with_progress<R: tauri::Runtime>(
 #[tauri::command(async)]
 pub fn copy_directory<R: Runtime>(
     window: Window<R>,
-    state: State<'_, CFSState>,
+    state: State<'_, AppState>,
     from: String,
     mut to: String,
     event_id: usize,
@@ -309,21 +306,20 @@ pub fn copy_directory<R: Runtime>(
     let control_vars = Arc::new((Mutex::new(CopyActions::Pause), Condvar::new()));
     let control_vars_clone = control_vars.clone();
 
-    let copy_state_change_listener = window.listen(&format!("copy-change-state//{}", event_id), move |e| {
-        let payload = e.payload();
+    let copy_state_change_listener =
+        window.listen(&format!("copy-change-state//{}", event_id), move |e| {
+            let payload = e.payload();
 
-        let &(ref lock, ref cvar) = &*control_vars;
-        let mut state = lock.lock().unwrap();
+            let &(ref lock, ref cvar) = &*control_vars;
+            let mut state = lock.lock().unwrap();
 
-        if let Some(payload) = payload {
             let parsed_value = CopyActions::from_window_event_payload(payload);
 
             if let Ok(parsed) = parsed_value {
                 *state = parsed;
                 cvar.notify_all();
             }
-        }
-    });
+        });
 
     if duplicate_file_action == DuplicateFileAction::Ask && path_to.exists() {
         let (duplicate_file_action, _) =

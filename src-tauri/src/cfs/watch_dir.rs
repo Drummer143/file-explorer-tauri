@@ -11,12 +11,13 @@ use std::{
     sync::mpsc::{channel, Receiver},
     thread::spawn,
 };
-use tauri::{Runtime, State, Window};
+use tauri::{Manager, Runtime, State, Window};
+
+use crate::AppState;
 
 use super::{
     get_file_subtype, get_file_type,
-    types::{ErrorMessage, FileChangeEventType, FileChangePayload, FileInfo, FileType},
-    CFSState,
+    types::{ErrorMessage, FileChangeEventType, FileChangePayload, FileInfo, FileType}
 };
 
 fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>>, id: usize) {
@@ -91,7 +92,7 @@ fn watch<R: Runtime>(window: Window<R>, rx: Receiver<notify::Result<NotifyEvent>
 #[tauri::command(async)]
 pub fn watch_dir<R: Runtime>(
     window: tauri::Window<R>,
-    state: State<'_, CFSState>,
+    state: State<'_, AppState>,
     path_to_dir: String,
 ) -> Result<usize, ErrorMessage> {
     let path = Path::new(&path_to_dir);
@@ -134,7 +135,7 @@ pub fn watch_dir<R: Runtime>(
 }
 
 #[tauri::command(async)]
-pub fn unwatch(state: tauri::State<'_, CFSState>, id: usize) -> Result<(), ErrorMessage> {
+pub fn unwatch(state: tauri::State<'_, AppState>, id: usize) -> Result<(), ErrorMessage> {
     if let Some((mut watcher, path)) = state.watcher.lock().unwrap().remove(&id) {
         let path = Path::new(&path);
 

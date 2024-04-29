@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api";
+import { invoke } from "@tauri-apps/api/core";
 
 export const openInExplorer = (pathToFile: string): Promise<void> => invoke<void>("open_in_explorer", { pathToFile });
 

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useRefState } from "@hooks";
 import { useExplorerHistory, useFilesSelectionStore } from "@zustand";
-import { openInExplorer, openFile, remove, removeMultiple } from "@tauriAPI";
+import { openInExplorer, openFile, removeAny, removeMultiple } from "@tauriAPI";
 import { addFileInClipboard, addNotificationFromError, pasteFile } from "@utils";
 
 type FileContextMenuProps = {
@@ -61,7 +61,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
 
                 removeMultiple(paths);
             } else {
-                remove(currentPath + sep + filename);
+                removeAny(currentPath + sep + filename);
             }
         } catch (error) {
             addNotificationFromError(error);

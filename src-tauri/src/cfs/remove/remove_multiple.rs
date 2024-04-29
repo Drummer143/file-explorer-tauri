@@ -1,20 +1,21 @@
-use tauri::{api::dialog, Runtime, State, Window};
+use tauri::{Runtime, State, Window};
+use tauri_plugin_dialog::DialogExt;
 
-use crate::cfs::{get_file_size::get_file_size, types::ErrorMessage, CFSState};
+use crate::{cfs::{get_file_size::get_file_size, types::ErrorMessage}, AppState};
 
 use super::move_to_trash::move_to_trash;
 
 #[tauri::command(async)]
 pub fn remove_multiple<R: Runtime>(
     window: Window<R>,
-    state: State<'_, CFSState>,
+    state: State<'_, AppState>,
     paths: Vec<String>,
 ) -> Result<(), ErrorMessage> {
-    let confirmed = dialog::blocking::ask(
-        Some(&window),
-        "Confirm action",
-        format!("Remove {} files", paths.len()),
-    );
+    let confirmed = window
+        .dialog()
+        .message(format!("Remove {} files", paths.len()))
+        .title("Confirm action")
+        .blocking_show();
 
     if !confirmed {
         return Ok(());
@@ -39,8 +40,11 @@ pub fn remove_multiple<R: Runtime>(
     let mut remove_permanently = true;
 
     if sum_size > trashcan_limit {
-        remove_permanently =
-            dialog::blocking::ask(Some(&window), "Confirm action", "Remove files permanently?");
+        remove_permanently = window
+            .dialog()
+            .message("Remove files permanently?")
+            .title("Confirm action")
+            .blocking_show();
     }
 
     for path in paths {

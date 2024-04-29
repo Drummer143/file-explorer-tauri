@@ -1,23 +1,21 @@
 import { v4 } from "uuid";
-import { unregisterAll, register } from "@tauri-apps/api/globalShortcut";
-import { WebviewWindow, UserAttentionType } from "@tauri-apps/api/window";
+import { unregisterAll, register } from "@tauri-apps/plugin-global-shortcut";
+import { window } from "@tauri-apps/api";
 
 export const registerGlobalHotKeys = () => unregisterAll()
     .then(() => {
         register("CommandOrControl+Shift+N", () => {
-            const window = new WebviewWindow("main" + v4(), {
-                url: location.href,
+            const appWindow = new window.Window("main" + v4(), {
                 focus: false,
                 decorations: false,
-                "fullscreen": false,
-                "height": 600,
-                "resizable": true,
-                "title": "file-explorer",
-                "width": 800,
-                "fileDropEnabled": true
+                fullscreen: false,
+                height: 600,
+                resizable: true,
+                title: "file-explorer",
+                width: 800
             });
 
-            window.requestUserAttention(UserAttentionType.Critical);
+            appWindow.requestUserAttention(window.UserAttentionType.Critical);
         });
     });
     // .then(() => console.log("listeners installed"));

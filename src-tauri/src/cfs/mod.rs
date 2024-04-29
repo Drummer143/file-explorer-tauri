@@ -11,48 +11,14 @@ pub(super) mod sort_files;
 pub(super) mod types;
 pub(super) mod watch_dir;
 
-use notify::RecommendedWatcher;
-use std::{collections::HashMap, ffi::OsStr, path::Path, sync::Mutex};
+use std::{ffi::OsStr, path::Path, process::Command};
 use tauri::{
-    plugin::{Builder, TauriPlugin},
-    Manager, Runtime, State, Window,
+    Runtime, State, Window
 };
 
-use self::{
-    copy::{
-        copy_directory::{__cmd__copy_directory, copy_directory},
-        copy_file::{__cmd__copy_file, copy_file},
-        copy_multiple_files::{__cmd__copy_multiple_files, copy_multiple_files},
-    },
-    get_dirnames::{__cmd__get_dirnames, get_dirnames},
-    get_disk_names::{__cmd__get_disk_names, get_disk_names},
-    get_disks::{__cmd__get_disks, get_disks},
-    read_dir::{__cmd__read_dir, read_dir},
-    remove::{
-        remove_directory::{__cmd__remove_directory, remove_directory},
-        remove_file::{__cmd__remove_file, remove_file},
-        remove_multiple::{__cmd__remove_multiple, remove_multiple},
-    },
-    rename::{__cmd__rename, rename},
-    types::{AppConfig, FileType},
-    types::{ErrorMessage, FileSubtype},
-    watch_dir::{__cmd__unwatch, __cmd__watch_dir, unwatch, watch_dir},
-};
+use crate::AppState;
 
-#[derive(Default, Debug)]
-pub struct CFSState {
-    watcher: Mutex<HashMap<usize, (RecommendedWatcher, String)>>,
-    app_config: AppConfig,
-}
-
-impl CFSState {
-    pub fn new_app_config(app_config: AppConfig) -> Self {
-        Self {
-            app_config,
-            watcher: Mutex::default(),
-        }
-    }
-}
+use self::{remove::{remove_directory::remove_directory, remove_file::remove_file}, types::{ErrorMessage, FileSubtype, FileType}};
 
 const DISPLAYABLE_IMAGE_EXTENSIONS: [&str; 13] = [
     "jpg", "jpeg", "jpe", "jif", "jfif", "jfi", "webp", "png", "gif", "svg", "svgz", "bmp", "dib",
@@ -87,14 +53,14 @@ fn get_file_subtype(path_to_file: &Path) -> Option<FileSubtype> {
 }
 
 #[tauri::command(async)]
-fn exists(path_to_file: String) -> bool {
+pub fn exists(path_to_file: String) -> bool {
     Path::new(&path_to_file).exists()
 }
 
 #[tauri::command(async)]
-fn remove<R: Runtime>(
+pub fn remove_any<R: Runtime>(
     window: Window<R>,
-    state: tauri::State<'_, CFSState>,
+    state: tauri::State<'_, AppState>,
     path_to_file: String,
 ) -> Result<(), ErrorMessage> {
     let path = Path::new(&path_to_file);
@@ -113,7 +79,7 @@ fn remove<R: Runtime>(
 }
 
 #[tauri::command(async)]
-fn print_state(state: State<'_, CFSState>) {
+pub fn print_state(state: State<'_, AppState>) {
     println!("{:#?}", state);
 }
 
@@ -121,7 +87,7 @@ fn print_state(state: State<'_, CFSState>) {
 ///
 /// Returns path to file.
 #[tauri::command(async)]
-fn add_index_to_filename(path_to_file: &str) -> Result<String, ErrorMessage> {
+pub fn add_index_to_filename(path_to_file: &str) -> Result<String, ErrorMessage> {
     let path = Path::new(path_to_file);
     let mut index = 0;
     let filename = path.file_stem().unwrap().to_str();
@@ -225,38 +191,65 @@ pub fn canonicalize(path: &Path) -> Result<String, ErrorMessage> {
     }
 }
 
-pub fn init<R: Runtime>(config: &tauri::Config) -> TauriPlugin<R> {
-    let (js_init_script, app_config) = app_config::init(tauri::api::path::app_config_dir(config));
+#[tauri::command(async)]
+pub fn open_file(path_to_file: String) -> Result<(), ErrorMessage> {
+    let path_to_file = Path::new(&path_to_file);
 
-    Builder::new("cfs")
-        .invoke_handler(tauri::generate_handler![
-            add_index_to_filename,
-            canonicalize,
-            copy_directory,
-            copy_file,
-            copy_multiple_files,
-            create_file,
-            dirname,
-            exists,
-            get_dirnames,
-            get_disks,
-            get_disk_names,
-            get_file_type,
-            print_state,
-            remove,
-            read_dir,
-            remove_directory,
-            remove_file,
-            remove_multiple,
-            rename,
-            unwatch,
-            watch_dir,
-        ])
-        .setup(|app| {
-            app.manage(CFSState::new_app_config(app_config));
+    if !path_to_file.exists() {
+        return Err(ErrorMessage::new_message("Path don't exist".into()));
+    }
 
-            Ok(())
-        })
-        .js_init_script(js_init_script)
-        .build()
+    let result = Command::new("explorer").arg(&path_to_file).output();
+
+    if let Err(error) = result {
+        return Err(ErrorMessage::new_all(
+            "Can't run command",
+            &error.to_string(),
+        ));
+    }
+
+    let output = result.unwrap();
+
+    if !output.status.success() {
+        Ok(())
+    } else {
+        let error = String::from_utf8_lossy(&output.stderr);
+
+        Err(ErrorMessage::new_all("error in result", &error))
+    }
+}
+
+#[tauri::command(async)]
+pub fn open_in_explorer(path_to_file: String) -> Result<(), ErrorMessage> {
+    let path = Path::new(&path_to_file);
+
+    let mut command = Command::new("explorer");
+
+    if path.is_file() {
+        command.arg("/select,");
+    }
+
+    let result = command.arg(&path_to_file).output();
+
+    if let Err(error) = result {
+        return Err(ErrorMessage::new_all(
+            "Can't run command",
+            &error.to_string(),
+        ));
+    }
+
+    let output = result.unwrap();
+
+    if !output.status.success() {
+        Ok(())
+    } else {
+        let error = String::from_utf8_lossy(&output.stderr);
+
+        Err(ErrorMessage::new_all("error in result", &error))
+    }
+}
+
+#[tauri::command(async)]
+pub fn get_config(state: State<'_, AppState>) -> Result<types::AppSettings, ErrorMessage> {
+    Ok(state.app_config.clone())
 }

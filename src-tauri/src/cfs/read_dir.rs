@@ -1,9 +1,10 @@
 use std::{fs::DirEntry, io::Error as IOError, os::windows::prelude::MetadataExt};
 
+use crate::AppState;
+
 use super::{
     get_file_subtype, get_file_type,
-    types::{ErrorMessage, FileInfo, FileType, SortConfig, SortOrder},
-    CFSState,
+    types::{ErrorMessage, FileInfo, FileType, SortConfig, SortOrder}
 };
 
 fn handle_file(file: Result<DirEntry, IOError>) -> Option<FileInfo> {
@@ -46,7 +47,7 @@ fn handle_file(file: Result<DirEntry, IOError>) -> Option<FileInfo> {
 
 #[tauri::command(async)]
 pub fn read_dir(
-    state: tauri::State<'_, CFSState>,
+    state: tauri::State<'_, AppState>,
     path_to_dir: String,
     sort_config: Option<SortConfig>,
 ) -> Result<Vec<FileInfo>, ErrorMessage> {

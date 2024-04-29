@@ -1,8 +1,8 @@
 import React, { memo, useCallback, useEffect, useRef, useState } from "react";
 
-import { appWindow } from "@tauri-apps/api/window";
-import { useRefState, useResizeObserver } from "@hooks";
+import { getCurrent } from "@tauri-apps/api/window";
 import { useFilesSelectionStore } from "@zustand";
+import { useRefState, useResizeObserver } from "@hooks";
 
 import styles from "./SelectionArea.module.scss";
 
@@ -103,7 +103,7 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
     const handleEndSelecting = useCallback(() => {
         document.removeEventListener("mousemove", handleMoveArea);
 
-        appWindow.setResizable(true);
+        getCurrent().setResizable(true);
 
         isMoving.current = false;
         isCtrlKeyPressed.current = false;
@@ -119,7 +119,7 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
             return;
         }
 
-        appWindow.setResizable(false);
+        getCurrent().setResizable(false);
 
         document.addEventListener("mousemove", handleMoveArea);
         document.addEventListener("mouseup", handleEndSelecting, { once: true });

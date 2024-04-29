@@ -1,39 +1,21 @@
 use std::path::PathBuf;
 
-use super::AppConfig;
+use crate::cfs::types::AppSettings;
 
-pub fn init(config_dir: Option<PathBuf>) -> (String, AppConfig) {
-    let create_js_init = |app_config: &str| {
-        format!(
-            r#"
-console.log("log from js init script in rust");
+// pub fn create_js_init(app_config: &str) -> String {
+//     format!(
+//         r#"
+// console.log("log from js init script in rust");
 
-window.appConfig = {};
+// window.AppSettings = {};
 
-console.log(window.appConfig, typeof window.appConfig);
-"#,
-            app_config
-        )
-    };
+// console.log(window.AppSettings, typeof window.AppSettings);
+// "#,
+//         app_config
+//     )
+// }
 
-    let create_default_values = || {
-        let default_config = AppConfig::default();
-        let str_config = serde_json::to_string(&default_config).unwrap();
-
-        (create_js_init(&str_config), default_config)
-    };
-
-    println!("config_dir_is_none: {:?}", config_dir.is_none());
-
-    if config_dir.is_none() {
-        return create_default_values();
-    }
-
-    let config_dir = config_dir.unwrap();
-    let config_dir = config_dir.as_path();
-
-    println!("config_dir: {:?}", config_dir);
-
+pub fn init(config_dir: &PathBuf) -> AppSettings {
     if !config_dir.exists() {
         if let Err(error) = std::fs::create_dir_all(config_dir) {
             println!("can't create config dir {}", error.to_string());
@@ -66,28 +48,28 @@ console.log(window.appConfig, typeof window.appConfig);
             Err(error) => {
                 println!("error on reading config: {}", error.to_string());
 
-                return create_default_values();
+                return AppSettings::default();
             }
         }
     }
 
-    let result = serde_json::from_str::<AppConfig>(&data);
+    let result = serde_json::from_str::<AppSettings>(&data);
 
-    let app_config: AppConfig = match result {
+    let app_config: AppSettings = match result {
         Ok(c) => c,
         Err(error) => {
             println!("Error on parsing app config: {}", error);
 
-            let config = AppConfig::default();
+            let config = AppSettings::default();
             let result = serde_json::to_string_pretty(&config);
 
             if let Ok(string) = result {
-                let _ = std::fs::write(path_to_app_config, string);                
+                let _ = std::fs::write(path_to_app_config, string);
             }
 
             config
         }
     };
 
-    (create_js_init(&data), app_config)
+    app_config
 }
