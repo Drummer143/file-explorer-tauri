@@ -22,7 +22,7 @@ const InteractivePath: React.FC = () => {
     const wrapperRef = useRef<HTMLDivElement | null>(null);
 
     const handlePathPartClick = (partIndex: number) => {
-        const currentPathParts = currentPath.split(sep);
+        const currentPathParts = currentPath.split(sep());
 
         // partIndex equals to (part index in array + 1), so if part is last in past
         // than it is current folder and there is no need to move in this folder
@@ -30,13 +30,13 @@ const InteractivePath: React.FC = () => {
             return;
         }
 
-        const newPath = currentPathParts.slice(0, partIndex + 1).join(sep);
+        const newPath = currentPathParts.slice(0, partIndex + 1).join(sep());
 
         pushRoute(newPath);
     };
 
     const openDirsList = async (e: MouseEvent<HTMLButtonElement>, splittedPath: string[], index: number) => {
-        const path = splittedPath.slice(0, index).join(sep);
+        const path = splittedPath.slice(0, index).join(sep());
 
         try {
             let dirs: string[] = [];
@@ -71,7 +71,7 @@ const InteractivePath: React.FC = () => {
     return (
         <>
             <div className={styles.interactivePath} ref={wrapperRef}>
-                {currentPath.split(sep).filter(Boolean).map((pathPart, i, arr) => (
+                {currentPath.split(sep()).filter(Boolean).map((pathPart, i, arr) => (
                     <React.Fragment key={pathPart + i}>
                         <button
                             type="button"
@@ -82,7 +82,7 @@ const InteractivePath: React.FC = () => {
                             {pathPart}
                         </button>
 
-                        {arr.length - 1 !== i && <p className={styles.pathSeparator}>{sep}</p>}
+                        {arr.length - 1 !== i && <p className={styles.pathSeparator}>{sep()}</p>}
                     </React.Fragment>
                 ))}
             </div>

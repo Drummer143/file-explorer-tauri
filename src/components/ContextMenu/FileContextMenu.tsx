@@ -26,7 +26,7 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
     const [readonly] = useState(ctxTarget.dataset.readonly === "true");
 
     const handleOpenFile = () => {
-        const path = currentPath ? currentPath + sep + filename : filename;
+        const path = currentPath ? currentPath + sep() + filename : filename;
 
         if (filetype === "file") {
             openFile(path);
@@ -40,12 +40,12 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
 
         switch (filetype) {
             case "disk":
-                path = filename + sep;
+                path = filename + sep();
                 break;
             case "folder":
             case "file":
             default:
-                path = currentPath + sep + filename;
+                path = currentPath + sep() + filename;
                 break;
         }
 
@@ -57,11 +57,11 @@ const FileContextMenu: React.FC<FileContextMenuProps> = ({ ctxTarget }) => {
 
         try {
             if (selectedFiles.length > 1) {
-                const paths = Array.from(selectedFiles).map(file => currentPath + sep + file);
+                const paths = Array.from(selectedFiles).map(file => currentPath + sep() + file);
 
                 removeMultiple(paths);
             } else {
-                removeAny(currentPath + sep + filename);
+                removeAny(currentPath + sep() + filename);
             }
         } catch (error) {
             addNotificationFromError(error);

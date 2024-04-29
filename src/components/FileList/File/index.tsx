@@ -14,7 +14,7 @@ type FileProps = ExplorerFile & { selected?: boolean };
 const File: React.FC<FileProps> = ({ name, size, readonly, selected, type }) => {
     const { currentPath } = useExplorerHistory();
 
-    const handleAction = () => openFile(currentPath + sep + name).catch(error => console.error(error));
+    const handleAction = () => openFile(currentPath + sep() + name).catch(error => console.error(error));
 
     const handleKeyDown: React.KeyboardEventHandler<HTMLButtonElement> = e => {
         if (["Space", "Enter"].includes(e.code)) {
@@ -37,7 +37,7 @@ const File: React.FC<FileProps> = ({ name, size, readonly, selected, type }) => 
             aria-selected={selected}
         >
             <div className="fileItemIcon">
-                {/* type === "image" ? <img src={convertFileSrc(currentPath + sep + name)} /> :  */<FileSVG />}
+                {/* type === "image" ? <img src={convertFileSrc(currentPath + sep() + name)} /> :  */<FileSVG />}
             </div>
 
             <div className="fileItemDescription">

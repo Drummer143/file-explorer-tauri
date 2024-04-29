@@ -29,7 +29,7 @@ const DirsList: ForwardRefRenderFunction<HTMLDivElement, DirsListProps> = ({
         e.stopPropagation();
 
         if (targetDir) {
-            pushRoute(`${targetDir}${sep}${file}`);
+            pushRoute(`${targetDir}${sep()}${file}`);
         } else {
             pushRoute(file);
         }

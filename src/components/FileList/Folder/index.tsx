@@ -13,7 +13,7 @@ const Folder: React.FC<FolderProps> = ({ name, readonly, selected }) => {
     const { currentPath, pushRoute } = useExplorerHistory();
 
     const handleAction = () => {
-        pushRoute(currentPath + sep + name);
+        pushRoute(currentPath + sep() + name);
     };
 
     const handleKeyDown: React.KeyboardEventHandler<HTMLButtonElement> = (e) => {

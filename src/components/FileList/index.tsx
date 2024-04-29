@@ -112,7 +112,7 @@ const FileList: React.FC = () => {
                         (document.activeElement as HTMLElement | null)?.dataset.contextMenuType !== "file";
 
                     if (possibleFocusedFileName && isNotFile) {
-                        to = to + sep + possibleFocusedFileName;
+                        to = to + sep() + possibleFocusedFileName;
                     }
 
                     pasteFile(to);

@@ -73,7 +73,7 @@ export const useWatchPathChange = () => {
             const currentPath = currentPathRef.current;
 
             if (currentPath) {
-                const path = currentPath + sep;
+                const path = currentPath + sep();
 
                 setFiles(await readDir(path, sortConfig));
 

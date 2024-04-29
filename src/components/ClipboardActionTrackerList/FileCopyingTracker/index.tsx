@@ -73,7 +73,7 @@ const FileCopyingTracker: React.FC<FileCopyingTrackerProps> = ({ eventId, filena
     const handleRemoveTrackerAndDeleteCopiedFile = () => {
         handleRemoveTracker();
 
-        removeRaw(to + sep + filename).catch(error => console.error(error));
+        removeRaw(to + sep() + filename).catch(error => console.error(error));
     };
 
     useEffect(() => {
