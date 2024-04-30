@@ -23,7 +23,12 @@
 
     border-radius: 0.125rem;
     background-color: rgba($color: #fff, $alpha: 0.15);
-    transition: border-radius 150ms;
+    border: 1px dashed transparent;
+    transition: border-radius 150ms, border-color 150ms;
+
+    &.dropTarget {
+        border-color: #fff;
+    }
 }
 
 .input {

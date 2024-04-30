@@ -1,11 +1,11 @@
-import React, { ChangeEventHandler, FormEventHandler, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { ChangeEventHandler, FormEventHandler, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { sep } from "@tauri-apps/api/path";
 import { message } from "@tauri-apps/plugin-dialog";
 
 import InteractivePath from "./InteractivePath";
 import InputSuggestions from "./InputSuggestions";
 import { joinCN } from "@utils";
-import { useClickAway } from "@hooks";
+import { useClickAway, useListenDragAndDrop } from "@hooks";
 import { useExplorerHistory } from "@zustand";
 import { canonicalize, pathExists } from "@tauriAPI";
 
@@ -16,12 +16,16 @@ const PathInput: React.FC = () => {
 
     const formRef = useRef<HTMLFormElement | null>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
+    const inputContainerRef = useRef<HTMLDivElement | null>(null);
     const inputTextSizeTrackerRef = useRef<HTMLSpanElement | null>(null);
 
     const [inputValue, setInputValue] = useState(currentPath);
     const [focusOnList, setFocusOnList] = useState(false);
+    const [isDropTarget, setIsDropTarget] = useState(false);
     const [isInputActive, setIsInputActive] = useState(false);
     const [inputTextWidth, setInputTextWidth] = useState(0);
+
+    const fileDropTarget = "pathInput";
 
     const unmountClickAway = useClickAway(inputRef, () => setIsInputActive(false), ["mousedown"]);
 
@@ -94,6 +98,27 @@ const PathInput: React.FC = () => {
         );
     };
 
+    const handleDropOver: DocumentEventHandler<"tauriDropOver"> = useCallback(e => {
+        setIsDropTarget(e.detail === fileDropTarget);
+    }, [fileDropTarget]);
+
+    const handleDrop: DocumentEventHandler<"tauriDrop"> = useCallback(e => {
+        setIsDropTarget(false);
+        if (e.detail.target === fileDropTarget) {
+            pushRoute(e.detail.paths[0]);
+        }
+    }, [pushRoute]);
+
+    const handleDragCancel: DocumentEventHandler<"tauriDragCancel"> = useCallback(() => {
+        setIsDropTarget(false);
+    }, []);
+
+    useListenDragAndDrop({
+        onDragCancel: handleDragCancel,
+        onDropOver: handleDropOver,
+        onDrop: handleDrop
+    });
+
     useLayoutEffect(() => {
         setInputTextWidth(inputTextSizeTrackerRef.current?.clientWidth || 0);
     }, [inputValue]);
@@ -105,8 +130,10 @@ const PathInput: React.FC = () => {
     return (
         <form className={styles.wrapper} onSubmit={handleSubmit} ref={formRef}>
             <div
-                className={styles.inputContainer}
+                ref={inputContainerRef}
+                className={joinCN(styles.inputContainer, isDropTarget && styles.dropTarget)}
                 data-current-path={currentPath}
+                data-file-drop-target={fileDropTarget}
             >
                 <span
                     ref={inputTextSizeTrackerRef}

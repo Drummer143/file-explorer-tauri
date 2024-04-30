@@ -25,11 +25,31 @@ declare global {
         openEditFileModal: CustomEvent<OpenEditFileModalDetail>;
         startTrackingClipboardAction: CustomEvent<StartTrackingClipboardActionDetail>;
         addNotification: CustomEvent<AppNotification>;
+        tauriDropOver: CustomEvent<string | undefined>;
+        tauriDrop: CustomEvent<{ target: string | undefined, paths: string[] }>;
+        tauriDragCancel: CustomEvent<undefined>;
+        tauriDrag: CustomEvent<undefined>;
     }
 
     type MergedEventMap = CustomEventMap & DocumentEventMap;
 
     interface Document {
+        addEventListener<T extends keyof MergedEventMap>(
+            event: T,
+            handler: (this: Document, e: MergedEventMap[T]) => void,
+            options?: boolean | AddEventListenerOptions
+        );
+
+        removeEventListener<T extends keyof MergedEventMap>(
+            type: T,
+            listener: (this: Document, e: MergedEventMap[T]) => void,
+            options?: boolean | EventListenerOptions
+        );
+
+        dispatchEvent<T extends keyof MergedEventMap>(e: MergedEventMap[T]);
+    }
+
+    interface HTMLDivElement {
         addEventListener<T extends keyof MergedEventMap>(
             event: T,
             handler: (this: Document, e: MergedEventMap[T]) => void,

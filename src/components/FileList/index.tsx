@@ -1,5 +1,5 @@
 /* eslint-disable max-lines */
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { sep } from "@tauri-apps/api/path";
 
 import Disk from "./Disk";
@@ -9,14 +9,16 @@ import Scrollbars from "../Scrollbars";
 import SelectionArea from "../SelectionArea";
 import { EditFileModal, FileExistModal } from "../modals";
 import { useExplorerHistory, useFilesSelectionStore } from "@zustand";
-import { useRefState, useResizeObserver, useWatchPathChange } from "@hooks";
-import { CTXTypes, addFileInClipboard, findActiveLayerKeys, pasteFile } from "@utils";
+import { useListenDragAndDrop, useRefState, useResizeObserver, useWatchPathChange } from "@hooks";
+import { CTXTypes, addFileInClipboard, findActiveLayerKeys, joinCN, pasteFile } from "@utils";
 
 import styles from "./FileList.module.scss";
 
 const FileList: React.FC = () => {
     const { prevTargetFile, currentPath } = useExplorerHistory();
     const { selectedItems, clearSelectedItems, setSelectedItems } = useFilesSelectionStore();
+
+    const [isDropTarget, setIsDropTarget] = useState(false);
 
     const currentPathRef = useRefState(currentPath);
     const selectedItemsRef = useRefState(selectedItems);
@@ -27,6 +29,8 @@ const FileList: React.FC = () => {
     const beforeResetFileSearchTimeout = useRef<NodeJS.Timeout | null>(null);
 
     const { files, loading } = useWatchPathChange();
+
+    const fileDropTarget = "fileList";
 
     const selectFileComponent = (file: CFile) => {
         const currentPath = currentPathRef.current;
@@ -310,6 +314,27 @@ const FileList: React.FC = () => {
         setSelectedItems([targetFilename]);
     };
 
+    const handleDragCancel: DocumentEventHandler<"tauriDragCancel"> = useCallback(() => {
+        setIsDropTarget(false);
+    }, []);
+
+    const handleDropOver: DocumentEventHandler<"tauriDropOver"> = useCallback(e => {
+        setIsDropTarget(e.detail === fileDropTarget);
+    }, []);
+
+    const handleDrop: DocumentEventHandler<"tauriDrop"> = useCallback(e => {
+        if (e.detail.target === fileDropTarget) {
+            console.log("drop", e);
+        }
+        setIsDropTarget(false);
+    }, []);
+
+    useListenDragAndDrop({
+        onDragCancel: handleDragCancel,
+        onDropOver: handleDropOver,
+        onDrop: handleDrop
+    });
+
     useEffect(() => {
         clearSelectedItems();
 
@@ -350,10 +375,11 @@ const FileList: React.FC = () => {
             <Scrollbars data-file-list-scrollbar>
                 <div
                     ref={listContainerRef}
-                    className={styles.wrapper}
+                    className={joinCN(styles.wrapper, isDropTarget && styles.dropTarget)}
+                    onClick={handleListWrapperClick}
                     data-context-menu-type={currentPath ? CTXTypes.explorer : undefined}
                     data-readonly={currentPath ? "" : true}
-                    onClick={handleListWrapperClick}
+                    data-file-drop-target={fileDropTarget}
                 >
                     {loading ? <div className={styles.loader}></div> : files.map(selectFileComponent)}
                 </div>

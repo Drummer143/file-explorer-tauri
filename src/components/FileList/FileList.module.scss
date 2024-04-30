@@ -11,12 +11,17 @@
     grid-template-columns: repeat(var(--count-of-columns), var(--file-list-item-width));
     grid-auto-rows: min-content;
     justify-content: center;
-
-    // overflow-x: hidden;
-    // overflow-y: auto;
+    border: 1px dashed transparent;
+    transition: border-color 150ms, border-radius 150ms;
 
     ::-webkit-scrollbar {
         appearance: none;
+    }
+
+    &.dropTarget {
+        border-color: #fff;
+        box-shadow: 0 0 10px #0008 inset;
+        border-radius: 0.25rem;
     }
 }
 
