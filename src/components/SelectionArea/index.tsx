@@ -140,6 +140,19 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
         };
     }, [handleStartSelecting, rootElement]);
 
+    useEffect(() => {
+        const unlisten = getCurrent().onFocusChanged(e => {
+            if (!e.payload) {
+                handleEndSelecting();
+                document.removeEventListener("mouseup", handleEndSelecting);
+            }
+        });
+
+        return () => {
+            unlisten.then(unlisten => unlisten());
+        }
+    }, [handleEndSelecting]);
+
     return (
         <div
             className={styles.wrapper}
