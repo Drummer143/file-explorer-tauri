@@ -52,7 +52,7 @@ const InteractivePath: React.FC = () => {
             setDirListIndex(index);
             setDirToReplace(splittedPath[index]);
 
-            const wrapperLeft = (wrapperRef.current?.getBoundingClientRect().left || 0);
+            const wrapperLeft = wrapperRef.current?.getBoundingClientRect().left || 0;
             const dirListX = (e.currentTarget || e.target)?.getBoundingClientRect().left || 0;
 
             setX(dirListX - wrapperLeft);
@@ -71,20 +71,23 @@ const InteractivePath: React.FC = () => {
     return (
         <>
             <div className={styles.interactivePath} ref={wrapperRef}>
-                {currentPath.split(sep()).filter(Boolean).map((pathPart, i, arr) => (
-                    <React.Fragment key={pathPart + i}>
-                        <button
-                            type="button"
-                            className={joinCN(styles.pathPart, i === dirListIndex && styles.selected)}
-                            onClick={() => handlePathPartClick(i)}
-                            onContextMenu={e => openDirsList(e, arr, i)}
-                        >
-                            {pathPart}
-                        </button>
+                {currentPath
+                    .split(sep())
+                    .filter(Boolean)
+                    .map((pathPart, i, arr) => (
+                        <React.Fragment key={pathPart + i}>
+                            <button
+                                type="button"
+                                className={joinCN(styles.pathPart, i === dirListIndex && styles.selected)}
+                                onClick={() => handlePathPartClick(i)}
+                                onContextMenu={e => openDirsList(e, arr, i)}
+                            >
+                                {pathPart}
+                            </button>
 
-                        {arr.length - 1 !== i && <p className={styles.pathSeparator}>{sep()}</p>}
-                    </React.Fragment>
-                ))}
+                            {arr.length - 1 !== i && <p className={styles.pathSeparator}>{sep()}</p>}
+                        </React.Fragment>
+                    ))}
             </div>
 
             {dirList && (

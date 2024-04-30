@@ -37,7 +37,7 @@ const File: React.FC<FileProps> = ({ name, size, readonly, selected, type }) => 
             aria-selected={selected}
         >
             <div className="fileItemIcon">
-                {/* type === "image" ? <img src={convertFileSrc(currentPath + sep() + name)} /> :  */<FileSVG />}
+                {/* type === "image" ? <img src={convertFileSrc(currentPath + sep() + name)} /> :  */ <FileSVG />}
             </div>
 
             <div className="fileItemDescription">

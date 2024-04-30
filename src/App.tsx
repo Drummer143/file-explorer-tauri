@@ -22,9 +22,7 @@ const App: React.FC = () => {
             })
             .catch(console.info);
 
-        unregisterAll()
-            .then(registerGlobalHotKeys)
-            .catch(registerGlobalHotKeys);
+        unregisterAll().then(registerGlobalHotKeys).catch(registerGlobalHotKeys);
 
         const appWindow = getCurrent();
 
@@ -44,9 +42,11 @@ const App: React.FC = () => {
                     return;
                 }
 
-                const target = (document.elementsFromPoint(position.x, position.y).find(el =>
-                    (el as HTMLElement | null)?.dataset.fileDropTarget
-                ) as HTMLElement | null)?.dataset.fileDropTarget;
+                const target = (
+                    document
+                        .elementsFromPoint(position.x, position.y)
+                        .find(el => (el as HTMLElement | null)?.dataset.fileDropTarget) as HTMLElement | null
+                )?.dataset.fileDropTarget;
 
                 return target;
             };

@@ -171,7 +171,9 @@
 
         border: 2px solid rgb(170, 170, 170);
         border-radius: 0.25rem;
-        transition: background-color 150ms, border-color 150ms;
+        transition:
+            background-color 150ms,
+            border-color 150ms;
 
         &:checked {
             background-color: rgb(200, 200, 200);

@@ -11,7 +11,9 @@ import { readDir, getDisks, watchDir } from "../tauriAPIWrapper";
 
 export const useWatchPathChange = () => {
     const { currentPath } = useExplorerHistory();
-    const { filesystem: { sort_config: sortConfig } } = useSnapshot(appConfig, { sync: true });
+    const {
+        filesystem: { sort_config: sortConfig }
+    } = useSnapshot(appConfig, { sync: true });
 
     const currentPathRef = useRefState(currentPath);
 
@@ -20,9 +22,9 @@ export const useWatchPathChange = () => {
 
     const untrackCurrentDir = useRef<
         | {
-            unwatch: () => Promise<void>;
-            unlisten: UnlistenFn;
-        }
+              unwatch: () => Promise<void>;
+              unlisten: UnlistenFn;
+          }
         | undefined
     >(undefined);
 
@@ -86,7 +88,7 @@ export const useWatchPathChange = () => {
         }
 
         setLoading(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [sortConfig, updateFilesOnDirChange]);
 
     useEffect(() => {

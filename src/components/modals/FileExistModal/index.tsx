@@ -53,7 +53,7 @@ const FileExistModal: React.FC = () => {
         mountListener();
 
         return () => {
-            if(unlistenExistFile.current) {
+            if (unlistenExistFile.current) {
                 unlistenExistFile.current();
             }
         };

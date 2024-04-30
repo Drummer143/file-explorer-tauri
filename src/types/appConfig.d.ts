@@ -4,7 +4,7 @@ interface NotificationConfig {
     lifetime_ms: number;
 }
 
-type SortOrder = "name" | "size"
+type SortOrder = "name" | "size";
 
 interface SortConfig {
     order: SortOrder;

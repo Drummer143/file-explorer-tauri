@@ -24,8 +24,7 @@ export const getDisks = () => invoke<ExplorerDisk[]>("get_disks");
 
 export const removeFile = (pathToFile: string) => invoke<void>("remove_file", { pathToFile });
 
-export const removeDirectory = (pathToDirectory: string) =>
-    invoke<void>("remove_directory", { pathToDirectory });
+export const removeDirectory = (pathToDirectory: string) => invoke<void>("remove_directory", { pathToDirectory });
 
 export const removeAny = (pathToFile: string) => invoke<void>("remove_any", { pathToFile });
 
@@ -44,12 +43,7 @@ export const copyFile = (from: string, to: string, eventId: number, removeTarget
         duplicateFileAction: "ask"
     });
 
-export const copyFolder = (
-    from: string,
-    to: string,
-    eventId: number,
-    removeTargetOnFinish: boolean
-) =>
+export const copyFolder = (from: string, to: string, eventId: number, removeTargetOnFinish: boolean) =>
     invoke<void>("copy_directory", {
         from,
         to,
@@ -58,32 +52,25 @@ export const copyFolder = (
         duplicateFileAction: "ask"
     });
 
-export const copyMultipleFiles = (
-    paths: PathsFromTo[],
-    eventId: number,
-    removeTargetOnFinish: boolean
-) => invoke<void>("copy_multiple_files", {
-    paths,
-    eventId,
-    removeTargetOnFinish
-});
+export const copyMultipleFiles = (paths: PathsFromTo[], eventId: number, removeTargetOnFinish: boolean) =>
+    invoke<void>("copy_multiple_files", {
+        paths,
+        eventId,
+        removeTargetOnFinish
+    });
 
-export const addIndexToFilename = (pathToFile: string) =>
-    invoke<string>("add_index_to_filename", { pathToFile });
+export const addIndexToFilename = (pathToFile: string) => invoke<string>("add_index_to_filename", { pathToFile });
 
 export const createFile = (path: string, filetype: Exclude<FileTypes, "disk">) =>
     invoke<void>("create_file", { path, filetype });
 
-export const getFileType = (pathToFile: string) =>
-    invoke<Exclude<FileTypes, "disk">>("get_file_type", { pathToFile });
+export const getFileType = (pathToFile: string) => invoke<Exclude<FileTypes, "disk">>("get_file_type", { pathToFile });
 
 export const dirname = (path: string) => invoke<string>("dirname", { path });
 
-export const getNestedDirnames = (pathToDir: string) =>
-    invoke<string[]>("get_dirnames", { pathToDir });
+export const getNestedDirnames = (pathToDir: string) => invoke<string[]>("get_dirnames", { pathToDir });
 
-export const getDiskNames = () =>
-    invoke<string[]>("get_disk_names");
+export const getDiskNames = () => invoke<string[]>("get_disk_names");
 
 export const canonicalize = (path: string) => invoke<string>("canonicalize", { path });
 

@@ -27,15 +27,24 @@ export const clearClipboard = () => {
     document.querySelector<HTMLElement>(".cut-file")?.classList.remove("cut-file");
 };
 
-export const prepareDataBeforeCopy = async (to: string): Promise<false | Omit<CopiedFileInfo, "files"> & ({
-    copyType: "multiple";
-    paths: PathsFromTo[];
-    files: PathsParts[];
-} | {
-    copyType: "file" | "folder";
-    paths: PathsFromTo;
-    files: PathsParts;
-})> => {
+export const prepareDataBeforeCopy = async (
+    to: string
+): Promise<
+    | false
+    | (Omit<CopiedFileInfo, "files"> &
+          (
+              | {
+                    copyType: "multiple";
+                    paths: PathsFromTo[];
+                    files: PathsParts[];
+                }
+              | {
+                    copyType: "file" | "folder";
+                    paths: PathsFromTo;
+                    files: PathsParts;
+                }
+          ))
+> => {
     const info = document.documentElement.dataset.copiedFileInfo;
 
     if (!info) {
@@ -75,7 +84,7 @@ export const prepareDataBeforeCopy = async (to: string): Promise<false | Omit<Co
             // if user is pasting file in the same folder where he copied file
             const pathFrom = mergePathParts(copiedFileInfo.files.dirname, copiedFileInfo.files.filename);
             const pathTo = mergePathParts(to, copiedFileInfo.files.filename);
-            
+
             if (isNestedPath(pathTo, pathFrom)) {
                 console.error("copying in nested folder");
                 return false;

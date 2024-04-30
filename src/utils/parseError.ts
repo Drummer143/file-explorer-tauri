@@ -1,7 +1,8 @@
 ﻿const parseErrorRecursion = (error: unknown, startTime: number): string | undefined => {
     if (Date.now() - startTime > 500) {
         return undefined;
-    } if (!error) {
+    }
+    if (!error) {
         return undefined;
     } else if (typeof error === "string") {
         return error;
@@ -24,4 +25,3 @@
 export const parseError = (error: unknown) => {
     return parseErrorRecursion(error, Date.now());
 };
-

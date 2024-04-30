@@ -12,7 +12,9 @@
     grid-auto-rows: min-content;
     justify-content: center;
     border: 1px dashed transparent;
-    transition: border-color 150ms, border-radius 150ms;
+    transition:
+        border-color 150ms,
+        border-radius 150ms;
 
     ::-webkit-scrollbar {
         appearance: none;

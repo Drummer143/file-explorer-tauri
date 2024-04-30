@@ -14,12 +14,7 @@ type MultipleFilesTrackerProps = Omit<StartTrackingClipboardActionDetail & { typ
     onRemove: (eventId: number) => void;
 };
 
-const MultipleFilesTracker: React.FC<MultipleFilesTrackerProps> = ({
-    action,
-    eventId,
-    onRemove,
-    paths
-}) => {
+const MultipleFilesTracker: React.FC<MultipleFilesTrackerProps> = ({ action, eventId, onRemove, paths }) => {
     const { t } = useTranslation("translation", { keyPrefix: "clipboardTrackers" });
 
     const [index, setIndex] = useState(0);
@@ -59,9 +54,13 @@ const MultipleFilesTracker: React.FC<MultipleFilesTrackerProps> = ({
     return (
         <div className={styles.wrapper}>
             <div className={styles.countDisplayer}>
-                <p>{index + 1} of {paths.length}</p>
+                <p>
+                    {index + 1} of {paths.length}
+                </p>
 
-                <button><CloseSVG strokeWidth={2} width={14} height={14} /></button>
+                <button>
+                    <CloseSVG strokeWidth={2} width={14} height={14} />
+                </button>
             </div>
 
             {fileType === "file" ? (

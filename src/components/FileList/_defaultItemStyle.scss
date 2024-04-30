@@ -20,7 +20,7 @@
     .appFocused &[aria-selected="true"]:not(:hover) {
         background-color: rgba($color: #fff, $alpha: 0.08);
     }
-    
+
     .appBlurred &[aria-selected="true"]:not(:hover) {
         background-color: rgba($color: #fff, $alpha: 0.04);
     }

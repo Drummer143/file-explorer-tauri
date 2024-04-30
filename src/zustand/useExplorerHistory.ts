@@ -22,7 +22,7 @@ interface ExplorerHistoryState {
 }
 
 export const useExplorerHistory = create<ExplorerHistoryState>()(
-    /* persist( */(set, get) => ({
+    /* persist( */ (set, get) => ({
         canGoBack: false,
         canGoForward: false,
         currentPath: "",
@@ -131,7 +131,7 @@ export const useExplorerHistory = create<ExplorerHistoryState>()(
                 history: [""]
             });
         }
-    })/* , {
+    }) /* , {
         name: "store:history",
         version: 1
     }) */

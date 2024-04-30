@@ -34,11 +34,7 @@ const MainFallbackScreen: ReactErrorFallback = ({ error }) => {
             <h1 className={styles.title}>{t("errorHappened")}</h1>
 
             <div className={showDetails ? styles.opened : undefined}>
-                <button
-                    onKeyDown={handleSideArrowKeydown}
-                    className={styles.openDetailsButton}
-                    onClick={toggleDetails}
-                >
+                <button onKeyDown={handleSideArrowKeydown} className={styles.openDetailsButton} onClick={toggleDetails}>
                     <ChevronRightArrowSVG width={"14px"} height={"14px"} fill="#fff" />
                     <p>{t("showDetails")}</p>
                 </button>

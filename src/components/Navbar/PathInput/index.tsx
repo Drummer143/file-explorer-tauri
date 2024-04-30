@@ -1,4 +1,12 @@
-import React, { ChangeEventHandler, FormEventHandler, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, {
+    ChangeEventHandler,
+    FormEventHandler,
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useRef,
+    useState
+} from "react";
 import { sep } from "@tauri-apps/api/path";
 import { message } from "@tauri-apps/plugin-dialog";
 
@@ -93,21 +101,25 @@ const PathInput: React.FC = () => {
     const handleToggleInputFocusFromSuggestions = () => {
         setFocusOnList(false);
         inputRef.current?.focus();
-        setTimeout(() =>
-            inputRef.current?.setSelectionRange(inputValue.length, inputValue.length)
-        );
+        setTimeout(() => inputRef.current?.setSelectionRange(inputValue.length, inputValue.length));
     };
 
-    const handleDropOver: DocumentEventHandler<"tauriDropOver"> = useCallback(e => {
-        setIsDropTarget(e.detail === fileDropTarget);
-    }, [fileDropTarget]);
+    const handleDropOver: DocumentEventHandler<"tauriDropOver"> = useCallback(
+        e => {
+            setIsDropTarget(e.detail === fileDropTarget);
+        },
+        [fileDropTarget]
+    );
 
-    const handleDrop: DocumentEventHandler<"tauriDrop"> = useCallback(e => {
-        setIsDropTarget(false);
-        if (e.detail.target === fileDropTarget) {
-            pushRoute(e.detail.paths[0]);
-        }
-    }, [pushRoute]);
+    const handleDrop: DocumentEventHandler<"tauriDrop"> = useCallback(
+        e => {
+            setIsDropTarget(false);
+            if (e.detail.target === fileDropTarget) {
+                pushRoute(e.detail.paths[0]);
+            }
+        },
+        [pushRoute]
+    );
 
     const handleDragCancel: DocumentEventHandler<"tauriDragCancel"> = useCallback(() => {
         setIsDropTarget(false);
@@ -135,10 +147,9 @@ const PathInput: React.FC = () => {
                 data-current-path={currentPath}
                 data-file-drop-target={fileDropTarget}
             >
-                <span
-                    ref={inputTextSizeTrackerRef}
-                    className={styles.invisibleTextSizeTracker}
-                >{inputValue.split(separator).slice(0, -1).join(separator)}\</span>
+                <span ref={inputTextSizeTrackerRef} className={styles.invisibleTextSizeTracker}>
+                    {inputValue.split(separator).slice(0, -1).join(separator)}\
+                </span>
 
                 <input
                     ref={inputRef}

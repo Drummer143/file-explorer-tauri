@@ -19,7 +19,7 @@ const Disk: React.FC<DiskProps> = ({ name, totalSpace, availableSpace, mountPoin
 
     const handleAction = () => pushRoute(mountPoint);
 
-    const handleKeyDown: React.KeyboardEventHandler<HTMLButtonElement> = (e) => {
+    const handleKeyDown: React.KeyboardEventHandler<HTMLButtonElement> = e => {
         if (["Space", "Enter"].includes(e.code)) {
             handleAction();
         }

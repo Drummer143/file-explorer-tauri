@@ -97,7 +97,9 @@
     padding: 0.125rem 0.25rem;
 
     background-color: rgba($color: #fff, $alpha: 0.2);
-    transition: background-color 150ms, border-color 150ms;
+    transition:
+        background-color 150ms,
+        border-color 150ms;
     border-radius: 0.125rem;
     border: 1px solid transparent;
 
@@ -116,7 +118,9 @@
     background-color: rgba($color: #0f0, $alpha: 0.28);
     border-radius: 0.25rem;
     justify-self: flex-end;
-    transition: background-color 150ms, border-color 150ms;
+    transition:
+        background-color 150ms,
+        border-color 150ms;
     border: 2px solid transparent;
 
     &:hover {

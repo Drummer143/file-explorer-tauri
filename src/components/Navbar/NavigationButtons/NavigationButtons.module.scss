@@ -19,7 +19,10 @@
 
     border-radius: 50%;
     outline: 1px solid transparent;
-    transition: opacity 150ms, transform 150ms, outline-color 150ms;
+    transition:
+        opacity 150ms,
+        transform 150ms,
+        outline-color 150ms;
     background-color: #555;
 
     &:disabled {

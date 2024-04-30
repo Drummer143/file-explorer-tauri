@@ -10,14 +10,14 @@ interface RootRect {
     top: number;
     bottom: number;
     left: number;
-    right: number
+    right: number;
 }
 
 type SelectionAreaProps = {
     targetSelector: string;
 
     rootElement?: HTMLElement | null;
-}
+};
 
 const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelector }) => {
     const { setSelectedItems, selectedItems } = useFilesSelectionStore();
@@ -42,63 +42,62 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
         }
     });
 
+    const handleMoveArea = useCallback(
+        (e: MouseEvent) => {
+            if (!isMoving.current) {
+                rootElement?.style.setProperty("pointer-events", "none");
+                setHidden(false);
 
-    const handleMoveArea = useCallback((e: MouseEvent) => {
-        if (!isMoving.current) {
-            rootElement?.style.setProperty("pointer-events", "none");
-            setHidden(false);
+                prevSelectedItems.current = selectedItemsRef.current;
+                isMoving.current = true;
+                isCtrlKeyPressed.current = e.ctrlKey;
+            }
 
-            prevSelectedItems.current = selectedItemsRef.current;
-            isMoving.current = true;
-            isCtrlKeyPressed.current = e.ctrlKey;
-        }
+            currentPos.current = {
+                y: Math.max(Math.min(e.clientY, rootRect.current.bottom), rootRect.current.top),
+                x: Math.max(Math.min(e.clientX, rootRect.current.right), rootRect.current.left)
+            };
 
-        currentPos.current = {
-            y: Math.max(Math.min(e.clientY, rootRect.current.bottom), rootRect.current.top),
-            x: Math.max(Math.min(e.clientX, rootRect.current.right), rootRect.current.left)
-        };
+            const targets = rootElement?.querySelectorAll(targetSelector);
 
-        const targets = rootElement?.querySelectorAll(targetSelector);
-
-        if (!targets?.length) {
-            return;
-        }
-
-        const selectedIds = isCtrlKeyPressed.current ? prevSelectedItems.current.concat() : [];
-
-        const maxX = Math.max(startPos.current.x, currentPos.current.x);
-        const minX = Math.min(startPos.current.x, currentPos.current.x);
-        const minY = Math.min(startPos.current.y, currentPos.current.y);
-        const maxY = Math.max(startPos.current.y, currentPos.current.y);
-
-        Array.from(targets).forEach(target => {
-            const rect = target.getBoundingClientRect();
-
-            const filename = (target as HTMLElement)?.dataset.filename;
-
-            if (!filename) {
+            if (!targets?.length) {
                 return;
             }
 
-            const isSelected = !(rect.right < minX ||
-                rect.left > maxX ||
-                rect.bottom < minY ||
-                rect.top > maxY);
+            const selectedIds = isCtrlKeyPressed.current ? prevSelectedItems.current.concat() : [];
 
-            if (isSelected) {
-                const targetIndex = selectedItemsRef.current.findIndex(entry => entry === filename);
+            const maxX = Math.max(startPos.current.x, currentPos.current.x);
+            const minX = Math.min(startPos.current.x, currentPos.current.x);
+            const minY = Math.min(startPos.current.y, currentPos.current.y);
+            const maxY = Math.max(startPos.current.y, currentPos.current.y);
 
-                if (targetIndex !== -1) {
-                    prevSelectedItems.current.splice(targetIndex, 1);
+            Array.from(targets).forEach(target => {
+                const rect = target.getBoundingClientRect();
+
+                const filename = (target as HTMLElement)?.dataset.filename;
+
+                if (!filename) {
+                    return;
                 }
 
-                selectedIds.push(filename);
-            }
-        });
+                const isSelected = !(rect.right < minX || rect.left > maxX || rect.bottom < minY || rect.top > maxY);
 
-        setSelectedItems(selectedIds);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [rootElement, setSelectedItems, targetSelector]);
+                if (isSelected) {
+                    const targetIndex = selectedItemsRef.current.findIndex(entry => entry === filename);
+
+                    if (targetIndex !== -1) {
+                        prevSelectedItems.current.splice(targetIndex, 1);
+                    }
+
+                    selectedIds.push(filename);
+                }
+            });
+
+            setSelectedItems(selectedIds);
+            // eslint-disable-next-line react-hooks/exhaustive-deps
+        },
+        [rootElement, setSelectedItems, targetSelector]
+    );
 
     const handleEndSelecting = useCallback(() => {
         document.removeEventListener("mousemove", handleMoveArea);
@@ -114,19 +113,26 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
         setHidden(true);
     }, [handleMoveArea, rootElement]);
 
-    const handleStartSelecting = useCallback((e: MouseEvent) => {
-        if (!e.target || !e.currentTarget || !(e.currentTarget as HTMLElement).isSameNode(e.target as HTMLElement)) {
-            return;
-        }
+    const handleStartSelecting = useCallback(
+        (e: MouseEvent) => {
+            if (
+                !e.target ||
+                !e.currentTarget ||
+                !(e.currentTarget as HTMLElement).isSameNode(e.target as HTMLElement)
+            ) {
+                return;
+            }
 
-        getCurrent().setResizable(false);
+            getCurrent().setResizable(false);
 
-        document.addEventListener("mousemove", handleMoveArea);
-        document.addEventListener("mouseup", handleEndSelecting, { once: true });
+            document.addEventListener("mousemove", handleMoveArea);
+            document.addEventListener("mouseup", handleEndSelecting, { once: true });
 
-        startPos.current = { y: e.clientY, x: e.clientX };
-        currentPos.current = startPos.current;
-    }, [handleEndSelecting, handleMoveArea]);
+            startPos.current = { y: e.clientY, x: e.clientX };
+            currentPos.current = startPos.current;
+        },
+        [handleEndSelecting, handleMoveArea]
+    );
 
     useEffect(() => {
         if (!rootElement) {
@@ -150,7 +156,7 @@ const SelectionArea: React.FC<SelectionAreaProps> = ({ rootElement, targetSelect
 
         return () => {
             unlisten.then(unlisten => unlisten());
-        }
+        };
     }, [handleEndSelecting]);
 
     return (

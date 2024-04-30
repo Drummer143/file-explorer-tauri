@@ -12,7 +12,7 @@ export const useFilesSelectionStore = create<FileSelectionState>((set, get) => (
 
     clearSelectedItems: () => set({ selectedItems: [] }),
 
-    setSelectedItems: (value) => {
+    setSelectedItems: value => {
         const { selectedItems } = get();
         const newSelected: string[] = typeof value === "function" ? value(selectedItems) : value;
 

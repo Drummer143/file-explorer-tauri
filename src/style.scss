@@ -41,7 +41,7 @@
     --file-list-gap: 16px;
     --file-list-item-width: 250px;
     --file-list-item-height: 60px;
-    
+
     --ctx-width: 200px;
 }
 
@@ -67,7 +67,11 @@ body {
 }
 
 .material-symbols-outlined {
-    font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 48;
+    font-variation-settings:
+        "FILL" 1,
+        "wght" 400,
+        "GRAD" 0,
+        "opsz" 48;
     user-select: none;
 }
 

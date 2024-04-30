@@ -7,13 +7,4 @@ import LeftArrowSVG from "./leftArrow.svg?react";
 import RightArrowSVG from "./rightArrow.svg?react";
 import ChevronRightArrowSVG from "./chevronRightArrow.svg?react";
 
-export {
-    PlaySVG,
-    PauseSVG,
-    ReloadSVG,
-    UpArrowSVG,
-    CheckMarkSVG,
-    LeftArrowSVG,
-    RightArrowSVG,
-    ChevronRightArrowSVG
-};
+export { PlaySVG, PauseSVG, ReloadSVG, UpArrowSVG, CheckMarkSVG, LeftArrowSVG, RightArrowSVG, ChevronRightArrowSVG };

@@ -44,7 +44,7 @@ const InputSuggestions: React.FC<InputSuggestionsProps> = ({
 
             if (!path.endsWith(separator)) {
                 const currentDirName = path.split(separator).pop()?.toLowerCase() || "";
-                const filtered = dirs.filter((suggestion) => suggestion.toLowerCase().startsWith(currentDirName));
+                const filtered = dirs.filter(suggestion => suggestion.toLowerCase().startsWith(currentDirName));
 
                 if (filtered.length) {
                     setFilteredSuggestedPaths(filtered);
@@ -68,7 +68,7 @@ const InputSuggestions: React.FC<InputSuggestionsProps> = ({
         onSelect(`${pathForSuggestions.split(separator).slice(0, -1).join(separator)}${separator}${suggestion}`);
     };
 
-    const onListKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (e) => {
+    const onListKeyDown: React.KeyboardEventHandler<HTMLDivElement> = e => {
         if (e.key === "ArrowDown") {
             setFocusedSuggestion(Math.min(focusedSuggestion + 1, (suggestedPaths?.length || 1) - 1));
         } else if (e.key === "ArrowUp") {

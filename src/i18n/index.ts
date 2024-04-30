@@ -7,8 +7,7 @@ import ru from "./localizations/ru";
 
 export const supportedLanguages = ["en", "ru"] as const;
 
-i18n
-    .use(LanguageDetector)
+i18n.use(LanguageDetector)
     .use(initReactI18next)
     .init({
         debug: import.meta.env.DEV,

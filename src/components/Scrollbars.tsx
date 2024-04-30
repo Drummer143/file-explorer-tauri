@@ -1,7 +1,7 @@
 ﻿import React from "react";
 import { OverlayScrollbarsComponent, OverlayScrollbarsComponentProps } from "overlayscrollbars-react";
 
-const Scrollbars: React.FC<OverlayScrollbarsComponentProps<"div">> = (props) => (
+const Scrollbars: React.FC<OverlayScrollbarsComponentProps<"div">> = props => (
     <OverlayScrollbarsComponent
         element="div"
         defer

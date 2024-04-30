@@ -16,7 +16,7 @@ const Folder: React.FC<FolderProps> = ({ name, readonly, selected }) => {
         pushRoute(currentPath + sep() + name);
     };
 
-    const handleKeyDown: React.KeyboardEventHandler<HTMLButtonElement> = (e) => {
+    const handleKeyDown: React.KeyboardEventHandler<HTMLButtonElement> = e => {
         if (["Space", "Enter"].includes(e.code)) {
             handleAction();
         }

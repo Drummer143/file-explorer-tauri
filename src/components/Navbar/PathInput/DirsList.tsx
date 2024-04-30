@@ -16,13 +16,10 @@ type DirsListProps = {
     onClose: () => void;
 };
 
-const DirsList: ForwardRefRenderFunction<HTMLDivElement, DirsListProps> = ({
-    dirToReplace,
-    targetDir,
-    onClose,
-    files,
-    x
-}, ref) => {
+const DirsList: ForwardRefRenderFunction<HTMLDivElement, DirsListProps> = (
+    { dirToReplace, targetDir, onClose, files, x },
+    ref
+) => {
     const pushRoute = useExplorerHistory(state => state.pushRoute);
 
     const handleClick = (e: MouseEvent, file: string) => {
@@ -38,11 +35,7 @@ const DirsList: ForwardRefRenderFunction<HTMLDivElement, DirsListProps> = ({
     };
 
     return (
-        <div
-            className={styles.dirsListWrapper}
-            ref={ref}
-            style={{ left: x }}
-        >
+        <div className={styles.dirsListWrapper} ref={ref} style={{ left: x }}>
             <Scrollbars className={styles.scrollBar}>
                 <div className={joinCN(styles.dirsList, files.length > 5 && styles.scrollable)}>
                     {files.map((file, i) => (

@@ -28,7 +28,9 @@
     border-radius: 0.25rem;
     border: none;
     outline: 1px solid transparent;
-    transition: background-color 150ms, outline-color 150ms;
+    transition:
+        background-color 150ms,
+        outline-color 150ms;
 
     .opened & {
         background-color: rgba($color: #000, $alpha: 0.1);

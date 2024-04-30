@@ -157,7 +157,6 @@ const FileList: React.FC = () => {
             const selectedItems = selectedItemsRef.current;
 
             if (focusedElementIndex === -1) {
-
                 if (selectedItems.length) {
                     for (const item of Array.from(listContainerRef.current.children)) {
                         const filename = (item as HTMLElement)?.dataset.filename;

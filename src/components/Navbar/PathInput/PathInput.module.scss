@@ -24,7 +24,9 @@
     border-radius: 0.125rem;
     background-color: rgba($color: #fff, $alpha: 0.15);
     border: 1px dashed transparent;
-    transition: border-radius 150ms, border-color 150ms;
+    transition:
+        border-radius 150ms,
+        border-color 150ms;
 
     &.dropTarget {
         border-color: #fff;
@@ -112,7 +114,7 @@
 }
 
 .scrollBar {
-    &>*:last-child {
+    & > *:last-child {
         padding: 0 0 0 2px;
     }
 }

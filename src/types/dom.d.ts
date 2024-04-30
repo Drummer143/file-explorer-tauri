@@ -11,22 +11,25 @@ declare global {
     type StartTrackingClipboardActionDetail = {
         eventId: number;
         action: "copy" | "cut";
-    } & ({
-        type: "file" | "folder";
-        to: string;
-        from: string;
-        filename: string;
-    } | {
-        type: "multiple"
-        paths: PathsFromTo[]
-    })
+    } & (
+        | {
+              type: "file" | "folder";
+              to: string;
+              from: string;
+              filename: string;
+          }
+        | {
+              type: "multiple";
+              paths: PathsFromTo[];
+          }
+    );
 
     interface CustomEventMap {
         openEditFileModal: CustomEvent<OpenEditFileModalDetail>;
         startTrackingClipboardAction: CustomEvent<StartTrackingClipboardActionDetail>;
         addNotification: CustomEvent<AppNotification>;
         tauriDropOver: CustomEvent<string | undefined>;
-        tauriDrop: CustomEvent<{ target: string | undefined, paths: string[] }>;
+        tauriDrop: CustomEvent<{ target: string | undefined; paths: string[] }>;
         tauriDragCancel: CustomEvent<undefined>;
         tauriDrag: CustomEvent<undefined>;
     }
@@ -72,4 +75,4 @@ declare global {
     }
 }
 
-export { };
+export {};

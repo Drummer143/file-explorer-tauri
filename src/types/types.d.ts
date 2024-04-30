@@ -45,7 +45,7 @@ interface CopiedFileInfo {
 }
 
 interface PathsParts {
-    dirname: string
+    dirname: string;
     filename: string;
 }
 
