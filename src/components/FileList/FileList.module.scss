@@ -7,7 +7,7 @@
     padding: 2rem;
 
     display: grid;
-    gap: 1rem;
+    gap: var(--file-list-gap);
     grid-template-columns: repeat(var(--count-of-columns), var(--file-list-item-width));
     grid-auto-rows: min-content;
     justify-content: center;

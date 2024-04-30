@@ -358,13 +358,16 @@ const FileList: React.FC = () => {
     useResizeObserver({
         target: listContainerRef.current,
         onResize: ([e]) => {
-            const itemWidth = parseInt(getComputedStyle(document.body).getPropertyValue("--file-list-item-width"));
+            const bodyStyle = getComputedStyle(document.body);
+            const itemWidth = parseInt(bodyStyle.getPropertyValue("--file-list-item-width"));
+            const listContainerGap = parseInt(bodyStyle.getPropertyValue("--file-list-gap"));
+            const effectiveItemWidth = itemWidth + listContainerGap;
 
             if (isNaN(itemWidth)) {
                 return console.error("Can't get width of item in file list");
             }
 
-            gridWidth.current = Math.floor(e.contentRect.width / itemWidth);
+            gridWidth.current = Math.floor((e.contentRect.width + listContainerGap) / effectiveItemWidth);
 
             listContainerRef.current?.style.setProperty("--count-of-columns", gridWidth.current.toString());
         }
