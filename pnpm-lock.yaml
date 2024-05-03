@@ -11,9 +11,6 @@ dependencies:
   '@tauri-apps/plugin-dialog':
     specifier: 2.0.0-beta.2
     version: 2.0.0-beta.2
-  '@tauri-apps/plugin-global-shortcut':
-    specifier: 2.0.0-beta.2
-    version: 2.0.0-beta.2
   i18next:
     specifier: ^23.11.2
     version: 23.11.3
@@ -1208,12 +1205,6 @@ packages:
 
   /@tauri-apps/plugin-dialog@2.0.0-beta.2:
     resolution: {integrity: sha512-WugTn/8d5jYA0GL1JRIJgA1OSxG0h2V4PSZZzehgA3v7rPlIU6w9s2+dSRqj55aMj6hm3Az9YbQqC18nuaHkpw==}
-    dependencies:
-      '@tauri-apps/api': 2.0.0-beta.4
-    dev: false
-
-  /@tauri-apps/plugin-global-shortcut@2.0.0-beta.2:
-    resolution: {integrity: sha512-ZYwdCyZiBOmXMtH/R3lfFpUVaD1RmK/XbmTG81v2xspx0bP2xPjnFF+UUiLQ6Ywe/Gl2P+gyxHnePOzEea7OVw==}
     dependencies:
       '@tauri-apps/api': 2.0.0-beta.4
     dev: false

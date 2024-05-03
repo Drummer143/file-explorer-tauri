@@ -14,6 +14,9 @@ pub fn remove_multiple<R: Runtime>(
     let confirmed = window
         .dialog()
         .message(format!("Remove {} files", paths.len()))
+        .kind(tauri_plugin_dialog::MessageDialogKind::Warning)
+        .cancel_button_label("Cancel")
+        .ok_button_label("Remove")
         .title("Confirm action")
         .blocking_show();
 
@@ -43,6 +46,9 @@ pub fn remove_multiple<R: Runtime>(
         remove_permanently = window
             .dialog()
             .message("Remove files permanently?")
+            .kind(tauri_plugin_dialog::MessageDialogKind::Warning)
+            .cancel_button_label("Cancel")
+            .ok_button_label("Remove permanently")
             .title("Confirm action")
             .blocking_show();
     }

@@ -4,4 +4,3 @@ export * from "./constants";
 export * from "./clipboard";
 export * from "./parseError";
 export * from "./joinClassnames";
-export * from "./registerGlobalHotkeys";

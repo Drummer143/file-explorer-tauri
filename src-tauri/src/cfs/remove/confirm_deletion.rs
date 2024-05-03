@@ -20,6 +20,9 @@ pub(super) fn confirm_deletion<R: Runtime>(
         let confirmed = window
             .dialog()
             .message(dialog_message)
+            .cancel_button_label("Cancel")
+            .kind(tauri_plugin_dialog::MessageDialogKind::Warning)
+            .ok_button_label("Remove")
             .title(dialog_title)
             .blocking_show();
 
@@ -32,6 +35,9 @@ pub(super) fn confirm_deletion<R: Runtime>(
         let remove_permanently = window
             .dialog()
             .message(format!("{filename} deletion"))
+            .cancel_button_label("Cancel")
+            .kind(tauri_plugin_dialog::MessageDialogKind::Warning)
+            .ok_button_label("Remove permanently")
             .title(format!("{filename} is too large. Remove permanently?"))
             .blocking_show();
 

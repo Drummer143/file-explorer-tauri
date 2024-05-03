@@ -1,12 +1,11 @@
 import { proxy } from "valtio";
 import { devtools } from "valtio/utils";
-import { unregisterAll } from "@tauri-apps/plugin-global-shortcut";
 import { useEffect, useState } from "react";
 import { PhysicalPosition, getCurrent } from "@tauri-apps/api/window";
 
 import Layout from "./components/Layout";
 import { getConfig } from "./tauriAPIWrapper/cfs";
-import { dispatchCustomEvent, registerGlobalHotKeys } from "@utils";
+import { dispatchCustomEvent } from "@utils";
 
 const App: React.FC = () => {
     const [isConfigLoading, setIsConfigLoading] = useState(true);
@@ -21,8 +20,6 @@ const App: React.FC = () => {
                 setIsConfigLoading(false);
             })
             .catch(console.info);
-
-        unregisterAll().then(registerGlobalHotKeys).catch(registerGlobalHotKeys);
 
         const appWindow = getCurrent();
 
